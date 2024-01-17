@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.infinitescroll
+package com.recipia.aos.ui.components.home
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -11,6 +11,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -21,22 +22,23 @@ import com.recipia.aos.ui.dto.RecipeMainListResponseDto
 import com.recipia.aos.ui.model.RecipeAllListViewModel
 
 @Composable
-fun ItemListWithInfiniteScroll(
+fun HomeScreen(
     viewModel: RecipeAllListViewModel, // ViewModel을 매개변수로 전달받음
 ) {
 
     val items by viewModel.items.observeAsState(initial = emptyList())
     val isLoading by viewModel.isLoading.observeAsState(initial = false)
     val loadFailed by viewModel.loadFailed.observeAsState(initial = false)
+    val context = LocalContext.current
 
     if (loadFailed) {
-        Toast.makeText(
-            LocalContext.current,
-            "데이터 로딩 실패",
-            Toast.LENGTH_SHORT
-        ).show()
-
+        Toast.makeText(context, "데이터 로딩 실패", Toast.LENGTH_SHORT).show()
         viewModel.resetLoadFailed() // 경고창을 한 번만 표시하도록 상태를 리셋
+    }
+
+    // 화면이 렌더링될 때 데이터 로딩 시작
+    LaunchedEffect(key1 = true) {
+        viewModel.loadMoreItems()
     }
 
     LazyColumn {
@@ -44,7 +46,7 @@ fun ItemListWithInfiniteScroll(
             ListItem(item = item)
 
             // 마지막 아이템에 도달했을 때 추가 데이터 로드
-            if (index == items.size - 1 && !viewModel.isLastPage) {
+            if (index == items.lastIndex && !viewModel.isLastPage && !isLoading) {
                 viewModel.loadMoreItems()
             }
         }

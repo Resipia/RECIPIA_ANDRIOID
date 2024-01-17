@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.model
 
+import JwtTokenManager
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -7,13 +8,13 @@ import androidx.lifecycle.ViewModel
 import com.recipia.aos.ui.api.GetAllRecipeListService
 import com.recipia.aos.ui.dto.PagingResponseDto
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
-import com.recipia.aos.ui.jwt.JwtTokenManager
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.math.log
 
 class RecipeAllListViewModel(
     private val jwtTokenManager: JwtTokenManager
@@ -23,7 +24,7 @@ class RecipeAllListViewModel(
     val items: LiveData<List<RecipeMainListResponseDto>> = _items
 
     private var currentPage = 0
-    private val pageSize = 5
+    private val pageSize = 10
     private val sortType = "new"
     var isLastPage = false
 
@@ -37,7 +38,7 @@ class RecipeAllListViewModel(
     val okHttpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
             // JwtTokenManager를 사용하여 토큰을 요청 헤더에 추가
-            val request = jwtTokenManager.addTokenToHeader(chain)
+            val request = jwtTokenManager.addAccessTokenToHeader(chain)
             chain.proceed(request)
         }
         .build()
@@ -52,10 +53,6 @@ class RecipeAllListViewModel(
     }
 
 
-    init {
-        loadMoreItems() // 이 위치에서 apiService가 처음 사용될 때 초기화됨
-    }
-
     fun resetLoadFailed() {
         _loadFailed.value = false
     }
@@ -64,7 +61,7 @@ class RecipeAllListViewModel(
         if (_isLoading.value == true || isLastPage) return
 
         _isLoading.value = true
-        loadItemsFromServer(currentPage, pageSize, sortType) // 서버로부터 데이터 가져오기
+        loadItemsFromServer(currentPage, pageSize, sortType)
     }
 
     // 서버로부터 데이터를 가져오는 함수 예시
@@ -72,29 +69,38 @@ class RecipeAllListViewModel(
         getAllRecipeListService.getAllRecipeList(page, size, sortType)
             .enqueue(object : Callback<PagingResponseDto<RecipeMainListResponseDto>> {
 
-            override fun onResponse(
-                call: Call<PagingResponseDto<RecipeMainListResponseDto>>,
-                response: Response<PagingResponseDto<RecipeMainListResponseDto>>
-            ) {
-                if (response.isSuccessful) {
+                // 응답 성공
+                override fun onResponse(
+                    call: Call<PagingResponseDto<RecipeMainListResponseDto>>,
+                    response: Response<PagingResponseDto<RecipeMainListResponseDto>>
+                ) {
+                    if (response.isSuccessful) {
+                        // 성공적인 응답 로그
+                        Log.d("MyViewModel", "Response received: ${response.body()}")
 
-                    // 성공적인 응답 로그
-                    Log.d("MyViewModel", "Response received: ${response.body()}")
-
-                    val newItems = response.body()?.content ?: emptyList()
-                    val currentItems = _items.value ?: emptyList()
-                    _items.postValue(currentItems + newItems)
-                    isLastPage = newItems.size < pageSize
-                    currentPage++ // 현재 페이지 업데이트
+                        val newItems = response.body()?.content ?: emptyList()
+                        val currentItems = _items.value ?: emptyList()
+                        _items.postValue(currentItems + newItems)
+                        isLastPage = newItems.size < pageSize
+                        currentPage++ // 현재 페이지 업데이트
+                        // todo: 여기서 ++해줘서 그런듯
+                        Log.d("Count", "content count received: ${response.body()?.content?.size}")
+                    }
+                    _isLoading.postValue(false) // LiveData 업데이트
                 }
-                _isLoading.postValue(false) // LiveData 업데이트
-            }
 
-            override fun onFailure(call: Call<PagingResponseDto<RecipeMainListResponseDto>>, t: Throwable) {
-                _isLoading.postValue(false) // LiveData 업데이트
-                _loadFailed.postValue(true) // 실패 상태 업데이트
-            }
-        })
+                // 응답 실패
+                override fun onFailure(
+                    call: Call<PagingResponseDto<RecipeMainListResponseDto>>,
+                    t: Throwable
+                ) {
+                    _isLoading.postValue(false) // 로딩 상태 업데이트
+                    _loadFailed.postValue(true) // 실패 상태 업데이트
+
+                    // 서버로부터의 오류 로그를 남깁니다.
+                    Log.e("MyViewModel", "Failed to load items: ${t.message}", t)
+                }
+            })
     }
 
 

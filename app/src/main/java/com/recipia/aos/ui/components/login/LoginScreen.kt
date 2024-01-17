@@ -1,6 +1,6 @@
-package com.recipia.aos.ui.components.signup
+package com.recipia.aos.ui.components.login
 
-import SignUpViewModel
+import LoginViewModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,20 +20,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.recipia.aos.ui.model.factory.MyViewModelFactory
 
 @Composable
-fun SignUpScreen(
+fun LoginScreen(
     navController: NavController,
-    viewModel: SignUpViewModel
+    viewModel: LoginViewModel
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -97,17 +92,24 @@ fun SignUpScreen(
 
         Button(
             onClick = {
-                viewModel.login(email, password, onLoginSuccess = {
-                    navController.navigate("home") // 로그인 성공 시 home 화면으로 이동
-                }, onLoginFailure = {
-                    loginError = "잘못된 입력정보입니다." // 로그인 실패 시 오류 메시지 설정
-                })
+                viewModel.login(
+                    email = email,
+                    password = password,
+                    onLoginSuccess = {
+                        navController.navigate("home") }, // todo 애초에 여기서부터 안탐
+                    onLoginFailure = { error -> loginError = error }
+                )
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+            modifier = Modifier.fillMaxWidth().height(50.dp)
         ) {
             Text(text = "로그인")
+        }
+
+        if (loginError.isNotEmpty()) {
+            Text(
+                text = loginError,
+                color = Color.Red
+            )
         }
     }
 }

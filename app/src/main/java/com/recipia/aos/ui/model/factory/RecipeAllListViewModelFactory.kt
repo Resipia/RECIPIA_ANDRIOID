@@ -1,8 +1,8 @@
 package com.recipia.aos.ui.model.factory
 
+import JwtTokenManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.recipia.aos.ui.jwt.JwtTokenManager
 import com.recipia.aos.ui.model.RecipeAllListViewModel
 
 class RecipeAllListViewModelFactory(

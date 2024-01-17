@@ -1,6 +1,7 @@
 package com.recipia.aos.ui.components.navigation
 
-import SignUpViewModel
+import JwtTokenManager
+import LoginViewModel
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -19,12 +20,11 @@ import androidx.navigation.compose.rememberNavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.TopAppBar
 import com.recipia.aos.ui.components.category.CategoriesScreen
-import com.recipia.aos.ui.components.infinitescroll.ItemListWithInfiniteScroll
+import com.recipia.aos.ui.components.home.HomeScreen
+import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
-import com.recipia.aos.ui.components.signup.SignUpScreen
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
-import com.recipia.aos.ui.jwt.JwtTokenManager
 import com.recipia.aos.ui.model.RecipeAllListViewModel
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeAllListViewModelFactory
@@ -34,28 +34,29 @@ fun AppNavigation(
     jwtTokenManager: JwtTokenManager
 ) {
 
+    // 네비게이션 컨트롤러, 레시피 상세 목록, 로그인 관련 모델 세팅
     val navController = rememberNavController()
     val viewModel: RecipeAllListViewModel = viewModel(
         factory = RecipeAllListViewModelFactory(jwtTokenManager)
     )
-    val signUpViewModel: SignUpViewModel = viewModel(
+    val loginViewModel: LoginViewModel = viewModel(
         factory = MyViewModelFactory(LocalContext.current),
-        modelClass = SignUpViewModel::class.java
+        modelClass = LoginViewModel::class.java
     )
-    // jwt가 존재하는지 검증한다.
-    val isUserLoggedIn = remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        isUserLoggedIn.value = jwtTokenManager.hasValidToken()
+    // jwt 존재 여부를 검증한다.
+    val isUserLoggedIn = remember {
+        mutableStateOf(jwtTokenManager.hasValidAccessToken())
     }
 
     // 네비게이션 컨트롤
-    NavHost(navController = navController, startDestination = if (isUserLoggedIn.value) "home" else "login") {
+    NavHost(
+        navController = navController, startDestination = if (isUserLoggedIn.value) "home" else "login"
+    ) {
+        // 로그인 화면
         composable("login") {
-            // 로그인 화면 구성
-            // SignUpViewModel을 네비게이션 구성의 일부로서 주입
-            SignUpScreen(navController, signUpViewModel)
+            LoginScreen(navController, loginViewModel)
         }
+        // 홈 화면(메인 레시피 목록들)
         composable("home") {
             Scaffold(
                 topBar = { TopAppBar(navController, viewModel) },
@@ -67,13 +68,15 @@ fun AppNavigation(
                         .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ItemListWithInfiniteScroll(viewModel)
+                    HomeScreen(viewModel)
                 }
             }
         }
+        // 마이페이지
         composable("mypage") {
             MyPageScreen(navController)
         }
+        // 카테고리 선택 화면
         composable("categories") {
             CategoriesScreen(
                 navController = navController,

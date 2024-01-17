@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
-import com.recipia.aos.ui.components.infinitescroll.ItemListWithInfiniteScroll
+import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.model.RecipeAllListViewModel
 
@@ -89,6 +89,6 @@ fun TopAppBar(
             )
         },
     ) { innerPadding ->
-        ItemListWithInfiniteScroll(viewModel)
+        HomeScreen(viewModel)
     }
 }
