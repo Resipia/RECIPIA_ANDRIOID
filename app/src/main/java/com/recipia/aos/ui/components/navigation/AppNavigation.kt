@@ -68,13 +68,16 @@ fun AppNavigation(
                         .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(viewModel, innerPadding)
+                    HomeScreen(navController, viewModel, innerPadding)
                 }
             }
         }
         // 마이페이지
         composable("mypage") {
             MyPageScreen(navController)
+        }
+        composable("create-recipe") {
+
         }
         // 카테고리 선택 화면
         composable("categories") {

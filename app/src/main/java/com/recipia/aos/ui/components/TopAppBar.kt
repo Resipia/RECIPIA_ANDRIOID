@@ -88,6 +88,6 @@ fun TopAppBar(
             )
         }
     ) { innerPadding ->
-        HomeScreen(viewModel, innerPadding)
+        HomeScreen(navController, viewModel, innerPadding)
     }
 }
