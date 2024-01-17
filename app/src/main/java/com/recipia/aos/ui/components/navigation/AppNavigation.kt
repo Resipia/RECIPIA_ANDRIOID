@@ -79,7 +79,7 @@ fun AppNavigation(
         }
         // 레시피 생성하기
         composable("create-recipe") {
-            CreateRecipeScreen(navController = navController)
+            CreateRecipeScreen(navController)
         }
         // 카테고리 선택 화면
         composable("categories") {
