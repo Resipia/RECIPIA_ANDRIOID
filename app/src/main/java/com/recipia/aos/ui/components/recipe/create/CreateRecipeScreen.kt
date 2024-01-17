@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.recipe.create
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.dto.recipecreate.NutritionalInfoDto
+import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 
 
 /**
@@ -38,7 +40,10 @@ import com.recipia.aos.ui.dto.recipecreate.NutritionalInfoDto
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateRecipeScreen(navController: NavController) {
+fun CreateRecipeScreen(
+    navController: NavController,
+    viewModel: CategorySelectionViewModel
+) {
     val scaffoldState = rememberScaffoldState()
     val recipeName = remember { mutableStateOf("") }
     val recipeDesc = remember { mutableStateOf("") }
@@ -47,7 +52,6 @@ fun CreateRecipeScreen(navController: NavController) {
     val hashtag = remember { mutableStateOf("") }
     val nutritionalInfoList = remember { mutableStateListOf<NutritionalInfoDto>() }
     val showNutritionalInfo = remember { mutableStateOf(false) }
-    val selectedCategories = remember { mutableStateOf(setOf<Int>()) }
 
     Scaffold(
         topBar = {
@@ -148,15 +152,10 @@ fun CreateRecipeScreen(navController: NavController) {
                     Text("카테고리 선택")
                 }
             }
+
             item {
                 // 선택된 카테고리 정보 표시
-                Text("선택된 카테고리: ${selectedCategories.value.joinToString()}")
-            }
-            items(nutritionalInfoList.size) { index ->
-                // 추가된 영양소 정보 입력 필드
-                NutritionalInfoInput(nutritionalInfoList[index]) { updatedInfo ->
-                    nutritionalInfoList[index] = updatedInfo
-                }
+                Text("선택된 카테고리: ${viewModel.selectedCategories.value.joinToString()}")
             }
             // 이미지 업로드 UI 추가
         }

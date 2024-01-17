@@ -27,6 +27,8 @@ import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.model.RecipeAllListViewModel
+import com.recipia.aos.ui.model.category.CategorySelectionViewModel
+import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeAllListViewModelFactory
 
@@ -43,6 +45,9 @@ fun AppNavigation(
     val loginViewModel: LoginViewModel = viewModel(
         factory = MyViewModelFactory(LocalContext.current),
         modelClass = LoginViewModel::class.java
+    )
+    val categorySelectionViewModel: CategorySelectionViewModel = viewModel(
+        factory = CategorySelectionViewModelFactory()
     )
     // jwt 존재 여부를 검증한다.
     val isUserLoggedIn = remember {
@@ -79,12 +84,16 @@ fun AppNavigation(
         }
         // 레시피 생성하기
         composable("create-recipe") {
-            CreateRecipeScreen(navController)
+            CreateRecipeScreen(
+                navController,
+                categorySelectionViewModel
+            )
         }
         // 카테고리 선택 화면
         composable("categories") {
             CategoriesScreen(
                 navController = navController,
+                viewModel = categorySelectionViewModel,
                 subCategories = listOf(
                     SubCategory(1, "김치찌개", 1),
                     SubCategory(2, "된장찌개", 1),

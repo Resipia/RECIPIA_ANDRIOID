@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.category
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +30,7 @@ import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
+import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 
 /**
  * 이 코드는 LazyRow를 사용하여 주어진 서브 카테고리 목록에 대해 FilterChip을 생성합니다.
@@ -39,6 +41,7 @@ import com.recipia.aos.ui.dto.SubCategory
 @Composable
 fun CategoriesScreen(
     navController: NavController, // NavController 인자 추가
+    viewModel: CategorySelectionViewModel,
     subCategories: List<SubCategory>,
     categories: List<Category>,
     onSelectedCategories: (Set<Int>) -> Unit // 콜백 함수 추가
@@ -114,11 +117,9 @@ fun CategoriesScreen(
                 Spacer(modifier = Modifier.padding(20.dp))
                 Button(
                     onClick = {
-                        onSelectedCategories(selectedSubCategories)
-                        // 선택된 카테고리 ID를 CreateRecipeScreen으로 전달
-                        navController.previousBackStackEntry?.savedStateHandle?.set("selectedCategories", selectedSubCategories)
+                        viewModel.setSelectedCategories(selectedSubCategories)
                         navController.popBackStack()
-                    }, // 콜백 호출
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
