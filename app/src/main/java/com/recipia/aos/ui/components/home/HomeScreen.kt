@@ -1,14 +1,19 @@
 package com.recipia.aos.ui.components.home
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,14 +21,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.recipia.aos.R
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
 import com.recipia.aos.ui.model.RecipeAllListViewModel
 
 @Composable
 fun HomeScreen(
     viewModel: RecipeAllListViewModel, // ViewModel을 매개변수로 전달받음
+    innerPadding: PaddingValues // 이 파라미터를 추가합니다.
 ) {
 
     val items by viewModel.items.observeAsState(initial = emptyList())
@@ -41,7 +51,9 @@ fun HomeScreen(
         viewModel.loadMoreItems()
     }
 
-    LazyColumn {
+    LazyColumn(
+        modifier = Modifier.padding(innerPadding)
+    ) {
         itemsIndexed(items) { index, item ->
             ListItem(item = item)
 
@@ -60,19 +72,43 @@ fun HomeScreen(
 
 @Composable
 fun ListItem(item: RecipeMainListResponseDto) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp)) {
-//        Image(
-//            painter = rememberImagePainter(data = item.subCategoryList.get(0).subCategoryNm),
-//            contentDescription = "Recipe Image",
-//            modifier = Modifier.size(100.dp).clip(RoundedCornerShape(8.dp))
-//        )
-        Column(modifier = Modifier
-            .padding(start = 16.dp)
-            .align(Alignment.CenterVertically)) {
-            Text(item.recipeName, style = MaterialTheme.typography.titleSmall)
-            Text(item.nickname, style = MaterialTheme.typography.bodyMedium)
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(8.dp),
+        shadowElevation = 4.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground), // Replace with your image resource
+                contentDescription = "Recipe Image",
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            Column(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .align(Alignment.CenterVertically)
+            ) {
+                Text(
+                    text = item.recipeName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = item.nickname,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

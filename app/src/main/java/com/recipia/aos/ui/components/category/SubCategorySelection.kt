@@ -1,6 +1,7 @@
 package com.recipia.aos.ui.components.category
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
@@ -12,9 +13,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,12 +54,18 @@ fun CategoriesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("카테고리 선택") },
+                title = { Text("카테고리 선택", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.Close, contentDescription = "닫기")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { innerPadding ->
@@ -65,8 +74,16 @@ fun CategoriesScreen(
                 groupedSubCategories.forEach { (categoryId, subCategoryList) ->
                     // Category 이름 찾기
                     val categoryName = categoryNameMap[categoryId] ?: "Unknown Category"
-                    Text(categoryName) // 카테고리 이름 표시
-                    LazyRow(modifier = Modifier.fillMaxWidth()) { // Chip들을 가로로 스크롤 가능하게 배치
+                    Text(
+                        categoryName,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    ) {
                         items(subCategoryList.size) { index ->
                             val subCategory = subCategoryList[index]
                             FilterChip(
@@ -87,18 +104,19 @@ fun CategoriesScreen(
                                 leadingIcon = if (subCategory.id in selectedSubCategories) {
                                     { Icon(Icons.Filled.Done, contentDescription = "Selected") }
                                 } else null,
-                                modifier = Modifier.padding(4.dp)
+                                modifier = Modifier.padding(horizontal = 4.dp)
                             )
                         }
                     }
                 }
+                Spacer(modifier = Modifier.padding(20.dp))
                 Button(
                     onClick = { onSelectedCategories(selectedSubCategories) }, // 콜백 호출
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .padding(16.dp)
                 ) {
-                    Text("선택 완료")
+                    Text("선택 완료", style = MaterialTheme.typography.labelLarge)
                 }
             }
         }

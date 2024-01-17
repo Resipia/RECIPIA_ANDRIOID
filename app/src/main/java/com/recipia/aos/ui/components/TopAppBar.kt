@@ -39,13 +39,13 @@ fun TopAppBar(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 title = {
                     Text(
-                        "Centered Top App Bar",
+                        "레시피앱",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -54,7 +54,7 @@ fun TopAppBar(
                     IconButton(onClick = { navController.navigate("categories") }) {
                         Icon(
                             imageVector = Icons.Filled.Menu,
-                            contentDescription = "Localized description"
+                            contentDescription = "메뉴"
                         )
                     }
                 },
@@ -62,7 +62,7 @@ fun TopAppBar(
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
-                            contentDescription = "Localized description"
+                            contentDescription = "더보기"
                         )
                     }
                     CustomDropdownMenu(
@@ -71,24 +71,23 @@ fun TopAppBar(
                     ) {
                         // 드롭다운 메뉴 아이템들
                         DropdownMenuItem(
-                            text = { Text("Edit") },
-                            onClick = { /* Handle edit! */ }
+                            text = { Text("수정") },
+                            onClick = { /* 수정 처리 */ }
                         )
                         DropdownMenuItem(
-                            text = { Text("Settings") },
-                            onClick = { /* Handle settings! */ }
+                            text = { Text("설정") },
+                            onClick = { /* 설정 처리 */ }
                         )
                         DropdownMenuItem(
-                            text = {
-                                Text("Send Feedback") },
-                            onClick = { /* Handle send feedback! */ }
+                            text = { Text("피드백 보내기") },
+                            onClick = { /* 피드백 처리 */ }
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior,
+                scrollBehavior = scrollBehavior
             )
-        },
+        }
     ) { innerPadding ->
-        HomeScreen(viewModel)
+        HomeScreen(viewModel, innerPadding)
     }
 }

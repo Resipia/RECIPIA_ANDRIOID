@@ -68,7 +68,7 @@ fun AppNavigation(
                         .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(viewModel)
+                    HomeScreen(viewModel, innerPadding)
                 }
             }
         }
