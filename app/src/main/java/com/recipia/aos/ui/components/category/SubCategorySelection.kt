@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 
@@ -67,7 +68,8 @@ fun CategoriesScreen(
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
-        }
+        },
+        bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             Column {

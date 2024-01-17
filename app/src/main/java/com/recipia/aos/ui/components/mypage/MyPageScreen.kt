@@ -1,11 +1,25 @@
 package com.recipia.aos.ui.components.mypage
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,39 +33,33 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.recipia.aos.R
+import com.recipia.aos.ui.components.BottomNavigationBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyPageScreen(
     navController: NavController
 ) {
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("") },
+                title = { Text("마이페이지", style = MaterialTheme.typography.titleMedium) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.Close, contentDescription = "닫기")
                     }
                 }
             )
-        }
+        },
+        bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally // 요소들을 가운데 정렬
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                "회원정보",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            // 회원 프로필 사진
             Image(
                 painter = painterResource(id = R.drawable.profile_placeholder),
                 contentDescription = "회원 프로필",
@@ -66,14 +74,13 @@ fun MyPageScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // 메뉴 아이템들
-            MenuItem("1. 내 정보 관리")
-            MenuItem("2. 작성한 레시피 목록")
-            MenuItem("3. 고객 센터")
-            MenuItem("4. Q&A")
+            MenuItem(navController, "내 정보 관리", "info")
+            MenuItem(navController, "작성한 레시피 목록", "recipes")
+            MenuItem(navController, "고객 센터", "support")
+            MenuItem(navController, "Q&A", "faq")
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 로그아웃 버튼
             Button(
                 onClick = { /* 로그아웃 로직 */ },
                 modifier = Modifier.fillMaxWidth()
@@ -85,16 +92,24 @@ fun MyPageScreen(
 }
 
 @Composable
-fun MenuItem(text: String) {
-    Text(
-        text,
+fun MenuItem(navController: NavController, text: String, route: String) {
+    Button(
+        onClick = { navController.navigate(route) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Light
-    )
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
+
 
 // 기존 MyPageScreen 컴포저블 아래에 이 미리보기 컴포저블을 추가
 @Preview(showBackground = true)
