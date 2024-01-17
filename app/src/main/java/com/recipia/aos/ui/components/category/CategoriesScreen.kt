@@ -113,7 +113,12 @@ fun CategoriesScreen(
                 }
                 Spacer(modifier = Modifier.padding(20.dp))
                 Button(
-                    onClick = { onSelectedCategories(selectedSubCategories) }, // 콜백 호출
+                    onClick = {
+                        onSelectedCategories(selectedSubCategories)
+                        // 선택된 카테고리 ID를 CreateRecipeScreen으로 전달
+                        navController.previousBackStackEntry?.savedStateHandle?.set("selectedCategories", selectedSubCategories)
+                        navController.popBackStack()
+                    }, // 콜백 호출
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)

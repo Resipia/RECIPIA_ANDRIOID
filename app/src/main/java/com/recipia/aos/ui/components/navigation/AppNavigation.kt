@@ -23,6 +23,7 @@ import com.recipia.aos.ui.components.category.CategoriesScreen
 import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
+import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.model.RecipeAllListViewModel
@@ -76,8 +77,9 @@ fun AppNavigation(
         composable("mypage") {
             MyPageScreen(navController)
         }
+        // 레시피 생성하기
         composable("create-recipe") {
-
+            CreateRecipeScreen(navController = navController)
         }
         // 카테고리 선택 화면
         composable("categories") {
