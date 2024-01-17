@@ -4,15 +4,21 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.recipia.aos.ui.api.GetAllRecipeListService
 import com.recipia.aos.ui.dto.PagingResponseDto
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
+import com.recipia.aos.ui.jwt.JwtTokenManager
+import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class MyViewModel : ViewModel() {
+class RecipeAllListViewModel(
+    private val jwtTokenManager: JwtTokenManager
+) : ViewModel() {
+
     private val _items = MutableLiveData<List<RecipeMainListResponseDto>>()
     val items: LiveData<List<RecipeMainListResponseDto>> = _items
 
@@ -27,13 +33,24 @@ class MyViewModel : ViewModel() {
     private val _loadFailed = MutableLiveData<Boolean>(false)
     val loadFailed: LiveData<Boolean> = _loadFailed
 
-    private val apiService: ApiService by lazy {
+
+    val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            // JwtTokenManager를 사용하여 토큰을 요청 헤더에 추가
+            val request = jwtTokenManager.addTokenToHeader(chain)
+            chain.proceed(request)
+        }
+        .build()
+
+    val getAllRecipeListService: GetAllRecipeListService by lazy {
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/")
+            .baseUrl("http://10.0.2.2:8082/") // 서버의 base URL을 설정하세요.
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(ApiService::class.java)
+            .create(GetAllRecipeListService::class.java)
     }
+
 
     init {
         loadMoreItems() // 이 위치에서 apiService가 처음 사용될 때 초기화됨
@@ -52,7 +69,7 @@ class MyViewModel : ViewModel() {
 
     // 서버로부터 데이터를 가져오는 함수 예시
     private fun loadItemsFromServer(page: Int, size: Int, sortType: String) {
-        apiService.getAllRecipeList(page, size, sortType)
+        getAllRecipeListService.getAllRecipeList(page, size, sortType)
             .enqueue(object : Callback<PagingResponseDto<RecipeMainListResponseDto>> {
 
             override fun onResponse(
