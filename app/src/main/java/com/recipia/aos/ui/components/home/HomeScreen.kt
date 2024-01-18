@@ -60,6 +60,7 @@ fun HomeScreen(
     val items by viewModel.items.observeAsState(initial = emptyList())
     val isLoading by viewModel.isLoading.observeAsState(initial = false)
     val loadFailed by viewModel.loadFailed.observeAsState(initial = false)
+    val navigateToLogin by viewModel.navigateToLogin.observeAsState(initial = false)
     val context = LocalContext.current
 
     if (loadFailed) {
@@ -70,6 +71,13 @@ fun HomeScreen(
     // 화면이 렌더링될 때 데이터 로딩 시작
     LaunchedEffect(key1 = true) {
         viewModel.loadMoreItems()
+    }
+
+    // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
+    if (navigateToLogin) {
+        LaunchedEffect(key1 = Unit) {
+            navController.navigate("login")
+        }
     }
 
     Scaffold(

@@ -141,8 +141,10 @@ class RecipeAllListViewModel(
             onTokenRenewed = { newToken ->
                 retryRequestWithNewToken(failedCall, newToken)
             },
-            onRenewalFailed = {
-                redirectToLogin()
+            onRenewalFailed = { navigateToLogin ->
+                if (navigateToLogin) {
+                    redirectToLogin() // 로그인 화면으로 이동하는 상태 업데이트
+                }
             }
         )
     }
