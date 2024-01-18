@@ -5,5 +5,5 @@ data class RecipeMainListResponseDto(
     val recipeName: String,
     val nickname: String,
     val subCategoryList: List<SubCategoryDto>,
-    val bookmarked: Boolean
+    val bookmarkId: Long?
 )

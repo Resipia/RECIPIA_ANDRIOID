@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
-import com.recipia.aos.ui.model.RecipeAllListViewModel
+import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

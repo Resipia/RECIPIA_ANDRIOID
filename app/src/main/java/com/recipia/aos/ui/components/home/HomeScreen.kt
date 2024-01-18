@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -20,9 +19,6 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,10 +28,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,29 +42,42 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.R
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
-import com.recipia.aos.ui.model.RecipeAllListViewModel
+import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
+import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: RecipeAllListViewModel,
+    recipeAllListViewModel: RecipeAllListViewModel,
+    bookmarkViewModel: BookMarkViewModel,
     innerPadding: PaddingValues
 ) {
 
-    val items by viewModel.items.observeAsState(initial = emptyList())
-    val isLoading by viewModel.isLoading.observeAsState(initial = false)
-    val loadFailed by viewModel.loadFailed.observeAsState(initial = false)
-    val navigateToLogin by viewModel.navigateToLogin.observeAsState(initial = false)
+    /**
+     * LiveData에 주로 observeAsState를 사용한다.
+     * observeAsState를 사용하면, LiveData가 노출하는 데이터가 변경될 때 Composable 함수가 자동으로 다시 호출되어 UI가 업데이트되는 구조다.
+     */
+    val items by recipeAllListViewModel.items.observeAsState(initial = emptyList())
+    val isLoading by recipeAllListViewModel.isLoading.observeAsState(initial = false)
+    val loadFailed by recipeAllListViewModel.loadFailed.observeAsState(initial = false)
+    val navigateToLogin by recipeAllListViewModel.navigateToLogin.observeAsState(initial = false)
+    val toastMessage by bookmarkViewModel.toastMessage.observeAsState()
     val context = LocalContext.current
+
+    // 토스트 메시지를 찾아서 띄우고 초기화 진행
+    toastMessage?.let {
+        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        bookmarkViewModel.toastMessage.value = null
+    }
 
     if (loadFailed) {
         Toast.makeText(context, "데이터 로딩 실패", Toast.LENGTH_SHORT).show()
-        viewModel.resetLoadFailed() // 경고창을 한 번만 표시하도록 상태를 리셋
+        recipeAllListViewModel.resetLoadFailed() // 경고창을 한 번만 표시하도록 상태를 리셋
     }
 
     // 화면이 렌더링될 때 데이터 로딩 시작
     LaunchedEffect(key1 = true) {
-        viewModel.loadMoreItems()
+        recipeAllListViewModel.loadMoreItems()
     }
 
     // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
@@ -98,11 +105,11 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 itemsIndexed(items) { index, item ->
-                    ListItem(item = item)
+                    ListItem(item, bookmarkViewModel)
 
                     // 마지막 아이템에 도달했을 때 추가 데이터 로드
-                    if (index == items.lastIndex && !viewModel.isLastPage && !isLoading) {
-                        viewModel.loadMoreItems()
+                    if (index == items.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
+                        recipeAllListViewModel.loadMoreItems()
                     }
                 }
 
@@ -118,7 +125,13 @@ fun HomeScreen(
 }
 
 @Composable
-fun ListItem(item: RecipeMainListResponseDto) {
+fun ListItem(
+    item: RecipeMainListResponseDto,
+    bookmarkViewModel: BookMarkViewModel,
+) {
+    // 북마크 상태 확인 (bookmarkId가 있으면 북마크된 것으로 간주)
+    val isBookmarked = item.bookmarkId != null
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -171,13 +184,11 @@ fun ListItem(item: RecipeMainListResponseDto) {
 
             // 북마크 아이콘
             IconButton(
-                onClick = {
-                          /* 북마크 클릭 처리 로직 */
-                },
-                modifier = Modifier.align(Alignment.CenterVertically)  // 아이콘을 세로 중앙에 위치시킴
+                onClick = { bookmarkViewModel.toggleBookmark(item) },
+                modifier = Modifier.align(Alignment.CenterVertically)
             ) {
-                val icon = if (item.bookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder
-                val tint = if (item.bookmarked) MaterialTheme.colorScheme.primary else Color.Gray
+                val icon = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder
+                val tint = if (isBookmarked) MaterialTheme.colorScheme.primary else Color.Gray
 
                 Icon(
                     imageVector = icon,
