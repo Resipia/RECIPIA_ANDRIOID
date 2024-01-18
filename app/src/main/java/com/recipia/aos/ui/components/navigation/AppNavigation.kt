@@ -1,6 +1,6 @@
 package com.recipia.aos.ui.components.navigation
 
-import JwtTokenManager
+import TokenManager
 import com.recipia.aos.ui.model.login.LoginViewModel
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -25,21 +25,22 @@ import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
-import com.recipia.aos.ui.model.RecipeAllListViewModel
+import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeAllListViewModelFactory
+import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 
 @Composable
 fun AppNavigation(
-    jwtTokenManager: JwtTokenManager
+    tokenManager: TokenManager
 ) {
 
     // 네비게이션 컨트롤러, 레시피 상세 목록, 로그인 관련 모델 세팅
     val navController = rememberNavController()
-    val viewModel: RecipeAllListViewModel = viewModel(
-        factory = RecipeAllListViewModelFactory(jwtTokenManager)
+    val recipeAllListViewModel: RecipeAllListViewModel = viewModel(
+        factory = RecipeAllListViewModelFactory(tokenManager)
     )
     val loginViewModel: LoginViewModel = viewModel(
         factory = MyViewModelFactory(LocalContext.current),
@@ -48,9 +49,11 @@ fun AppNavigation(
     val categorySelectionViewModel: CategorySelectionViewModel = viewModel(
         factory = CategorySelectionViewModelFactory()
     )
+    val bookmarkViewModel: BookMarkViewModel = viewModel()
+
     // jwt 존재 여부를 검증한다.
     val isUserLoggedIn = remember {
-        mutableStateOf(jwtTokenManager.hasValidAccessToken())
+        mutableStateOf(tokenManager.hasValidAccessToken())
     }
 
     // 네비게이션 컨트롤
@@ -64,7 +67,7 @@ fun AppNavigation(
         // 홈 화면(메인 레시피 목록들)
         composable("home") {
             Scaffold(
-                topBar = { TopAppBar(navController, viewModel) },
+                topBar = { TopAppBar(navController, recipeAllListViewModel) },
                 bottomBar = { BottomNavigationBar(navController) }
             ) { innerPadding ->
                 Surface(
@@ -73,7 +76,7 @@ fun AppNavigation(
                         .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(navController, viewModel, innerPadding)
+                    HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel, innerPadding)
                 }
             }
         }

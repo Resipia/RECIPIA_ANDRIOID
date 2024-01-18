@@ -1,17 +1,17 @@
 package com.recipia.aos.ui.model.factory
 
-import JwtTokenManager
+import TokenManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.recipia.aos.ui.model.RecipeAllListViewModel
+import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 
 class RecipeAllListViewModelFactory(
-    private val jwtTokenManager: JwtTokenManager
+    private val tokenManager: TokenManager
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RecipeAllListViewModel::class.java)) {
-            return RecipeAllListViewModel(jwtTokenManager) as T
+            return RecipeAllListViewModel(tokenManager) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
