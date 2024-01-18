@@ -1,6 +1,6 @@
-package com.recipia.aos.ui.jwt
+package com.recipia.aos.ui.model.jwt
 
-import JwtTokenManager
+import TokenManager
 import android.util.Log
 import com.recipia.aos.ui.api.JwtRepublishService
 import com.recipia.aos.ui.dto.login.ResponseDto
@@ -18,8 +18,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 /**
  * 토큰 재발급 요청을 보내는 클래스
  */
-class TokenManager(
-    private val jwtTokenManager: JwtTokenManager
+class TokenRepublishManager(
+    private val tokenManager: TokenManager
 ) {
 
     private val jwtRepublishService: JwtRepublishService by lazy {
@@ -41,12 +41,12 @@ class TokenManager(
 
     fun renewTokenIfNeeded(
         onTokenRenewed: (String) -> Unit,
-        onRenewalFailed: () -> Unit
+        onRenewalFailed: (Boolean) -> Unit
     ) {
 
         // 1. 멤버id, 리프레시 토큰 추출
-        val memberId = jwtTokenManager.loadMemberId()
-        val refreshToken = jwtTokenManager.loadRefreshToken()
+        val memberId = tokenManager.loadMemberId()
+        val refreshToken = tokenManager.loadRefreshToken()
 
         if (memberId != null && refreshToken != null) {
 
@@ -62,11 +62,11 @@ class TokenManager(
                         if (response.isSuccessful) {
                             val newAccessToken = response.body()?.result?.accessToken
                             newAccessToken?.let {
-                                jwtTokenManager.saveAccessToken(it)
+                                tokenManager.saveAccessToken(it)
                                 onTokenRenewed(it)
-                            } ?: onRenewalFailed()
+                            } ?: onRenewalFailed(false)
                         } else {
-                            onRenewalFailed()
+                            onRenewalFailed(true)
                         }
                     }
 
@@ -77,11 +77,11 @@ class TokenManager(
                     ) {
                         // 실패한 경우 로그를 찍어서 문제를 파악하도록 하자.
                         Log.e("TokenManager", "Error on renewing token: ${t.message}")
-                        onRenewalFailed()
+                        onRenewalFailed(true)
                     }
                 })
         } else {
-            onRenewalFailed()
+            onRenewalFailed(true)
         }
     }
 }

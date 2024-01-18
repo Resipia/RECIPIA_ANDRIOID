@@ -1,6 +1,6 @@
 package com.recipia.aos
 
-import JwtTokenManager
+import TokenManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,10 +11,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val jwtTokenManager = JwtTokenManager(this.applicationContext)
+            val tokenManager = TokenManager(this.applicationContext)
 
             setContent {
-                AppNavigation(jwtTokenManager)
+                AppNavigation(tokenManager)
             }
         }
     }

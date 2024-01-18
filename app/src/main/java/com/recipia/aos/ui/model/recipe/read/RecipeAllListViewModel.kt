@@ -1,15 +1,14 @@
-package com.recipia.aos.ui.model
+package com.recipia.aos.ui.model.recipe.read
 
-import JwtTokenManager
+import TokenManager
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.recipia.aos.ui.api.GetAllRecipeListService
-import com.recipia.aos.ui.api.JwtRepublishService
 import com.recipia.aos.ui.dto.PagingResponseDto
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
-import com.recipia.aos.ui.jwt.TokenManager
+import com.recipia.aos.ui.model.jwt.TokenRepublishManager
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -18,7 +17,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class RecipeAllListViewModel(
-    private val jwtTokenManager: JwtTokenManager
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _items = MutableLiveData<List<RecipeMainListResponseDto>>()
@@ -44,7 +43,7 @@ class RecipeAllListViewModel(
     val okHttpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
             // JwtTokenManager를 사용하여 토큰을 요청 헤더에 추가
-            val request = jwtTokenManager.addAccessTokenToHeader(chain)
+            val request = tokenManager.addAccessTokenToHeader(chain)
             chain.proceed(request)
         }
         .build()
@@ -52,7 +51,7 @@ class RecipeAllListViewModel(
     // 실제 요청은 이걸로 이루어짐
     val getAllRecipeListService: GetAllRecipeListService by lazy {
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/") // 서버의 base URL을 설정하세요.
+            .baseUrl("http://10.0.2.2:8082/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -135,14 +134,16 @@ class RecipeAllListViewModel(
     private fun handleUnauthorizedError(
         failedCall: Call<PagingResponseDto<RecipeMainListResponseDto>>
     ) {
-        val tokenManager = TokenManager(jwtTokenManager)
+        val tokenRepublishManager = TokenRepublishManager(tokenManager)
         // 토큰을 새롭게 발급받고 새로운 요청을 보낸다.
-        tokenManager.renewTokenIfNeeded(
+        tokenRepublishManager.renewTokenIfNeeded(
             onTokenRenewed = { newToken ->
                 retryRequestWithNewToken(failedCall, newToken)
             },
-            onRenewalFailed = {
-                redirectToLogin()
+            onRenewalFailed = { navigateToLogin ->
+                if (navigateToLogin) {
+                    redirectToLogin() // 로그인 화면으로 이동하는 상태 업데이트
+                }
             }
         )
     }

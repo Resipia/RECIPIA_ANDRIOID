@@ -1,6 +1,6 @@
 package com.recipia.aos.ui.model.login
 
-import JwtTokenManager
+import TokenManager
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.recipia.aos.ui.api.LoginService
@@ -23,8 +23,8 @@ class LoginViewModel(
         .build()
 
     private val apiService: LoginService = retrofit.create(LoginService::class.java)
-    private val jwtTokenManager =
-        JwtTokenManager(appContext.applicationContext) // Application Context 사용
+    private val tokenManager =
+        TokenManager(appContext.applicationContext) // Application Context 사용
 
     // 로그인 함수
     fun login(
@@ -46,9 +46,9 @@ class LoginViewModel(
                 if (response.isSuccessful) {
                     response.body()?.result?.let {
                         // 엑세스 토큰, 리프래시 토큰, 멤버id 저장
-                        jwtTokenManager.saveAccessToken(it.accessToken)
-                        jwtTokenManager.saveRefreshToken(it.refreshToken)
-                        jwtTokenManager.saveMemberId(it.memberId)
+                        tokenManager.saveAccessToken(it.accessToken)
+                        tokenManager.saveRefreshToken(it.refreshToken)
+                        tokenManager.saveMemberId(it.memberId)
                         onLoginSuccess() // 엑세스 토큰을 전달하지 않고 콜백만 호출
                     } ?: onLoginFailure("server response fail")
                 } else {

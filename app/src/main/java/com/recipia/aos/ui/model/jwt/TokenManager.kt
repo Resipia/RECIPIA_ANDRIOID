@@ -2,7 +2,7 @@ import android.content.Context
 import okhttp3.Interceptor
 import okhttp3.Request
 
-class JwtTokenManager(private val context: Context) {
+class TokenManager(private val context: Context) {
     // 엑세스 토큰 저장
     fun saveAccessToken(token: String) {
         val sharedPreferences = context.getSharedPreferences("recipia", Context.MODE_PRIVATE)
