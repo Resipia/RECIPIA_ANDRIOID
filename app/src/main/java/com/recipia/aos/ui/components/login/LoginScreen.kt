@@ -1,6 +1,6 @@
 package com.recipia.aos.ui.components.login
 
-import LoginViewModel
+import com.recipia.aos.ui.model.login.LoginViewModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize

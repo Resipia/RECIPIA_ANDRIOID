@@ -68,7 +68,7 @@ fun BottomNavigationBar(navController: NavController) {
                 onClick = {
                     selectedItem.value = index
                     when (label) {
-                        "채팅" -> Toast.makeText(context, "개발중인 기능입니다", Toast.LENGTH_SHORT).show()
+                        "채팅" -> Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
                         else -> {
                             // 네비게이션 로직
                             navController.navigate(when (label) {

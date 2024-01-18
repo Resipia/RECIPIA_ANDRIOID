@@ -72,7 +72,6 @@ fun HomeScreen(
         viewModel.loadMoreItems()
     }
 
-
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -110,7 +109,6 @@ fun HomeScreen(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListItem(item: RecipeMainListResponseDto) {
     Surface(
@@ -165,7 +163,9 @@ fun ListItem(item: RecipeMainListResponseDto) {
 
             // 북마크 아이콘
             IconButton(
-                onClick = { /* 북마크 클릭 처리 로직 */ },
+                onClick = {
+                          /* 북마크 클릭 처리 로직 */
+                },
                 modifier = Modifier.align(Alignment.CenterVertically)  // 아이콘을 세로 중앙에 위치시킴
             ) {
                 val icon = if (item.bookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder

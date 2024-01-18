@@ -1,8 +1,12 @@
+package com.recipia.aos.ui.model.login
+
+import JwtTokenManager
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.recipia.aos.ui.api.LoginService
-import com.recipia.aos.ui.dto.signup.ServerResponseDto
-import com.recipia.aos.ui.dto.signup.TokenMemberInfoDto
+import com.recipia.aos.ui.dto.login.LoginResponseDto
+import com.recipia.aos.ui.dto.login.ResponseDto
+import com.recipia.aos.ui.dto.login.TokenMemberInfoDto
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -19,7 +23,8 @@ class LoginViewModel(
         .build()
 
     private val apiService: LoginService = retrofit.create(LoginService::class.java)
-    private val jwtTokenManager = JwtTokenManager(appContext.applicationContext) // Application Context 사용
+    private val jwtTokenManager =
+        JwtTokenManager(appContext.applicationContext) // Application Context 사용
 
     // 로그인 함수
     fun login(
@@ -31,12 +36,12 @@ class LoginViewModel(
         // 토큰 정보 세팅하고 api 로그인 요청 실시
         val tokenMemberInfoDto = TokenMemberInfoDto(email, password)
         val call = apiService.login(tokenMemberInfoDto)
-        call.enqueue(object : Callback<ServerResponseDto> {
+        call.enqueue(object : Callback<ResponseDto<LoginResponseDto>> {
 
             // 성공적으로 응답이 왔을 때
             override fun onResponse(
-                call: Call<ServerResponseDto>,
-                response: Response<ServerResponseDto>
+                call: Call<ResponseDto<LoginResponseDto>>,
+                response: Response<ResponseDto<LoginResponseDto>>
             ) {
                 if (response.isSuccessful) {
                     response.body()?.result?.let {
@@ -55,7 +60,7 @@ class LoginViewModel(
 
             // 응답 실패 시
             override fun onFailure(
-                call: Call<ServerResponseDto>,
+                call: Call<ResponseDto<LoginResponseDto>>,
                 t: Throwable
             ) {
                 onLoginFailure(t.message ?: "network error occur")  // 실패 메시지 전달

@@ -1,6 +1,6 @@
 package com.recipia.aos.ui.model.factory
 
-import LoginViewModel
+import com.recipia.aos.ui.model.login.LoginViewModel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
