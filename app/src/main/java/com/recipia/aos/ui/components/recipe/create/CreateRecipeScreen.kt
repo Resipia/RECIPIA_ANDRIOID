@@ -101,10 +101,22 @@ fun CreateRecipeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("레시피 생성", style = MaterialTheme.typography.titleLarge) },
+                title = {
+                    Text(
+                        "레시피 생성",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.Close, contentDescription = "닫기")
+                    IconButton(onClick = {
+                        recipeCreateModel.clearData()
+                        viewModel.selectedCategories.value = emptySet()
+                        navController.popBackStack()
+                    }) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "닫기"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

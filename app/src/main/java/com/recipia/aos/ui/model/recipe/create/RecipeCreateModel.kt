@@ -200,4 +200,15 @@ class RecipeCreateModel(
         }
         return null
     }
+
+    fun clearData() {
+        recipeName.value = ""
+        recipeDesc.value = ""
+        timeTaken.value = ""
+        ingredient.value = ""
+        hashtag.value = ""
+        nutritionalInfoList.clear()
+        selectedImageUris.clear()
+    }
+
 }
