@@ -26,19 +26,19 @@ class RecipeAllListViewModel(
         private set // 이렇게 하면 외부에서는 읽기만 가능해짐
 
     // 현재 페이지, 사이즈, 정렬 유형 저장
-    private var currentRequestPage: Int = 0
-    private var currentRequestSize: Int = 10
-    private var currentRequestSortType: String = "new"
+    var currentRequestPage: Int = 0
+    var currentRequestSize: Int = 10
+    var currentRequestSortType: String = "new"
     var isLastPage = false
 
-    private val _isLoading = MutableLiveData<Boolean>()
+    val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _loadFailed = MutableLiveData<Boolean>(false)
+    val _loadFailed = MutableLiveData<Boolean>(false)
     val loadFailed: LiveData<Boolean> = _loadFailed
 
     // 로그인 화면으로 이동해야 함을 알린다.
-    private val _navigateToLogin = MutableLiveData<Boolean>()
+    val _navigateToLogin = MutableLiveData<Boolean>()
     val navigateToLogin: LiveData<Boolean> = _navigateToLogin
 
     // 모든 레시피 리스트를 호출하는 서비스 선언
@@ -71,6 +71,14 @@ class RecipeAllListViewModel(
 
     private fun redirectToLogin() {
         _navigateToLogin.value = true
+    }
+
+    // 데이터를 새로고침하는 메서드
+    fun refreshItems() {
+        currentRequestPage = 0 // 페이지를 초기화
+        isLastPage = false
+        items.value = emptyList() // 기존 데이터를 초기화
+        loadMoreItems() // 첫 페이지부터 다시 로딩
     }
 
     // 더 많은 아이템을 요청하는 메서드
