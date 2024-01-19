@@ -20,7 +20,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 class BookMarkViewModel() : ViewModel() {
 
     val toastMessage = MutableLiveData<String>()
-    val bookmarks = MutableLiveData<List<RecipeMainListResponseDto>?>()
+    private val bookmarks = MutableLiveData<List<RecipeMainListResponseDto>?>()
+
+    // 북마크 상태 변경을 감지하기 위한 LiveData
+    val bookmarkChangeNotifier = MutableLiveData<Long?>()
 
     // 북마크 요청 refrofit 설정 (로깅 인터셉터 추가)
     private val bookmarkService: BookmarkService by lazy {
@@ -124,5 +127,7 @@ class BookMarkViewModel() : ViewModel() {
             }
         }
         bookmarks.postValue(updatedList)
+        // 북마크 변경을 알림
+        bookmarkChangeNotifier.postValue(recipeId)
     }
 }
