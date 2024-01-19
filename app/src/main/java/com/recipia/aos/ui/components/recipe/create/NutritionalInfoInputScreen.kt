@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,9 +15,12 @@ import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
 
 /**
  * 영양소 입력 필드
+ * NutritionalInfoDto의 각 필드는 사용자가 입력을 할 때마다 즉시 업데이트되고 (onNutritionalInfoChanged(updatedInfo) 적용)
+ * 최종적으로 상위 컴포넌트나 ViewModel에 전달될 수 있게 되어,
+ * 사용자가 "저장" 버튼을 눌렀을 때 최신 상태의 데이터를 서버에 전송할 준비가 완료된다.
  */
 @Composable
-fun NutritionalInfoInput(
+fun NutritionalInfoInputScreen(
     nutritionalInfo: NutritionalInfoDto,
     onNutritionalInfoChanged: (NutritionalInfoDto) -> Unit
 ) {
@@ -31,66 +33,56 @@ fun NutritionalInfoInput(
         OutlinedTextField(
             value = nutritionalInfo.carbohydrates?.toString() ?: "",
             onValueChange = { text ->
-                onNutritionalInfoChanged(nutritionalInfo.copy(carbohydrates = text.toIntOrNull()))
+                val updatedInfo = nutritionalInfo.copy(carbohydrates = text.toIntOrNull())
+                onNutritionalInfoChanged(updatedInfo)
             },
             label = { Text("탄수화물 함량 (g)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth() // 너비를 화면 전체로 설정
+            modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = nutritionalInfo.protein?.toString() ?: "",
             onValueChange = { text ->
-                onNutritionalInfoChanged(nutritionalInfo.copy(protein = text.toIntOrNull()))
+                val updatedInfo = nutritionalInfo.copy(protein = text.toIntOrNull())
+                onNutritionalInfoChanged(updatedInfo)
             },
             label = { Text("단백질 함량 (g)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth() // 너비를 화면 전체로 설정
+            modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = nutritionalInfo.fat?.toString() ?: "",
             onValueChange = { text ->
-                onNutritionalInfoChanged(nutritionalInfo.copy(fat = text.toIntOrNull()))
+                val updatedInfo = nutritionalInfo.copy(fat = text.toIntOrNull())
+                onNutritionalInfoChanged(updatedInfo)
             },
             label = { Text("지방 함량 (g)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth() // 너비를 화면 전체로 설정
+            modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = nutritionalInfo.vitamins?.toString() ?: "",
             onValueChange = { text ->
-                onNutritionalInfoChanged(nutritionalInfo.copy(vitamins = text.toIntOrNull()))
+                val updatedInfo = nutritionalInfo.copy(vitamins = text.toIntOrNull())
+                onNutritionalInfoChanged(updatedInfo)
             },
             label = { Text("비타민 함량 (mg)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth() // 너비를 화면 전체로 설정
+            modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = nutritionalInfo.minerals?.toString() ?: "",
             onValueChange = { text ->
-                onNutritionalInfoChanged(nutritionalInfo.copy(minerals = text.toIntOrNull()))
+                val updatedInfo = nutritionalInfo.copy(minerals = text.toIntOrNull())
+                onNutritionalInfoChanged(updatedInfo)
             },
             label = { Text("미네랄 함량 (mg)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth() // 너비를 화면 전체로 설정
+            modifier = Modifier.fillMaxWidth()
         )
-
-        // "영양소 입력하기" 버튼
-        Button(onClick = {
-            // 새로운 입력 필드를 추가하면서 현재 입력된 값을 보존합니다.
-            val newNutritionalInfo = NutritionalInfoDto(
-                carbohydrates = nutritionalInfo.carbohydrates,
-                protein = nutritionalInfo.protein,
-                fat = nutritionalInfo.fat,
-                vitamins = nutritionalInfo.vitamins,
-                minerals = nutritionalInfo.minerals
-            )
-            onNutritionalInfoChanged(newNutritionalInfo)
-        }) {
-            Text("영양소 입력하기")
-        }
     }
 }
