@@ -71,7 +71,10 @@ fun HomeScreen(
     val toastMessage by bookmarkViewModel.toastMessage.observeAsState()
     val context = LocalContext.current
 
-    // 북마크 상태 변경 감지 및 UI 업데이트
+    /**
+     * 상태가 변경될 때마다, 즉 북마크가 추가되거나 제거될 때마다 recipeAllListViewModel의 updateItemBookmarkId 함수를 호출하여 전체 목록의 상태를 업데이트합니다.
+     * 이 로직은 북마크 상태의 변경이 백엔드에서 성공적으로 처리되었을 때, 앱의 전체 상태(여기서는 레시피 목록)를 업데이트하는 데 사용됩니다.
+     */
     val bookmarkUpdateState by bookmarkViewModel.bookmarkUpdateState.observeAsState()
     LaunchedEffect(bookmarkUpdateState) {
         bookmarkUpdateState?.let { state ->
@@ -209,7 +212,10 @@ fun ListItem(
                 Log.d("ListItem", "After subcategory rendering")
             }
 
-            // 북마크 아이콘
+            /**
+             * 사용자가 아이콘을 클릭하면, isBookmarked 상태가 토글되고, BookMarkViewModel의 addBookmark 또는 removeBookmark 함수가 호출됩니다.
+             * 이 로직은 사용자 인터랙션에 직접 반응하여 UI 상의 북마크 상태를 변경하고, 백엔드(데이터베이스 또는 서버)에 북마크의 추가 또는 제거를 요청합니다.
+             */
             IconButton(
                 onClick = {
                     if (isBookmarked) {
