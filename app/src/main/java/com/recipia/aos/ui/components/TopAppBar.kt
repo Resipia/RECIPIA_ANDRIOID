@@ -24,14 +24,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
+import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBar(
     navController: NavController,
-    viewModel: RecipeAllListViewModel
-) {
+    viewModel: RecipeAllListViewModel,
+    bookmarkViewModel: BookMarkViewModel,
+
+    ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
 
@@ -88,6 +91,6 @@ fun TopAppBar(
             )
         }
     ) { innerPadding ->
-        HomeScreen(navController, viewModel, innerPadding)
+        HomeScreen(navController, viewModel, bookmarkViewModel, innerPadding)
     }
 }
