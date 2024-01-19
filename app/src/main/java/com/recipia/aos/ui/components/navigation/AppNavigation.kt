@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.navigation
 
+import FindIdScreen
 import TokenManager
 import com.recipia.aos.ui.model.login.LoginViewModel
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,8 +20,8 @@ import androidx.navigation.compose.rememberNavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.TopAppBar
 import com.recipia.aos.ui.components.category.CategoriesScreen
-import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.login.LoginScreen
+import com.recipia.aos.ui.components.login.forgot.EmailVerificationScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.dto.Category
@@ -67,7 +68,7 @@ fun AppNavigation(
         // 홈 화면(메인 레시피 목록들)
         composable("home") {
             Scaffold(
-                topBar = { TopAppBar(navController, recipeAllListViewModel) },
+                topBar = { TopAppBar(navController, recipeAllListViewModel, bookmarkViewModel) },
                 bottomBar = { BottomNavigationBar(navController) }
             ) { innerPadding ->
                 Surface(
@@ -76,7 +77,7 @@ fun AppNavigation(
                         .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel, innerPadding)
+//                    HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel, innerPadding)
                 }
             }
         }
@@ -88,8 +89,17 @@ fun AppNavigation(
         composable("create-recipe") {
             CreateRecipeScreen(
                 navController,
-                categorySelectionViewModel
+                categorySelectionViewModel,
+                tokenManager
             )
+        }
+        // ID찾기 화면
+        composable("findId") {
+            FindIdScreen(navController)
+        }
+        // 이메일로 ID찾기 화면
+        composable("emailVerificationScreen") {
+            EmailVerificationScreen(navController)
         }
         // 카테고리 선택 화면
         composable("categories") {
