@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.home
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,7 +54,6 @@ fun HomeScreen(
     bookmarkViewModel: BookMarkViewModel,
     innerPadding: PaddingValues
 ) {
-
     /**
      * LiveData에 주로 observeAsState를 사용한다.
      * observeAsState를 사용하면, LiveData가 노출하는 데이터가 변경될 때 Composable 함수가 자동으로 다시 호출되어 UI가 업데이트되는 구조다.
@@ -63,6 +64,11 @@ fun HomeScreen(
     val navigateToLogin by recipeAllListViewModel.navigateToLogin.observeAsState(initial = false)
     val toastMessage by bookmarkViewModel.toastMessage.observeAsState()
     val context = LocalContext.current
+
+    // 데이터 로깅
+    items.forEach { item ->
+        Log.d("HomeScreen", "Item in the list: ${item.id}")
+    }
 
     // 토스트 메시지를 찾아서 띄우고 초기화 진행
     toastMessage?.let {
@@ -95,31 +101,30 @@ fun HomeScreen(
             ) {
                 Icon(Icons.Filled.Add, "글쓰기")
             }
-        },
-        content = {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    bottom = innerPadding.calculateBottomPadding() + 80.dp, // 여기에서 추가 패딩을 적용합니다
-                    top = innerPadding.calculateTopPadding()
-                ),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                itemsIndexed(items) { index, item ->
-                    ListItem(item, bookmarkViewModel)
+        }
+    ) {
+        LazyColumn(
+            contentPadding = PaddingValues(
+                bottom = innerPadding.calculateBottomPadding() + 80.dp, // 여기에서 추가 패딩을 적용합니다
+                top = innerPadding.calculateTopPadding()
+            ),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            itemsIndexed(items) { index, item ->
+                ListItem(item, bookmarkViewModel)
 
-                    // 마지막 아이템에 도달했을 때 추가 데이터 로드
-                    if (index == items.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
-                        recipeAllListViewModel.loadMoreItems()
-                    }
-                }
-
-                // 로딩 중이라면 로딩 인디케이터를 표시
-                if (isLoading) {
-                    item { CircularProgressIndicator(modifier = Modifier.padding(16.dp)) }
+                // 마지막 아이템에 도달했을 때 추가 데이터 로드
+                if (index == items.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
+                    recipeAllListViewModel.loadMoreItems()
                 }
             }
+
+            // 로딩 중이라면 로딩 인디케이터를 표시
+            if (isLoading) {
+                item { CircularProgressIndicator(modifier = Modifier.padding(16.dp)) }
+            }
         }
-    )
+    }
 
 
 }
@@ -129,6 +134,8 @@ fun ListItem(
     item: RecipeMainListResponseDto,
     bookmarkViewModel: BookMarkViewModel,
 ) {
+
+    Log.d("ListItem", "Rendering item: ${item.id}")
     // 북마크 상태 확인 (bookmarkId가 있으면 북마크된 것으로 간주)
     val isBookmarked = item.bookmarkId != null
 
@@ -152,6 +159,7 @@ fun ListItem(
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
+            Log.d("ListItem", "After image loading")
 
             Column(
                 modifier = Modifier
@@ -169,17 +177,21 @@ fun ListItem(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Log.d("ListItem", "After text rendering")
 
                 // 서브 카테고리 Assist Chips
-                Row(modifier = Modifier.padding(top = 8.dp)) {
-                    item.subCategoryList.take(3).forEach { subCategory ->
-                        AssistChip(
-                            onClick = { /* 서브 카테고리 선택 또는 해제 로직 */ },
-                            label = { Text(subCategory.subCategoryNm ?: "", fontSize = 10.sp) },
-                            modifier = Modifier.padding(horizontal = 4.dp)
-                        )
+                if (item.subCategoryList.isNotEmpty()) {
+                    Row(modifier = Modifier.padding(top = 8.dp)) {
+                        item.subCategoryList.take(3).forEach { subCategory ->
+                            AssistChip(
+                                onClick = { /* 서브 카테고리 선택 또는 해제 로직 */ },
+                                label = { Text(subCategory, fontSize = 10.sp) },
+                                modifier = Modifier.padding(horizontal = 4.dp)
+                            )
+                        }
                     }
                 }
+                Log.d("ListItem", "After subcategory rendering")
             }
 
             // 북마크 아이콘
@@ -187,14 +199,18 @@ fun ListItem(
                 onClick = { bookmarkViewModel.toggleBookmark(item) },
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
-                val icon = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder
-                val tint = if (isBookmarked) MaterialTheme.colorScheme.primary else Color.Gray
+                val (icon, tint) = if (isBookmarked) {
+                    Pair(Icons.Filled.Bookmark, MaterialTheme.colorScheme.primary)
+                } else {
+                    Pair(Icons.Outlined.BookmarkBorder, Color.Gray)
+                }
 
                 Icon(
                     imageVector = icon,
                     contentDescription = "즐겨찾기",
                     tint = tint
                 )
+                Log.d("ListItem", "After bookmark icon")
             }
         }
     }
