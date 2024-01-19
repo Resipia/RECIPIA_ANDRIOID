@@ -1,6 +1,5 @@
 package com.recipia.aos.ui.components.category
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
