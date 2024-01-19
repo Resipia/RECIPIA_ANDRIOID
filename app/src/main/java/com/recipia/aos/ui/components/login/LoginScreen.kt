@@ -152,7 +152,7 @@ fun LoginScreen(
                 text = "회원가입",
                 fontSize = 12.sp,
                 modifier = Modifier.clickable {
-                    navController.navigate("signUp")
+                    navController.navigate("signUpAgree")
                 }
             )
         }

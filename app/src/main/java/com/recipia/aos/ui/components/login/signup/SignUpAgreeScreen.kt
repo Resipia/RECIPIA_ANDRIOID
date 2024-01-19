@@ -1,6 +1,6 @@
 package com.recipia.aos.ui.components.login.signup
 
-import androidx.compose.foundation.background
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,7 +17,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -27,13 +26,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
+/**
+ * 회원가입 동의여부 페이지
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(
+fun SignUpAgreeScreen(
     navController: NavController
 ) {
 
@@ -42,6 +44,7 @@ fun SignUpScreen(
     var isCheckedPrivacy by remember { mutableStateOf(false) }
     var isCheckedOutsourcing by remember { mutableStateOf(false) }
     var isCheckedOptionalPrivacy by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -136,7 +139,19 @@ fun SignUpScreen(
             onCheckedChange = { isCheckedOptionalPrivacy = it }
         )
 
-        // "취소" 및 "동의" 버튼 영역
+        // "동의" 버튼을 눌렀을 때의 동작
+        val onAgreeButtonClick: () -> Unit = {
+            // 필수 항목을 모두 동의했는지 확인
+            if (isCheckedTerms && isCheckedPrivacy && isCheckedOutsourcing) {
+                // 동의한 경우 회원가입 페이지로 이동
+                navController.navigate("signUpForm")
+            } else {
+                // 필수 항목 중 하나라도 동의하지 않은 경우 토스트 메시지 표시
+                Toast.makeText(context, "필수 항목은 동의해주셔야 합니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // "동의" 버튼 영역
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -151,17 +166,16 @@ fun SignUpScreen(
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp)
+                    .fillMaxWidth()
             ) {
                 Text(text = "취소")
             }
 
             Button(
-                onClick = {
-                    // 동의 버튼 동작 추가, 회원가입 페이지로 이동
-                    navController.navigate("회원가입 페이지로 이동")
-                },
+                onClick = onAgreeButtonClick, // 동의 버튼 동작 변경
                 modifier = Modifier
                     .weight(1f)
+                    .fillMaxWidth()
             ) {
                 Text(text = "동의")
             }
@@ -169,42 +183,3 @@ fun SignUpScreen(
     }
 }
 
-@Composable
-private fun CheckboxWithViewButton(
-    label: String,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically // 중앙 정렬로 변경
-    ) {
-        Checkbox(
-            checked = isChecked,
-            onCheckedChange = { onCheckedChange(!isChecked) },
-            modifier = Modifier
-                .padding(end = 8.dp)
-        )
-
-        Text(
-            text = label,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .weight(1f)
-                .clickable { onCheckedChange(!isChecked) }
-                .align(Alignment.CenterVertically) // 체크박스와 텍스트 중앙 정렬
-        )
-
-        TextButton(
-            onClick = {
-                // "보기" 버튼 동작 추가, 해당 내용을 보여주는 페이지로 이동
-            },
-            modifier = Modifier
-                .background(Color.Transparent)
-        ) {
-            Text(text = "보기")
-        }
-    }
-}

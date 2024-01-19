@@ -22,7 +22,8 @@ import com.recipia.aos.ui.components.TopAppBar
 import com.recipia.aos.ui.components.category.CategoriesScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.login.forgot.EmailVerificationScreen
-import com.recipia.aos.ui.components.login.signup.SignUpScreen
+import com.recipia.aos.ui.components.login.signup.SignUpAgreeScreen
+import com.recipia.aos.ui.components.login.signup.SignUpFormScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.dto.Category
@@ -110,9 +111,13 @@ fun AppNavigation(
         composable("emailVerificationScreen") {
             EmailVerificationScreen(navController)
         }
-        // 회원가입 화면
-        composable("signUp") {
-            SignUpScreen(navController)
+        // 회원가입 동의 화면
+        composable("signUpAgree") {
+            SignUpAgreeScreen(navController)
+        }
+        // 회원가입 form 화면
+        composable("signUpForm") {
+            SignUpFormScreen(navController)
         }
         // 카테고리 선택 화면
         composable("categories") {
