@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -211,7 +212,8 @@ fun CreateRecipeScreen(
                     value = recipeName.value,
                     onValueChange = { recipeName.value = it },
                     label = { Text("레시피 이름") },
-                    modifier = Modifier.fillMaxWidth() // 너비를 화면 전체로 설정
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 )
             }
             item {
@@ -221,7 +223,8 @@ fun CreateRecipeScreen(
                     label = { Text("레시피 설명") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(150.dp) // 높이 지정
+                        .height(150.dp),
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 )
             }
             item {
@@ -229,8 +232,11 @@ fun CreateRecipeScreen(
                     value = timeTaken.value,
                     onValueChange = { timeTaken.value = it },
                     label = { Text("소요 시간 (분)") },
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    modifier = Modifier.fillMaxWidth() // 너비를 화면 전체로 설정
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
                 )
             }
             item {
@@ -238,15 +244,17 @@ fun CreateRecipeScreen(
                     value = ingredient.value,
                     onValueChange = { ingredient.value = it },
                     label = { Text("재료") },
-                    modifier = Modifier.fillMaxWidth() // 너비를 화면 전체로 설정
-                )
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                )x
             }
             item {
                 TextField(
                     value = hashtag.value,
                     onValueChange = { hashtag.value = it },
                     label = { Text("해시태그") },
-                    modifier = Modifier.fillMaxWidth() // 너비를 화면 전체로 설정
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 )
             }
             // "영양소 입력하기" 버튼
@@ -285,8 +293,6 @@ fun CreateRecipeScreen(
                 // 선택된 카테고리 정보 표시
                 Text("선택된 카테고리: ${viewModel.selectedCategories.value.joinToString()}")
             }
-            // 이미지 업로드 UI 추가
-
         }
     }
 }

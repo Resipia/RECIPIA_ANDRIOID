@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
@@ -37,7 +38,10 @@ fun NutritionalInfoInputScreen(
                 onNutritionalInfoChanged(updatedInfo)
             },
             label = { Text("탄수화물 함량 (g)") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -48,7 +52,10 @@ fun NutritionalInfoInputScreen(
                 onNutritionalInfoChanged(updatedInfo)
             },
             label = { Text("단백질 함량 (g)") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -59,7 +66,10 @@ fun NutritionalInfoInputScreen(
                 onNutritionalInfoChanged(updatedInfo)
             },
             label = { Text("지방 함량 (g)") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -70,7 +80,10 @@ fun NutritionalInfoInputScreen(
                 onNutritionalInfoChanged(updatedInfo)
             },
             label = { Text("비타민 함량 (mg)") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -81,7 +94,10 @@ fun NutritionalInfoInputScreen(
                 onNutritionalInfoChanged(updatedInfo)
             },
             label = { Text("미네랄 함량 (mg)") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
             modifier = Modifier.fillMaxWidth()
         )
     }
