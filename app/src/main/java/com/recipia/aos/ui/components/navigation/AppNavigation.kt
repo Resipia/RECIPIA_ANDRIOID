@@ -32,7 +32,9 @@ import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeAllListViewModelFactory
+import com.recipia.aos.ui.model.factory.RecipeCreateModelFactory
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
+import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 
 @Composable
 fun AppNavigation(
@@ -53,6 +55,9 @@ fun AppNavigation(
     )
     val bookmarkViewModel: BookMarkViewModel = viewModel(
         factory = BookMarkViewModelFactory(tokenManager)
+    )
+    val recipeCreateModel: RecipeCreateModel = viewModel(
+        factory = RecipeCreateModelFactory(tokenManager)
     )
     // jwt 존재 여부를 검증한다.
     val isUserLoggedIn = remember {
@@ -92,6 +97,7 @@ fun AppNavigation(
             CreateRecipeScreen(
                 navController,
                 categorySelectionViewModel,
+                recipeCreateModel,
                 tokenManager
             )
         }
