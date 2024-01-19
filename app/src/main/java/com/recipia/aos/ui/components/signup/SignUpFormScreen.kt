@@ -54,6 +54,17 @@ fun SignUpFormScreen(
     var selectedDate by remember { mutableStateOf("") }
     val context = LocalContext.current
 
+    // 필수 입력 필드가 모두 입력되었는지 검사하는 함수
+    fun isInputValid(): Boolean {
+        return email.isNotBlank() &&
+                password.isNotBlank() &&
+                confirmPassword.isNotBlank() &&
+                name.isNotBlank() &&
+                selectedDate.isNotBlank() &&
+                gender.isNotBlank() &&
+                phone.isNotBlank()
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -181,10 +192,16 @@ fun SignUpFormScreen(
                     Text(text = "이전")
                 }
 
+                // "다음" 버튼 클릭 시 처리
                 Button(
                     onClick = {
-                        // TODO: 회원가입 로직 추가
-                        Toast.makeText(context, "회원가입 진행", Toast.LENGTH_SHORT).show()
+                        if (isInputValid()) {
+                            // 모든 필드가 유효하면 다음 화면으로 이동
+                            navController.navigate("emailVerification")
+                        } else {
+                            // 필수 입력 필드가 비어있을 경우 메시지 표시
+                            Toast.makeText(context, "필수 입력 필드를 모두 작성하세요.", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     modifier = Modifier
                         .weight(1f)
@@ -197,4 +214,3 @@ fun SignUpFormScreen(
 
     }
 }
-
