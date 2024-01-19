@@ -1,6 +1,7 @@
 package com.recipia.aos.ui.components.recipe.create
 
 import TokenManager
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -39,6 +40,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,39 +63,40 @@ import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 /**
  * 레시피 생성 필드
  */
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateRecipeScreen(
     navController: NavController,
     viewModel: CategorySelectionViewModel,
+    recipeCreateModel: RecipeCreateModel,
     tokenManager: TokenManager
 ) {
-    val recipeName = remember { mutableStateOf("") }
-    val recipeDesc = remember { mutableStateOf("") }
-    val timeTaken = remember { mutableStateOf("") }
-    val ingredient = remember { mutableStateOf("") }
-    val hashtag = remember { mutableStateOf("") }
-    val nutritionalInfoList = remember { mutableStateListOf<NutritionalInfoDto>() }
-    val showNutritionalInfo = remember { mutableStateOf(false) }
+
+    val recipeName = recipeCreateModel.recipeName.value
+    val recipeDesc = recipeCreateModel.recipeDesc.value
+    val timeTaken = recipeCreateModel.timeTaken.value
+    val ingredient = recipeCreateModel.ingredient.value
+    val hashtag = recipeCreateModel.hashtag.value
+    val nutritionalInfoList = recipeCreateModel.nutritionalInfoList
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
+    val showNutritionalInfo = mutableStateOf(false)
 
     // 여기에서 레시피 생성 모델 인스턴스 생성
     val model = RecipeCreateModel(tokenManager)
 
     // 선택한 이미지 URI
-    var selectedImageUris by remember {
-        mutableStateOf<List<Uri?>>(emptyList())
-    }
+    var selectedImageUris = recipeCreateModel.selectedImageUris
 
     val multiplePhotosPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(
             maxItems = 10
         ),
         onResult = {
-            selectedImageUris = it
+            recipeCreateModel.selectedImageUris.clear()
+            recipeCreateModel.selectedImageUris.addAll(it)
         }
     )
-
 
     Scaffold(
         topBar = {
@@ -121,11 +124,11 @@ fun CreateRecipeScreen(
 
                     val requestDto = RecipeCreateUpdateRequestDto(
                         id = null,
-                        recipeName = recipeName.value,
-                        recipeDesc = recipeDesc.value,
-                        timeTaken = timeTaken.value.toIntOrNull() ?: 0,
-                        ingredient = ingredient.value,
-                        hashtag = hashtag.value,
+                        recipeName = recipeName,
+                        recipeDesc = recipeDesc,
+                        timeTaken = timeTaken.toIntOrNull() ?: 0,
+                        ingredient = ingredient,
+                        hashtag = hashtag,
                         nutritionalInfo = lastNutritionalInfo,
                         subCategoryDtoList = subCategoryDtoList,
                         deleteFileOrder = listOf()
@@ -137,6 +140,16 @@ fun CreateRecipeScreen(
                         imageUris = selectedImageUris,
                         context = context,
                         onSuccess = {
+                            // 서버로 데이터 전송 성공 후에 상태 초기화
+                            recipeCreateModel.recipeName.value = ""
+                            recipeCreateModel.recipeDesc.value = ""
+                            recipeCreateModel.timeTaken.value = ""
+                            recipeCreateModel.ingredient.value = ""
+                            recipeCreateModel.hashtag.value = ""
+                            nutritionalInfoList.clear()
+                            recipeCreateModel.selectedImageUris = mutableStateListOf<Uri?>()
+                            viewModel.selectedCategories.value = emptySet()
+
                             Toast.makeText(context, "레시피 생성 성공", Toast.LENGTH_SHORT).show()
                             // 추가적인 성공 로직
                         }
@@ -204,13 +217,16 @@ fun CreateRecipeScreen(
                 // 이미지 썸네일 목록
                 ImageThumbnails(selectedImageUris) { removedUri ->
                     // 이미지 제거
-                    selectedImageUris = selectedImageUris.filter { it != removedUri }
+                    selectedImageUris =
+                        selectedImageUris.filter { it != removedUri }.toMutableList() as SnapshotStateList<Uri?> // 변경
                 }
             }
             item {
                 TextField(
-                    value = recipeName.value,
-                    onValueChange = { recipeName.value = it },
+                    value = recipeCreateModel.recipeName.value,
+                    onValueChange = { newValue ->
+                        recipeCreateModel.recipeName.value = newValue
+                    },
                     label = { Text("레시피 이름") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
@@ -218,8 +234,10 @@ fun CreateRecipeScreen(
             }
             item {
                 TextField(
-                    value = recipeDesc.value,
-                    onValueChange = { recipeDesc.value = it },
+                    value = recipeCreateModel.recipeDesc.value,
+                    onValueChange = { newValue ->
+                        recipeCreateModel.recipeDesc.value = newValue
+                    },
                     label = { Text("레시피 설명") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -229,8 +247,10 @@ fun CreateRecipeScreen(
             }
             item {
                 TextField(
-                    value = timeTaken.value,
-                    onValueChange = { timeTaken.value = it },
+                    value = recipeCreateModel.timeTaken.value,
+                    onValueChange = { newValue ->
+                        recipeCreateModel.timeTaken.value = newValue
+                    },
                     label = { Text("소요 시간 (분)") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions.Default.copy(
@@ -241,8 +261,10 @@ fun CreateRecipeScreen(
             }
             item {
                 TextField(
-                    value = ingredient.value,
-                    onValueChange = { ingredient.value = it },
+                    value = recipeCreateModel.ingredient.value,
+                    onValueChange = { newValue ->
+                        recipeCreateModel.ingredient.value = newValue
+                    },
                     label = { Text("재료") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
@@ -250,52 +272,79 @@ fun CreateRecipeScreen(
             }
             item {
                 TextField(
-                    value = hashtag.value,
-                    onValueChange = { hashtag.value = it },
+                    value = recipeCreateModel.hashtag.value,
+                    onValueChange = { newValue ->
+                        recipeCreateModel.hashtag.value = newValue
+                    },
                     label = { Text("해시태그") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 )
             }
-            // "영양소 입력하기" 버튼
+
             item {
-                Button(
-                    onClick = {
-                        // 버튼을 클릭하면 영양소 입력 영역 표시 여부를 변경
-                        showNutritionalInfo.value = !showNutritionalInfo.value
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("영양소 입력하기")
-                }
-            }
-            // 영양소 입력 필드 영역 (버튼 누르면 필드 열림)
-            if (showNutritionalInfo.value) {
-                item {
-                    NutritionalInfoInputScreen(nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()) { updatedInfo ->
-                        nutritionalInfoList.add(updatedInfo)
+                    // "영양소 입력하기" 버튼
+                    Button(
+                        onClick = { showNutritionalInfo.value = !showNutritionalInfo.value },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                    ) {
+                        Text("영양소 입력하기", fontSize = 12.sp)
+                    }
+
+                    // "카테고리 선택" 버튼
+                    Button(
+                        onClick = { navController.navigate("categories") },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp)
+                    ) {
+                        Text("카테고리 선택", fontSize = 12.sp)
                     }
                 }
             }
-            item {
-                // 카테고리 선택 버튼
-                Button(
-                    onClick = {
-                        navController.navigate("categories")
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("카테고리 선택")
+            // 영양소 입력 영역
+            if (showNutritionalInfo.value) {
+                item {
+                    NutritionalInfoInputScreen(nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()) { updatedInfo ->
+                        // 사용자가 입력한 영양소 정보 가져오기
+                        val carbohydrates = updatedInfo.carbohydrates
+                        val protein = updatedInfo.protein
+                        val fat = updatedInfo.fat
+                        val vitamins = updatedInfo.vitamins
+                        val minerals = updatedInfo.minerals
+
+                        // 영양소 정보를 NutritionalInfoDto 객체로 생성
+                        val nutritionalInfoDto = NutritionalInfoDto(
+                            carbohydrates = carbohydrates,
+                            protein = protein,
+                            fat = fat,
+                            vitamins = vitamins,
+                            minerals = minerals
+                        )
+
+                        // 생성된 NutritionalInfoDto 객체를 nutritionalInfoList에 추가
+                        nutritionalInfoList.add(nutritionalInfoDto)
+                    }
                 }
             }
 
+            // 카테고리 정보 표시
             item {
-                // 선택된 카테고리 정보 표시
                 Text("선택된 카테고리: ${viewModel.selectedCategories.value.joinToString()}")
             }
+
         }
     }
 }
+
 
 @Composable
 fun ImageThumbnails(selectedImageUris: List<Uri?>, onRemoveImage: (Uri) -> Unit) {

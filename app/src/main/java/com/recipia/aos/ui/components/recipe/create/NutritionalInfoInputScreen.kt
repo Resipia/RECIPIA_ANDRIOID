@@ -13,6 +13,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
+import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 
 /**
  * 영양소 입력 필드
@@ -29,7 +30,6 @@ fun NutritionalInfoInputScreen(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("영양소 입력하기", fontWeight = FontWeight.Bold)
 
         OutlinedTextField(
             value = nutritionalInfo.carbohydrates?.toString() ?: "",

@@ -7,9 +7,15 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.recipia.aos.ui.api.CreateRecipeService
 import com.recipia.aos.ui.dto.login.ResponseDto
+import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
 import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -29,7 +35,17 @@ import java.io.File
  */
 class RecipeCreateModel(
     private val tokenManager: TokenManager
-) {
+) : ViewModel() {
+
+    // 레시피 생성 화면에서 사용되는 데이터
+    var recipeName = mutableStateOf("")
+    var recipeDesc = mutableStateOf("")
+    var timeTaken = mutableStateOf("")
+    var ingredient = mutableStateOf("")
+    var hashtag = mutableStateOf("")
+    var nutritionalInfoList = mutableStateListOf<NutritionalInfoDto>()
+    var selectedImageUris = mutableStateListOf<Uri?>()
+
 
     private val recipeService: CreateRecipeService by lazy {
         val logging = HttpLoggingInterceptor().apply {
