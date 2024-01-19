@@ -49,6 +49,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
 import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
@@ -300,7 +301,7 @@ fun ImageThumbnails(selectedImageUris: List<Uri?>, onRemoveImage: (Uri) -> Unit)
                     .padding(8.dp)
             ) {
                 Image(
-                    painter = rememberImagePainter(uri),
+                    painter = rememberAsyncImagePainter(uri),
                     contentDescription = "Selected Image",
                     modifier = Modifier.fillMaxSize()
                 )

@@ -28,6 +28,7 @@ import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
+import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeAllListViewModelFactory
@@ -50,8 +51,9 @@ fun AppNavigation(
     val categorySelectionViewModel: CategorySelectionViewModel = viewModel(
         factory = CategorySelectionViewModelFactory()
     )
-    val bookmarkViewModel: BookMarkViewModel = viewModel()
-
+    val bookmarkViewModel: BookMarkViewModel = viewModel(
+        factory = BookMarkViewModelFactory(tokenManager)
+    )
     // jwt 존재 여부를 검증한다.
     val isUserLoggedIn = remember {
         mutableStateOf(tokenManager.hasValidAccessToken())

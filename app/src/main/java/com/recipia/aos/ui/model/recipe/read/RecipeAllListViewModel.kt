@@ -2,6 +2,7 @@ package com.recipia.aos.ui.model.recipe.read
 
 import TokenManager
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,8 +22,8 @@ class RecipeAllListViewModel(
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
-    private val _items = MutableLiveData<List<RecipeMainListResponseDto>>()
-    val items: LiveData<List<RecipeMainListResponseDto>> = _items
+    var items = mutableStateOf<List<RecipeMainListResponseDto>>(listOf())
+        private set // 이렇게 하면 외부에서는 읽기만 가능해짐
 
     // 현재 페이지, 사이즈, 정렬 유형 저장
     private var currentRequestPage: Int = 0
@@ -92,7 +93,11 @@ class RecipeAllListViewModel(
         currentRequestSortType = sortType
 
         // 서버에 레시피 전체 리스트 데이터 요청
-        getAllRecipeListService.getAllRecipeList(currentRequestPage, currentRequestSize, currentRequestSortType)
+        getAllRecipeListService.getAllRecipeList(
+            currentRequestPage,
+            currentRequestSize,
+            currentRequestSortType
+        )
             .enqueue(object : Callback<PagingResponseDto<RecipeMainListResponseDto>> {
 
                 // 응답 성공
@@ -104,8 +109,8 @@ class RecipeAllListViewModel(
                         Log.d("RecipeAllListViewModel", "Response received: ${response.body()}")
 
                         val newItems = response.body()?.content ?: emptyList()
-                        val currentItems = _items.value ?: emptyList()
-                        _items.postValue(currentItems + newItems)
+                        val currentItems = items.value // 여기서 items의 현재 값 가져오기
+                        items.value = currentItems + newItems // items 업데이트
                         isLastPage = newItems.size < currentRequestSize
                         currentRequestPage++ // 현재 페이지 업데이트
                         Log.d("Count", "content count received: ${response.body()?.content?.size}")
@@ -174,8 +179,8 @@ class RecipeAllListViewModel(
                     if (response.isSuccessful) {
                         // 성공적으로 데이터를 받아왔을 때의 처리
                         val newItems = response.body()?.content ?: emptyList()
-                        val currentItems = _items.value ?: emptyList()
-                        _items.postValue(currentItems + newItems)
+                        val currentItems = items.value // 여기서 items의 현재 값 가져오기
+                        items.value = currentItems + newItems // items 업데이트
                         isLastPage = newItems.size < currentRequestSize
                         currentRequestPage++
                     } else {
@@ -196,6 +201,17 @@ class RecipeAllListViewModel(
                     Log.e("RecipeAllListViewModel", "Retry Failed to load items: ${t.message}", t)
                 }
             })
+    }
+
+    // RecipeAllListViewModel 내에 아이템 업데이트 메서드
+    fun updateItemBookmarkId(recipeId: Long, bookmarkId: Long?) {
+        items.value = items.value.map { item ->
+            if (item.id == recipeId) {
+                item.copy(bookmarkId = bookmarkId)
+            } else {
+                item
+            }
+        }
     }
 
 

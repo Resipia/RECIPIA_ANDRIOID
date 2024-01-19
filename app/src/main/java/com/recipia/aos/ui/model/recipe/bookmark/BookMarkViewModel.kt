@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.model.recipe.bookmark
 
+import TokenManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.recipia.aos.ui.api.BookmarkService
@@ -17,13 +18,15 @@ import retrofit2.converter.gson.GsonConverterFactory
 /**
  * 북마크 전용 모델 객체
  */
-class BookMarkViewModel() : ViewModel() {
+class BookMarkViewModel(
+    private val tokenManager: TokenManager
+) : ViewModel() {
 
     val toastMessage = MutableLiveData<String>()
-    private val bookmarks = MutableLiveData<List<RecipeMainListResponseDto>?>()
 
-    // 북마크 상태 변경을 감지하기 위한 LiveData
-    val bookmarkChangeNotifier = MutableLiveData<Long?>()
+    // 북마크 상태 업데이트를 위한 LiveData
+    private val _bookmarkUpdateState = MutableLiveData<BookmarkUpdateState?>()
+    val bookmarkUpdateState: MutableLiveData<BookmarkUpdateState?> get() = _bookmarkUpdateState
 
     // 북마크 요청 refrofit 설정 (로깅 인터셉터 추가)
     private val bookmarkService: BookmarkService by lazy {
@@ -33,6 +36,10 @@ class BookMarkViewModel() : ViewModel() {
 
         val client = OkHttpClient.Builder()
             .addInterceptor(logging)
+            .addInterceptor { chain ->
+                val request = tokenManager.addAccessTokenToHeader(chain)
+                chain.proceed(request)
+            }
             .build()
 
         Retrofit.Builder()
@@ -45,32 +52,26 @@ class BookMarkViewModel() : ViewModel() {
 
     // 북마크 추가
     fun addBookmark(recipeId: Long) {
-
         val request = BookmarkRequestDto(recipeId)
         bookmarkService.addBookmark(request).enqueue(object : Callback<ResponseDto<Long>> {
-
             // 응답 성공
             override fun onResponse(
                 call: Call<ResponseDto<Long>>,
                 response: Response<ResponseDto<Long>>
             ) {
                 if (response.isSuccessful) {
-                    // 북마크를 추가하고 받은 결과값에 있는 id를 상태 업데이트에 사용한다.
                     val newBookmarkId = response.body()?.result
                     newBookmarkId?.let { bookmarkId ->
-                        updateBookmarkStatus(recipeId,  bookmarkId)
+                        _bookmarkUpdateState.postValue(BookmarkUpdateState.Added(recipeId, bookmarkId))
+                        toastMessage.postValue("북마크에 추가되었습니다.")
                     }
-                    toastMessage.postValue("북마크에 추가되었습니다.")
                 } else {
                     toastMessage.postValue("북마크 추가 실패: ${response.message()}")
                 }
             }
 
             // 응답 실패
-            override fun onFailure(
-                call: Call<ResponseDto<Long>>,
-                t: Throwable
-            ) {
+            override fun onFailure(call: Call<ResponseDto<Long>>, t: Throwable) {
                 toastMessage.postValue("네트워크 오류: ${t.message}")
             }
         })
@@ -86,9 +87,7 @@ class BookMarkViewModel() : ViewModel() {
                 response: Response<ResponseDto<Void>>
             ) {
                 if (response.isSuccessful) {
-                    // 북마크 상태 업데이트
-                    updateBookmarkStatus(null, null)
-                    // 토스트 메시지 전송
+                    _bookmarkUpdateState.postValue(BookmarkUpdateState.Removed(bookmarkId))
                     toastMessage.postValue("북마크가 제거되었습니다.")
                 } else {
                     toastMessage.postValue("북마크 제거 실패: ${response.message()}")
@@ -105,29 +104,18 @@ class BookMarkViewModel() : ViewModel() {
         })
     }
 
-    // 북마크 상태 토글
+    // 북마크 상태 토글 함수
     fun toggleBookmark(item: RecipeMainListResponseDto) {
         item.bookmarkId?.let {
+            // bookmarkId가 있으면 북마크 제거
             removeBookmark(it)
         } ?: run {
+            // bookmarkId가 없으면 북마크 추가
             addBookmark(item.id ?: return)
         }
     }
 
-    // 북마크 상태 업데이트
-    private fun updateBookmarkStatus(
-        recipeId: Long?,
-        newBookmarkId: Long?
-    ) {
-        val updatedList = bookmarks.value?.map { recipe ->
-            if (recipe.id == recipeId) {
-                recipe.copy(bookmarkId = newBookmarkId)
-            } else {
-                recipe
-            }
-        }
-        bookmarks.postValue(updatedList)
-        // 북마크 변경을 알림
-        bookmarkChangeNotifier.postValue(recipeId)
+    fun resetBookmarkUpdateState() {
+        _bookmarkUpdateState.value = null
     }
 }

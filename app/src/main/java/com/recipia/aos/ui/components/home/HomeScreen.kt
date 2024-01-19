@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.home
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -29,9 +30,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,8 +49,10 @@ import androidx.navigation.NavController
 import com.recipia.aos.R
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
+import com.recipia.aos.ui.model.recipe.bookmark.BookmarkUpdateState
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
     navController: NavController,
@@ -58,16 +64,27 @@ fun HomeScreen(
      * LiveData에 주로 observeAsState를 사용한다.
      * observeAsState를 사용하면, LiveData가 노출하는 데이터가 변경될 때 Composable 함수가 자동으로 다시 호출되어 UI가 업데이트되는 구조다.
      */
-    val items by recipeAllListViewModel.items.observeAsState(initial = emptyList())
+    // items 상태를 직접 사용
     val isLoading by recipeAllListViewModel.isLoading.observeAsState(initial = false)
     val loadFailed by recipeAllListViewModel.loadFailed.observeAsState(initial = false)
     val navigateToLogin by recipeAllListViewModel.navigateToLogin.observeAsState(initial = false)
     val toastMessage by bookmarkViewModel.toastMessage.observeAsState()
     val context = LocalContext.current
 
-    // 데이터 로깅
-    items.forEach { item ->
-        Log.d("HomeScreen", "Item in the list: ${item.id}")
+    // 북마크 상태 변경 감지 및 UI 업데이트
+    val bookmarkUpdateState by bookmarkViewModel.bookmarkUpdateState.observeAsState()
+    LaunchedEffect(bookmarkUpdateState) {
+        bookmarkUpdateState?.let { state ->
+            when (state) {
+                is BookmarkUpdateState.Added -> {
+                    recipeAllListViewModel.updateItemBookmarkId(state.recipeId, state.bookmarkId)
+                }
+                is BookmarkUpdateState.Removed -> {
+                    recipeAllListViewModel.updateItemBookmarkId(state.recipeId, null)
+                }
+            }
+            bookmarkViewModel.resetBookmarkUpdateState()
+        }
     }
 
     // 토스트 메시지를 찾아서 띄우고 초기화 진행
@@ -105,21 +122,22 @@ fun HomeScreen(
     ) {
         LazyColumn(
             contentPadding = PaddingValues(
-                bottom = innerPadding.calculateBottomPadding() + 80.dp, // 여기에서 추가 패딩을 적용합니다
+                bottom = innerPadding.calculateBottomPadding() + 80.dp, // 추가 패딩 적용
                 top = innerPadding.calculateTopPadding()
             ),
             modifier = Modifier.fillMaxSize()
         ) {
-            itemsIndexed(items) { index, item ->
+            // recipeAllListViewModel.items.value를 사용
+            itemsIndexed(recipeAllListViewModel.items.value) { index, item ->
+                // State 객체로 변환된 bookmarkUpdateState를 ListItem에 전달
                 ListItem(item, bookmarkViewModel)
-
                 // 마지막 아이템에 도달했을 때 추가 데이터 로드
-                if (index == items.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
+                if (index == recipeAllListViewModel.items.value.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
                     recipeAllListViewModel.loadMoreItems()
                 }
             }
 
-            // 로딩 중이라면 로딩 인디케이터를 표시
+            // 로딩 중이라면 로딩 인디케이터 표시
             if (isLoading) {
                 item { CircularProgressIndicator(modifier = Modifier.padding(16.dp)) }
             }
@@ -134,10 +152,7 @@ fun ListItem(
     item: RecipeMainListResponseDto,
     bookmarkViewModel: BookMarkViewModel,
 ) {
-
-    Log.d("ListItem", "Rendering item: ${item.id}")
-    // 북마크 상태 확인 (bookmarkId가 있으면 북마크된 것으로 간주)
-    val isBookmarked = item.bookmarkId != null
+    var isBookmarked by remember { mutableStateOf(item.bookmarkId != null) }
 
     Surface(
         modifier = Modifier
@@ -196,7 +211,16 @@ fun ListItem(
 
             // 북마크 아이콘
             IconButton(
-                onClick = { bookmarkViewModel.toggleBookmark(item) },
+                onClick = {
+                    if (isBookmarked) {
+                        // 북마크 제거 로직
+                        bookmarkViewModel.removeBookmark(item.bookmarkId!!)
+                    } else {
+                        // 북마크 추가 로직
+                        item.id?.let { bookmarkViewModel.addBookmark(it) }
+                    }
+                    isBookmarked = !isBookmarked
+                },
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
                 val (icon, tint) = if (isBookmarked) {
@@ -210,7 +234,6 @@ fun ListItem(
                     contentDescription = "즐겨찾기",
                     tint = tint
                 )
-                Log.d("ListItem", "After bookmark icon")
             }
         }
     }
