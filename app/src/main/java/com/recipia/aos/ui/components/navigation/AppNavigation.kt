@@ -22,6 +22,7 @@ import com.recipia.aos.ui.components.TopAppBar
 import com.recipia.aos.ui.components.category.CategoriesScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.login.forgot.EmailVerificationScreen
+import com.recipia.aos.ui.components.login.signup.SignUpScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.dto.Category
@@ -108,6 +109,10 @@ fun AppNavigation(
         // 이메일로 ID찾기 화면
         composable("emailVerificationScreen") {
             EmailVerificationScreen(navController)
+        }
+        // 회원가입 화면
+        composable("signUp") {
+            SignUpScreen(navController)
         }
         // 카테고리 선택 화면
         composable("categories") {
