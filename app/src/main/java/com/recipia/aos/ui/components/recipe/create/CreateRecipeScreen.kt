@@ -246,7 +246,7 @@ fun CreateRecipeScreen(
                     label = { Text("재료") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                )x
+                )
             }
             item {
                 TextField(
