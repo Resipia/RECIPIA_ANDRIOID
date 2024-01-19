@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.login.signup.function
+package com.recipia.aos.ui.components.signup.function
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.BorderStroke

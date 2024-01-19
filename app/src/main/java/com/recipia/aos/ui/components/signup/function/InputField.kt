@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.login.signup.function
+package com.recipia.aos.ui.components.signup.function
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth

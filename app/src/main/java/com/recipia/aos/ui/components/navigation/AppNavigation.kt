@@ -22,8 +22,8 @@ import com.recipia.aos.ui.components.TopAppBar
 import com.recipia.aos.ui.components.category.CategoriesScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.login.forgot.EmailVerificationScreen
-import com.recipia.aos.ui.components.login.signup.SignUpAgreeScreen
-import com.recipia.aos.ui.components.login.signup.SignUpFormScreen
+import com.recipia.aos.ui.components.signup.SignUpAgreeScreen
+import com.recipia.aos.ui.components.signup.SignUpFormScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.dto.Category

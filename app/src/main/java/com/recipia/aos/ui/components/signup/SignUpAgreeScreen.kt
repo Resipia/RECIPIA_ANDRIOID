@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.login.signup
+package com.recipia.aos.ui.components.signup
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable

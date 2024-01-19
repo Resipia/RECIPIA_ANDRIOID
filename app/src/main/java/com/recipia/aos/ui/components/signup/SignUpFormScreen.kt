@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.login.signup
+package com.recipia.aos.ui.components.signup
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -33,9 +33,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.recipia.aos.ui.components.login.signup.function.GenderSelector
-import com.recipia.aos.ui.components.login.signup.function.InputField
-import com.recipia.aos.ui.components.login.signup.function.MyDatePickerDialog
+import com.recipia.aos.ui.components.signup.function.GenderSelector
+import com.recipia.aos.ui.components.signup.function.InputField
+import com.recipia.aos.ui.components.signup.function.MyDatePickerDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
