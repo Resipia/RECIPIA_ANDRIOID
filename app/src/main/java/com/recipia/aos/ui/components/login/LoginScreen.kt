@@ -1,7 +1,10 @@
 package com.recipia.aos.ui.components.login
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import com.recipia.aos.ui.model.login.LoginViewModel
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,11 +21,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
@@ -30,6 +35,7 @@ fun LoginScreen(
     navController: NavController,
     viewModel: LoginViewModel
 ) {
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var loginError by remember { mutableStateOf("") } // 로그인 오류 메시지 상태
@@ -96,20 +102,61 @@ fun LoginScreen(
                     email = email,
                     password = password,
                     onLoginSuccess = {
-                        navController.navigate("home") }, // todo 애초에 여기서부터 안탐
+                        navController.navigate("home")
+                    }, // todo 애초에 여기서부터 안탐
                     onLoginFailure = { error -> loginError = error }
                 )
             },
-            modifier = Modifier.fillMaxWidth().height(50.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
         ) {
             Text(text = "로그인")
         }
 
-        if (loginError.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 아이디 찾기 텍스트
             Text(
-                text = loginError,
-                color = Color.Red
+                text = "아이디 찾기",
+                fontSize = 12.sp,
+                modifier = Modifier.clickable {
+                    navController.navigate("findId")
+                }
+            )
+            Text(
+                text = " | ",
+                fontSize = 12.sp
+            )
+
+            // 비밀번호 찾기 텍스트
+            Text(
+                text = "비밀번호 찾기",
+                fontSize = 12.sp,
+                modifier = Modifier.clickable {
+                    navController.navigate("findPassword")
+                }
+            )
+            Text(
+                text = " | ",
+                fontSize = 12.sp
+            )
+
+            // 회원가입 텍스트
+            Text(
+                text = "회원가입",
+                fontSize = 12.sp,
+                modifier = Modifier.clickable {
+                    navController.navigate("register")
+                }
             )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
