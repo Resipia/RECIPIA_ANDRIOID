@@ -10,6 +10,7 @@ import com.recipia.aos.ui.dto.PagingResponseDto
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
 import com.recipia.aos.ui.model.jwt.TokenRepublishManager
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,17 +40,22 @@ class RecipeAllListViewModel(
     private val _navigateToLogin = MutableLiveData<Boolean>()
     val navigateToLogin: LiveData<Boolean> = _navigateToLogin
 
-    // 클라이언트에서 보낼 요청을 생성 (여기서 jwt를 헤더에 추가해줌)
-    val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor { chain ->
-            // JwtTokenManager를 사용하여 토큰을 요청 헤더에 추가
-            val request = tokenManager.addAccessTokenToHeader(chain)
-            chain.proceed(request)
-        }
-        .build()
-
-    // 실제 요청은 이걸로 이루어짐
+    // 모든 레시피 리스트를 호출하는 서비스 선언
     val getAllRecipeListService: GetAllRecipeListService by lazy {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        // 클라이언트에서 보낼 요청을 생성 (여기서 jwt를 헤더에 추가해줌)
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .addInterceptor { chain ->
+                // JwtTokenManager를 사용하여 토큰을 요청 헤더에 추가
+                val request = tokenManager.addAccessTokenToHeader(chain)
+                chain.proceed(request)
+            }
+            .build()
+
         Retrofit.Builder()
             .baseUrl("http://10.0.2.2:8082/")
             .client(okHttpClient)
@@ -68,10 +74,12 @@ class RecipeAllListViewModel(
 
     // 더 많은 아이템을 요청하는 메서드
     fun loadMoreItems() {
+        Log.d("RecipeAllListViewModel", "Loading more items")
         if (_isLoading.value == true || isLastPage) return
 
         _isLoading.value = true
         loadItemsFromServer(currentRequestPage, currentRequestSize, currentRequestSortType)
+        Log.d("RecipeAllListViewModel", "Loading finished")
     }
 
     // 서버로부터 데이터를 가져오는 함수 예시
@@ -100,7 +108,6 @@ class RecipeAllListViewModel(
                         _items.postValue(currentItems + newItems)
                         isLastPage = newItems.size < currentRequestSize
                         currentRequestPage++ // 현재 페이지 업데이트
-                        // todo: 여기서 ++해줘서 그런듯
                         Log.d("Count", "content count received: ${response.body()?.content?.size}")
                     } else {
                         if (response.code() == 401) {
