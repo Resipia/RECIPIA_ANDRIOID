@@ -38,7 +38,7 @@ fun EmailVerificationForgotIdScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "아이디 찾기", style = MaterialTheme.typography.bodyMedium) },
+                title = { Text(text = "이메일 찾기", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)

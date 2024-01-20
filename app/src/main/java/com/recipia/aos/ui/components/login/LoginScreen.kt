@@ -131,9 +131,9 @@ fun LoginScreen(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 아이디 찾기 텍스트
+            // 이메일 찾기 텍스트
             Text(
-                text = "아이디 찾기",
+                text = "이메일 찾기",
                 fontSize = 12.sp,
                 modifier = Modifier.clickable {
                     navController.navigate("findId")

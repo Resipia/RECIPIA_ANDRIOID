@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -183,7 +184,13 @@ fun HomeScreen(
                 itemsIndexed(
                     recipeAllListViewModel.items.value
                 ) { index, item ->
-                    ListItem(item, bookmarkViewModel)
+                    // 각 아이템을 컴포저로 그려내기
+                    ListItem(
+                        item,
+                        bookmarkViewModel,
+                        navController
+                    )
+
                     // 마지막 아이템에 도달했을 때 추가 데이터 로드
                     if (index == recipeAllListViewModel.items.value.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
                         recipeAllListViewModel.loadMoreItems()
@@ -198,19 +205,17 @@ fun HomeScreen(
 fun ListItem(
     item: RecipeMainListResponseDto,
     bookmarkViewModel: BookMarkViewModel,
+    navController: NavController
 ) {
     var isBookmarked by remember { mutableStateOf(item.bookmarkId != null) }
 
-    Surface(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(8.dp),
-        shadowElevation = 4.dp
+            .clickable { navController.navigate("recipeDetail/${item.id}") } // 상세보기 화면으로 이동
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -286,6 +291,8 @@ fun ListItem(
                 )
             }
         }
+        // 항목 사이에 구분선 추가
+        androidx.compose.material.Divider()
     }
 }
 

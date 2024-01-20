@@ -45,7 +45,7 @@ fun FindIdScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "아이디 찾기",
+                        text = "이메일 찾기",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },

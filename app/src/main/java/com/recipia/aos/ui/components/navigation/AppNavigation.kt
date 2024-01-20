@@ -1,6 +1,5 @@
 package com.recipia.aos.ui.components.navigation
 
-import com.recipia.aos.ui.components.forgot.email.FindIdScreen
 import TokenManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,20 +12,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.TopAppBar
 import com.recipia.aos.ui.components.category.CategoriesScreen
-import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.forgot.email.EmailVerificationForgotIdScreen
+import com.recipia.aos.ui.components.forgot.email.FindIdScreen
 import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
+import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
+import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.signup.SignUpAgreeScreen
 import com.recipia.aos.ui.components.signup.SignUpFormScreen
-import com.recipia.aos.ui.components.signup.verify.EmailVerificationScreen
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
@@ -35,11 +37,13 @@ import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeAllListViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeCreateModelFactory
+import com.recipia.aos.ui.model.factory.RecipeDetailViewModelFactory
 import com.recipia.aos.ui.model.login.LoginViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
-import com.recipia.aos.ui.model.signup.EmailVerificationViewModel
+import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
+import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 
 @Composable
 fun AppNavigation(
@@ -64,7 +68,10 @@ fun AppNavigation(
     val recipeCreateModel: RecipeCreateModel = viewModel(
         factory = RecipeCreateModelFactory(tokenManager)
     )
-    val emailVerificationViewModel: EmailVerificationViewModel = viewModel()
+    val recipeDetailViewModel: RecipeDetailViewModel = viewModel(
+        factory = RecipeDetailViewModelFactory(tokenManager)
+    )
+    val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     // jwt 존재 여부를 검증한다.
     val isUserLoggedIn = remember {
         mutableStateOf(tokenManager.hasValidAccessToken())
@@ -94,6 +101,16 @@ fun AppNavigation(
                 }
             }
         }
+        // 레시피 상세보기 화면
+        composable(
+            route = "recipeDetail/{recipeId}",
+            arguments = listOf(navArgument("recipeId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            RecipeDetailScreen(
+                recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L,
+                recipeDetailViewModel
+            )
+        }
         // 마이페이지
         composable("mypage") {
             MyPageScreen(navController)
@@ -121,18 +138,11 @@ fun AppNavigation(
         }
         // 회원가입 동의 화면
         composable("signUpAgree") {
-            SignUpAgreeScreen(navController)
+            SignUpAgreeScreen(navController, phoneNumberAuthViewModel)
         }
         // 회원가입 form 화면
         composable("signUpForm") {
             SignUpFormScreen(navController)
-        }
-        // 회원가임 > 이메일 인증 화면
-        composable("emailVerification") {
-            EmailVerificationScreen(
-                viewModel = emailVerificationViewModel,
-                navController = navController
-            )
         }
         // 카테고리 선택 화면
         composable("categories") {

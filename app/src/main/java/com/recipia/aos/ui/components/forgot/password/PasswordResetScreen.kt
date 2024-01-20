@@ -91,14 +91,14 @@ fun PasswordResetScreen(
                 verticalAlignment = Alignment.CenterVertically // 수직 방향으로 중앙 정렬
             ) {
                 Text(
-                    text = "아이디가 기억나지 않는다면?",
+                    text = "이메일이 기억나지 않는다면?",
                     style = MaterialTheme.typography.bodyMedium
                 )
 
                 Spacer(modifier = Modifier.width(8.dp)) // 두 텍스트 사이 간격 추가
 
                 Text(
-                    text = "아이디 찾기",
+                    text = "이메일 찾기",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier

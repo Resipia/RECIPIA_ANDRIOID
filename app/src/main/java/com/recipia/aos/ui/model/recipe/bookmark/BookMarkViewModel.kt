@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.recipia.aos.ui.api.BookmarkService
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
-import com.recipia.aos.ui.dto.login.ResponseDto
+import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.recipe.BookmarkRequestDto
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
