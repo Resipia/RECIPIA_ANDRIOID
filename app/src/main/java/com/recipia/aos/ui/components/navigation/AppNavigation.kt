@@ -27,8 +27,9 @@ import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
-import com.recipia.aos.ui.components.signup.SignUpAgreeScreen
-import com.recipia.aos.ui.components.signup.SignUpFormScreen
+import com.recipia.aos.ui.components.signup.PhoneNumberValidAndSignUpAgreeScreen
+import com.recipia.aos.ui.components.signup.EmailValidAndPasswordFormScreen
+import com.recipia.aos.ui.components.signup.ProfileSettingFormScreen
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
@@ -44,13 +45,18 @@ import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
+import com.recipia.aos.ui.model.signup.SignUpViewModel
 
 @Composable
 fun AppNavigation(
     tokenManager: TokenManager
 ) {
 
-    // 네비게이션 컨트롤러, 레시피 상세 목록, 로그인 관련 모델 세팅
+    /**
+     * 모든 composable 루트에서 동일한 ViewModel 인스턴스를 공유하고 싶다면,
+     * ViewModel 인스턴스를 NavHost 바깥에서 생성하고 이 Model 인스턴스를 공유하고 싶은 모든 composable 블록에
+     * 동일한 인스턴스를 주입하는 방식을 사용하면 된다.
+     */
     val navController = rememberNavController()
     val recipeAllListViewModel: RecipeAllListViewModel = viewModel(
         factory = RecipeAllListViewModelFactory(tokenManager)
@@ -72,6 +78,7 @@ fun AppNavigation(
         factory = RecipeDetailViewModelFactory(tokenManager)
     )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
+    val signUpViewModel: SignUpViewModel = viewModel()
     // jwt 존재 여부를 검증한다.
     val isUserLoggedIn = remember {
         mutableStateOf(tokenManager.hasValidAccessToken())
@@ -79,7 +86,8 @@ fun AppNavigation(
 
     // 네비게이션 컨트롤
     NavHost(
-        navController = navController, startDestination = if (isUserLoggedIn.value) "home" else "login"
+        navController = navController,
+        startDestination = if (isUserLoggedIn.value) "home" else "login"
     ) {
         // 로그인 화면
         composable("login") {
@@ -136,13 +144,17 @@ fun AppNavigation(
         composable("findPassword") {
             PasswordResetScreen(navController)
         }
-        // 회원가입 동의 화면
-        composable("signUpAgree") {
-            SignUpAgreeScreen(navController, phoneNumberAuthViewModel)
+        // 회원가입 1단계: 전화번호 인증 및 회원가입 동의 form 화면
+        composable("signUpFirstForm") {
+            PhoneNumberValidAndSignUpAgreeScreen(navController, phoneNumberAuthViewModel, signUpViewModel)
         }
-        // 회원가입 form 화면
-        composable("signUpForm") {
-            SignUpFormScreen(navController)
+        // 회원가입 2단계: 이메일, 비밀번호 form 화면
+        composable("signUpSecondForm") {
+            EmailValidAndPasswordFormScreen(navController, signUpViewModel)
+        }
+        // 회원가입 3단계: 프로필 세팅 form
+        composable("signUpThirdForm") {
+            ProfileSettingFormScreen(navController, signUpViewModel)
         }
         // 카테고리 선택 화면
         composable("categories") {

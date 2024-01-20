@@ -1,8 +1,10 @@
 package com.recipia.aos.ui.components.signup.function
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -28,34 +30,42 @@ fun InputField(
     focusRequester: FocusRequester,
     errorMessage: String,
     isPassword: Boolean = false,
-    isPhone: Boolean = false
+    isPhone: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
-    Text(label, style = MaterialTheme.typography.bodyMedium)
+    Column(
+        modifier = modifier.padding(8.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.fillMaxWidth()
+        )
 
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .focusRequester(focusRequester),
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-        isError = errorMessage.isNotEmpty(),
-        keyboardOptions = if (isPhone) {
-            KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number,
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
+            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+            isError = errorMessage.isNotEmpty(),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = when {
+                    isPhone -> KeyboardType.Number
+                    isPassword -> KeyboardType.Password
+                    else -> KeyboardType.Text
+                },
                 imeAction = ImeAction.Next
             )
-        } else {
-            KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
-        }
-    )
-
-    if (errorMessage.isNotEmpty()) {
-        Text(
-            text = errorMessage,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall
         )
+
+        if (errorMessage.isNotEmpty()) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
     }
-    Spacer(modifier = Modifier.height(8.dp))
 }

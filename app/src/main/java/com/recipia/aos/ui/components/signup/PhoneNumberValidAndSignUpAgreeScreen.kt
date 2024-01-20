@@ -41,8 +41,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
+import com.recipia.aos.ui.model.signup.SignUpViewModel
 import kotlinx.coroutines.delay
 
 /**
@@ -50,9 +52,10 @@ import kotlinx.coroutines.delay
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpAgreeScreen(
+fun PhoneNumberValidAndSignUpAgreeScreen(
     navController: NavController,
-    phoneNumberAuthViewModel: PhoneNumberAuthViewModel
+    phoneNumberAuthViewModel: PhoneNumberAuthViewModel,
+    signUpViewModel: SignUpViewModel
 ) {
 
     var isCheckedAll by remember { mutableStateOf(false) }
@@ -144,7 +147,8 @@ fun SignUpAgreeScreen(
 
             // 인증번호 전송 버튼 아래의 서버 응답 메시지 표시
             if (phoneNumberAuthViewModel.responseCode == 400 &&
-                phoneNumberAuthViewModel.verificationSentMessage.isNotEmpty()) {
+                phoneNumberAuthViewModel.verificationSentMessage.isNotEmpty()
+            ) {
                 Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
                 Text(
                     phoneNumberAuthViewModel.verificationSentMessage,
@@ -152,7 +156,8 @@ fun SignUpAgreeScreen(
                     modifier = Modifier.align(Alignment.Start) // 좌측 정렬
                 )
             } else if (phoneNumberAuthViewModel.responseCode == 200 &&
-                phoneNumberAuthViewModel.verificationSentMessage.isNotEmpty()) {
+                phoneNumberAuthViewModel.verificationSentMessage.isNotEmpty()
+            ) {
                 Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
                 Text(
                     phoneNumberAuthViewModel.verificationSentMessage,
@@ -186,6 +191,10 @@ fun SignUpAgreeScreen(
                     onClick = {
                         // 인증코드 검증 요청하기
                         phoneNumberAuthViewModel.checkVerificationCode(verificationCode)
+                        if (phoneNumberAuthViewModel.isVerificationSuccess) {
+                            // 인증 성공시 ViewModel에 전화번호 저장
+                            signUpViewModel.updatePhoneNumber(phoneNumber)
+                        }
                     },
                     enabled = isVerificationButtonEnabled, // 버튼 활성화 여부
                     modifier = Modifier
@@ -308,7 +317,7 @@ fun SignUpAgreeScreen(
                 // 필수 항목을 모두 동의했는지 확인
                 if (isCheckedTerms && isCheckedPrivacy && isCheckedOutsourcing) {
                     // 동의한 경우 회원가입 페이지로 이동
-                    navController.navigate("signUpForm")
+                    navController.navigate("signUpSecondForm")
                 } else {
                     // 필수 항목 중 하나라도 동의하지 않은 경우 토스트 메시지 표시
                     Toast.makeText(context, "필수 항목은 동의해주셔야 합니다.", Toast.LENGTH_SHORT).show()
@@ -316,7 +325,8 @@ fun SignUpAgreeScreen(
             }
 
             // "동의" 버튼 활성화 여부 결정
-            val isAgreeButtonEnabled = phoneNumberAuthViewModel.isVerificationSuccess && isCheckedTerms && isCheckedPrivacy && isCheckedOutsourcing
+            val isAgreeButtonEnabled =
+                phoneNumberAuthViewModel.isVerificationSuccess && isCheckedTerms && isCheckedPrivacy && isCheckedOutsourcing
 
             // "동의" 버튼 영역
             Row(
