@@ -150,7 +150,7 @@ fun AppNavigation(
         }
         // 회원가입 2단계: 이메일, 비밀번호 form 화면
         composable("signUpSecondForm") {
-            EmailValidAndPasswordFormScreen(navController, signUpViewModel)
+            EmailValidAndPasswordFormScreen(navController, signUpViewModel, phoneNumberAuthViewModel)
         }
         // 회원가입 3단계: 프로필 세팅 form
         composable("signUpThirdForm") {

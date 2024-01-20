@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -72,6 +73,32 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
     var isVerificationButtonEnabled by remember { mutableStateOf(false) } // "인증하기" 버튼 활성화 여부
     var phoneNumber by remember { mutableStateOf("") } // 전화번호 입력 상태
 
+    // AlertDialog를 표시할지 여부를 관리하는 상태
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("주의!") },
+            text = { Text("뒤로 가시면 다시 회원가입을 진행하셔야 합니다.") },
+            confirmButton = {
+                Button(onClick = {
+                    signUpViewModel.clearData() // SignUpViewModel 초기화
+                    phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
+                    showDialog = false
+                    navController.navigate("login") // "login" 화면으로 이동
+                }) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -82,16 +109,8 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            // 뒤로가기 버튼 동작
-                            navController.popBackStack()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = null
-                        )
+                    IconButton(onClick = { showDialog = true }) {
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

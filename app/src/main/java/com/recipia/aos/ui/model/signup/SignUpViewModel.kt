@@ -38,6 +38,14 @@ class SignUpViewModel : ViewModel() {
     val _emailDuplicateCheckResult = MutableLiveData<String?>()
     val emailDuplicateCheckResult: LiveData<String?> = _emailDuplicateCheckResult
 
+    // 이메일 인증 성공 여부를 나타내는 LiveData 추가
+    private val _isEmailVerified = MutableLiveData(false)
+    val isEmailVerified: LiveData<Boolean> = _isEmailVerified
+
+    // 비밀번호 일치 여부를 나타내는 LiveData 추가
+    private val _isPasswordMatching = MutableLiveData(false)
+    val isPasswordMatching: LiveData<Boolean> = _isPasswordMatching
+
     // RecipeApiService를 초기화
     val memberManagementService: MemberManagementService by lazy {
         val logging = HttpLoggingInterceptor().apply {
@@ -88,9 +96,12 @@ class SignUpViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = getCheckDuplicateEmailResult(email)
+
                 if (response.isSuccessful) {
                     val responseDto: ResponseDto<Boolean>? = response.body()
                     if (responseDto?.result != null) {
+                        // 이메일 인증 성공 여부 업데이트
+                        _isEmailVerified.value = responseDto.result
                         _isEmailAvailable.value = responseDto.result
                         // 중복 체크 결과 메시지 업데이트
                         _emailDuplicateCheckResult.value = if (responseDto.result) "사용가능한 이메일입니다." else "이미 존재하는 이메일입니다."
@@ -110,6 +121,24 @@ class SignUpViewModel : ViewModel() {
     ): Response<ResponseDto<Boolean>> {
         // Retrofit을 사용하여 API 호출
         return memberManagementService.checkDuplicateEmail(EmailAvailableRequestDto(email))
+    }
+
+    // 비밀번호 일치여부 변경 함수
+    fun updatePasswordMatching(isMatching: Boolean) {
+        _isPasswordMatching.value = isMatching
+    }
+
+    // Model 초기화 함수
+    fun clearData() {
+        _name.value = ""
+        _nickname.value = ""
+        _email.value = ""
+        _password.value = ""
+        _phoneNumber.value = ""
+        _isEmailAvailable.value = null
+        _emailDuplicateCheckResult.value = null
+        _isEmailVerified.value = false
+        _isPasswordMatching.value = false
     }
 
 }

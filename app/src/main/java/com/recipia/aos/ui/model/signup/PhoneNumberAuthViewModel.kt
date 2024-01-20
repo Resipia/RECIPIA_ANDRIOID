@@ -97,4 +97,14 @@ class PhoneNumberAuthViewModel() : ViewModel() {
         }
     }
 
+    // 모델 데이터 초기화 함수
+    fun clearData() {
+        phone = ""
+        responseCode = 0
+        isVerificationSuccess = false
+        verificationMessage = ""
+        verificationSentMessage = ""
+        verificationSuccessMessage = ""
+    }
+
 }

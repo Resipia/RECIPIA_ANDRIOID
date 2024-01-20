@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,13 +39,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.signup.function.InputField
+import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailValidAndPasswordFormScreen(
     navController: NavController,
-    signUpViewModel: SignUpViewModel
+    signUpViewModel: SignUpViewModel,
+    phoneNumberAuthViewModel: PhoneNumberAuthViewModel // ViewModel 추가
 ) {
     // ViewModel에서 각 입력 필드의 현재 값을 가져옴
     val currentName by signUpViewModel.name.collectAsState()
@@ -75,8 +78,35 @@ fun EmailValidAndPasswordFormScreen(
     val passwordFocusRequester = remember { FocusRequester() }
     val confirmPasswordFocusRequester = remember { FocusRequester() }
 
-    // ViewModel에서 중복 확인 결과를 관찰
     val emailDuplicateCheckResult by signUpViewModel.emailDuplicateCheckResult.observeAsState()
+    val isEmailVerified by signUpViewModel.isEmailVerified.observeAsState()
+    val isPasswordMatching by signUpViewModel.isPasswordMatching.observeAsState()
+
+    // AlertDialog를 표시할지 여부를 관리하는 상태
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("주의!") },
+            text = { Text("뒤로 가시면 다시 회원가입을 진행하셔야 합니다.") },
+            confirmButton = {
+                Button(onClick = {
+                    signUpViewModel.clearData() // SignUpViewModel 초기화
+                    phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
+                    showDialog = false
+                    navController.navigate("login") // "login" 화면으로 이동
+                }) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
+    }
 
     // 입력 필드 검증
     fun validateFields() {
@@ -129,7 +159,7 @@ fun EmailValidAndPasswordFormScreen(
             TopAppBar(
                 title = { Text(text = "회원가입", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { showDialog = true }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                     }
                 },
@@ -231,7 +261,7 @@ fun EmailValidAndPasswordFormScreen(
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = if (emailDuplicateCheckResult == "사용가능한 이메일입니다.") Color(0xFF006633) else Color.Red,
                         modifier = Modifier.fillMaxWidth()
-                            .padding(8.dp),
+                            .padding(9.dp),
                         textAlign = TextAlign.Start
                     )
                 }
@@ -256,16 +286,14 @@ fun EmailValidAndPasswordFormScreen(
                     onValueChange = { newPassword ->
                         confirmPassword = newPassword
                         confirmPasswordError = "" // 사용자가 입력할 때마다 에러 메시지 초기화
-                        if (password.isNotEmpty() && confirmPassword.isNotEmpty()) {
-                            if (password == confirmPassword) {
-                                passwordMatchMessage = "비밀번호가 일치합니다."
-                                passwordMatchColor = Color(0xFF808000) // 올리브 그린
-                            } else {
-                                passwordMatchMessage = "비밀번호가 일치하지 않습니다."
-                                passwordMatchColor = Color.Red
-                            }
+                        val isMatching = password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword
+                        signUpViewModel.updatePasswordMatching(isMatching) // 비밀번호 일치 여부 업데이트
+                        if (isMatching) {
+                            passwordMatchMessage = "비밀번호가 일치합니다."
+                            passwordMatchColor = Color(0xFF006633)
                         } else {
-                            passwordMatchMessage = ""
+                            passwordMatchMessage = "비밀번호가 일치하지 않습니다."
+                            passwordMatchColor = Color.Red
                         }
                     },
                     focusRequester = confirmPasswordFocusRequester,
@@ -273,11 +301,14 @@ fun EmailValidAndPasswordFormScreen(
                     isPassword = true
                 )
 
+                // 비밀번호 일치 메시지 표시
                 if (passwordMatchMessage.isNotEmpty()) {
                     Text(
                         text = passwordMatchMessage,
                         color = passwordMatchColor,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.fillMaxWidth().padding(9.dp),
+                        textAlign = TextAlign.Start
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -305,6 +336,7 @@ fun EmailValidAndPasswordFormScreen(
                                 navController.navigate("signUpThirdForm")
                             }
                         },
+                        enabled = (isEmailVerified == true) && (isPasswordMatching == true), // 이메일 인증 및 비밀번호 일치 여부에 따라 버튼 활성화
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()
