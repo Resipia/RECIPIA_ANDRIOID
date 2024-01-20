@@ -100,7 +100,16 @@ fun LoginScreen(
 
         // 로그인 버튼
         Button(
-            onClick = { /* 로그인 처리 */ },
+            onClick = {
+                viewModel.login(
+                    email = email,
+                    password = password,
+                    onLoginSuccess = {
+                        navController.navigate("home")
+                    }, // todo 애초에 여기서부터 안탐
+                    onLoginFailure = { error -> loginError = error }
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
