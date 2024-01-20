@@ -88,8 +88,8 @@ fun EmailValidAndPasswordFormScreen(
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("주의!") },
-            text = { Text("뒤로 가시면 다시 회원가입을 진행하셔야 합니다.") },
+            title = { Text("주의") },
+            text = { Text("뒤로 가시면 입력했던 모든 정보가 초기화 되며 다시 회원가입을 진행하셔야 합니다.") },
             confirmButton = {
                 Button(onClick = {
                     signUpViewModel.clearData() // SignUpViewModel 초기화

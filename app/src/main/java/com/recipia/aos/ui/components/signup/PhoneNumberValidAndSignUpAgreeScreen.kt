@@ -79,8 +79,8 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("주의!") },
-            text = { Text("뒤로 가시면 다시 회원가입을 진행하셔야 합니다.") },
+            title = { Text("주의") },
+            text = { Text("뒤로 가시면 입력했던 모든 정보가 초기화 되며 다시 회원가입을 진행하셔야 합니다.") },
             confirmButton = {
                 Button(onClick = {
                     signUpViewModel.clearData() // SignUpViewModel 초기화
@@ -331,7 +331,7 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
                 onCheckedChange = { isCheckedOptionalPrivacy = it }
             )
 
-            // "동의" 버튼을 눌렀을 때의 동작
+            // "다음" 버튼을 눌렀을 때의 동작
             val onAgreeButtonClick: () -> Unit = {
                 // 필수 항목을 모두 동의했는지 확인
                 if (isCheckedTerms && isCheckedPrivacy && isCheckedOutsourcing) {
@@ -343,11 +343,11 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
                 }
             }
 
-            // "동의" 버튼 활성화 여부 결정
+            // "다음" 버튼 활성화 여부 결정
             val isAgreeButtonEnabled =
                 phoneNumberAuthViewModel.isVerificationSuccess && isCheckedTerms && isCheckedPrivacy && isCheckedOutsourcing
 
-            // "동의" 버튼 영역
+            // "다음" 버튼 영역
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -367,7 +367,7 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
                     Text(text = "이전")
                 }
 
-                // "동의" 버튼 영역
+                // "다음" 버튼 영역
                 Button(
                     onClick = onAgreeButtonClick,
                     enabled = isAgreeButtonEnabled, // 동의 버튼 활성화 여부
@@ -376,7 +376,7 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
                         .padding(vertical = 16.dp),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = "동의")
+                    Text(text = "다음")
                 }
             }
         }
