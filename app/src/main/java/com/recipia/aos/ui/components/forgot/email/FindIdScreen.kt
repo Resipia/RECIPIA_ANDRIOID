@@ -1,3 +1,5 @@
+package com.recipia.aos.ui.components.forgot.email
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

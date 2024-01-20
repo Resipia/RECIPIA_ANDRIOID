@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.login.forgot
+package com.recipia.aos.ui.components.forgot.email
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

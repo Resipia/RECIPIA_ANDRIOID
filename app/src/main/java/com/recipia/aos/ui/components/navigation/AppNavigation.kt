@@ -1,6 +1,6 @@
 package com.recipia.aos.ui.components.navigation
 
-import FindIdScreen
+import com.recipia.aos.ui.components.forgot.email.FindIdScreen
 import TokenManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,7 +20,8 @@ import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.TopAppBar
 import com.recipia.aos.ui.components.category.CategoriesScreen
 import com.recipia.aos.ui.components.login.LoginScreen
-import com.recipia.aos.ui.components.login.forgot.EmailVerificationForgotIdScreen
+import com.recipia.aos.ui.components.forgot.email.EmailVerificationForgotIdScreen
+import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.components.signup.SignUpAgreeScreen
@@ -113,6 +114,10 @@ fun AppNavigation(
         // 이메일로 ID찾기 화면
         composable("emailVerificationScreen") {
             EmailVerificationForgotIdScreen(navController)
+        }
+        // PASSWORD찾기 화면
+        composable("findPassword") {
+            PasswordResetScreen(navController)
         }
         // 회원가입 동의 화면
         composable("signUpAgree") {
