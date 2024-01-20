@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,76 +33,67 @@ import androidx.navigation.NavController
 fun EmailVerificationForgotIdScreen(
     navController: NavController,
 ) {
-
-    // 이메일 입력 필드의 값을 저장할 상태 변수
     var email by remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.Start
-    ) {
-        TopAppBar(
-            title = {
-                Text(
-                    text = "아이디 찾기",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            },
-            navigationIcon = {
-                IconButton(
-                    onClick = {
-                        // 뒤로가기 버튼 동작
-                        navController.popBackStack()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "아이디 찾기", style = MaterialTheme.typography.bodyMedium) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = null
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "이메일 인증",
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        Text(
-            text = "가입 시 등록한 이메일 주소로 아이디 일부를 보내드립니다.",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(vertical = 16.dp)
-        )
-
-        // 이메일 주소 입력 필드
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
+        }
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            label = { Text("가입시 등록한 이메일 주소") }
-        )
-
-        Button(
-            onClick = {
-                // 다음 화면으로 이동
-                navController.navigate("다음 화면 경로")
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
+                .fillMaxSize()
+                .padding(innerPadding) // Scaffold로부터 제공된 패딩 적용
+                .padding(16.dp),
+            horizontalAlignment = Alignment.Start
         ) {
-            Text(text = "다음")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "이메일 인증",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Text(
+                text = "가입 시 등록한 이메일 주소로 아이디 일부를 보내드립니다.",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+
+            // 이메일 주소 입력 필드
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                label = { Text("가입시 등록한 이메일 주소") }
+            )
+
+            Button(
+                onClick = {
+                    // 다음 화면으로 이동
+                    navController.navigate("다음 화면 경로")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+            ) {
+                Text(text = "다음")
+            }
         }
     }
 }
