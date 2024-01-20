@@ -1,15 +1,28 @@
 package com.recipia.aos.ui.components.signup
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,11 +38,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 import com.recipia.aos.ui.components.signup.function.GenderSelector
 import com.recipia.aos.ui.components.signup.function.InputField
 import com.recipia.aos.ui.components.signup.function.MyDatePickerDialog
@@ -41,13 +63,23 @@ fun ProfileSettingFormScreen(
     navController: NavController,
     signUpViewModel: SignUpViewModel
 ) {
-    var name by remember { mutableStateOf("") }
+    // 프로필 사진, 한줄 소개, 생년월일, 성별 상태 관리
+    var profilePictureUri by remember { mutableStateOf<Uri?>(null) }
+    var oneLineIntroduction by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
-    var isAdvertisingAgree by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf("") }
 
     // 입력 필드 검증 상태
-    val nameFocusRequester = remember { FocusRequester() }
+    val oneLineIntroFocusRequester = remember { FocusRequester() }
+
+    // 이미지 선택기를 초기화
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        uri?.let {
+            profilePictureUri = it
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -74,16 +106,32 @@ fun ProfileSettingFormScreen(
 
             item { Spacer(modifier = Modifier.height(10.dp)) }
 
-            // "이름" 입력 필드 관련 코드
+            // 프로필 사진 입력 필드
             item {
-                InputField(
-                    label = "이름",
-                    value = name,
-                    onValueChange = { name = it },
-                    focusRequester = nameFocusRequester,
-                    errorMessage = "nameError"
+                ProfilePictureInputField(
+                    profilePictureUri = profilePictureUri,
+                    onImageSelected = {
+                        imagePickerLauncher.launch(
+                            // 이미지만 선택 가능하도록
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
+                        )
+                    }
                 )
-                // 별도의 에러 메시지 표시 부분 제거
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // 한줄 소개 입력 필드
+            item {
+                OutlinedTextField(
+                    value = oneLineIntroduction,
+                    onValueChange = { oneLineIntroduction = it },
+                    label = { Text("한줄 소개") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(oneLineIntroFocusRequester) // focusRequester를 Modifier에 추가
+                )
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
@@ -118,44 +166,67 @@ fun ProfileSettingFormScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            item {
-                CheckboxWithViewButton(
-                    label = "광고성 정보 수신 전체 동의 (선택)",
-                    isChecked = isAdvertisingAgree,
-                    onCheckedChange = { isAdvertisingAgree = it }
-                )
-            }
-
-            // 버튼 영역
+            // 하단 버튼 영역
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Button(
-                        onClick = { navController.popBackStack() },
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .padding(end = 8.dp) // 버튼 사이 간격 추가
+                        onClick = { /* 건너뛰기 로직 */ },
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text(text = "이전")
+                        Text("건너뛰기")
                     }
-
-                    // "다음" 버튼 클릭 시 처리
+                    Spacer(modifier = Modifier.width(8.dp))
                     Button(
-                        onClick = {
-                            // 모든 필드가 유효한 경우
-                            navController.navigate("signUpSuccess")
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                        onClick = { /* 회원가입 완료 로직 */ },
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text("다음")
+                        Text("회원가입 완료")
                     }
+                }
+            }
+        }
+    }
+}
+
+// 프로필 사진 입력 필드 컴포저블 함수
+@Composable
+fun ProfilePictureInputField(
+    profilePictureUri: Uri?,
+    onImageSelected: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp) // 상단 여백 조정
+            .height(150.dp) // 박스 높이 조정
+            .aspectRatio(1f), // 정사각형 비율 유지
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(150.dp) // 프로필 이미지 영역 크기 1.5배로 증가
+                .border(2.dp, Color.Gray, shape = RoundedCornerShape(75.dp)) // 원형 테두리 크기 조정
+                .clip(RoundedCornerShape(75.dp)), // 이미지 원형으로 클립
+            contentAlignment = Alignment.Center
+        ) {
+            if (profilePictureUri != null) {
+                Image(
+                    painter = rememberAsyncImagePainter(profilePictureUri),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize() // 이미지 크기 최대로 조정
+                )
+            } else {
+                IconButton(onClick = { onImageSelected() }) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "프로필 사진 추가",
+                        tint = Color.Gray
+                    )
                 }
             }
         }
