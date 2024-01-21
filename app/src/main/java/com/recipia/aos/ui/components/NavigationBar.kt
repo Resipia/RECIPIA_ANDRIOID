@@ -16,6 +16,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -23,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.ai.client.generativeai.Chat
 import java.util.Locale
 
@@ -41,7 +44,7 @@ fun NavigationBar(
         containerColor = containerColor,
         contentColor = contentColor,
         tonalElevation = tonalElevation,
-        windowInsets = windowInsets
+        windowInsets = windowInsets,
     ) {
         content()
     }
@@ -51,6 +54,18 @@ fun NavigationBar(
 fun BottomNavigationBar(navController: NavController) {
     val selectedItem = remember { mutableStateOf(0) }
     val context = LocalContext.current
+
+    // navController의 상태가 변경될 때마다 selectedItem을 업데이트
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    LaunchedEffect(currentRoute) {
+        selectedItem.value = when (currentRoute) {
+            "home" -> 0
+            "my-page" -> 3
+            // 여기에 다른 경로에 대한 처리를 추가
+            else -> 0
+        }
+    }
+
     val items = listOf(
         "홈" to Icons.Filled.Home,
         "위글위글" to Icons.Filled.Settings, // 여기에 해당하는 아이콘을 선택하세요
@@ -66,17 +81,17 @@ fun BottomNavigationBar(navController: NavController) {
                 label = { Text(label) },
                 selected = selectedItem.value == index,
                 onClick = {
-                    selectedItem.value = index
                     when (label) {
                         "채팅" -> Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
                         else -> {
-                            // 네비게이션 로직
                             navController.navigate(when (label) {
                                 "홈" -> "home"
-                                "마이페이지" -> "mypage"
+                                "마이페이지" -> "my-page"
                                 // 다른 네비게이션 경로들
                                 else -> "home"
-                            })
+                            }) {
+                                launchSingleTop = true
+                            }
                         }
                     }
                 }

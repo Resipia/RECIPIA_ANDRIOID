@@ -55,6 +55,7 @@ class RecipeDetailViewModel(
         viewModelScope.launch {
             try {
                 _isLoading.value = true
+                _recipeDetail.value = null // 이전 상태 초기화
                 val response = getRecipeDetailView(recipeId) // Retrofit을 사용한 서버 요청
                 if (response.isSuccessful && response.body() != null) {
                     _recipeDetail.value = response.body()!!.result

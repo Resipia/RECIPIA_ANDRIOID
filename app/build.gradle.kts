@@ -91,4 +91,6 @@ dependencies {
     implementation("androidx.compose.material:material:1.3.1")
     implementation("com.airbnb.android:lottie-compose:6.0.1")
 
+//    implementation("com.google.accompanist:accompanist-pager:0.32")
+
 }

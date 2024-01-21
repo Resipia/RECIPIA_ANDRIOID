@@ -109,12 +109,3 @@ fun MenuItem(navController: NavController, text: String, route: String) {
         )
     }
 }
-
-
-// 기존 MyPageScreen 컴포저블 아래에 이 미리보기 컴포저블을 추가
-@Preview(showBackground = true)
-@Composable
-fun MyPageScreenPreview() {
-    val navController = rememberNavController() // 네비게이션 컨트롤러를 위한 임시 객체
-    MyPageScreen(navController = navController) // MyPageScreen 호출
-}

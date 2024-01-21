@@ -109,6 +109,10 @@ fun AppNavigation(
                 }
             }
         }
+        // 마이페이지
+        composable("my-page") {
+            MyPageScreen(navController)
+        }
         // 레시피 상세보기 화면
         composable(
             route = "recipeDetail/{recipeId}",
@@ -116,12 +120,9 @@ fun AppNavigation(
         ) { backStackEntry ->
             RecipeDetailScreen(
                 recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L,
-                recipeDetailViewModel
+                recipeDetailViewModel,
+                navController
             )
-        }
-        // 마이페이지
-        composable("mypage") {
-            MyPageScreen(navController)
         }
         // 레시피 생성하기
         composable("create-recipe") {
