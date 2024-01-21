@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.dto.Category
@@ -73,20 +75,28 @@ fun CategoriesScreen(
         },
         bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(horizontal = 24.dp) // 좌우 패딩 추가
+        ) {
             Column {
                 groupedSubCategories.forEach { (categoryId, subCategoryList) ->
                     // Category 이름 찾기
                     val categoryName = categoryNameMap[categoryId] ?: "Unknown Category"
+
+                    // 대카테고리 이름 스타일 조정
                     Text(
-                        categoryName,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        categoryNameMap[categoryId] ?: "Unknown Category",
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
+                        modifier = Modifier.padding(vertical = 12.dp)
                     )
+
+                    // 서브 카테고리 리스트 스타일 조정
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp)
+                            .padding(bottom = 12.dp)
                     ) {
                         items(subCategoryList.size) { index ->
                             val subCategory = subCategoryList[index]
@@ -121,7 +131,8 @@ fun CategoriesScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(2.dp),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text("선택 완료", style = MaterialTheme.typography.labelLarge)
                 }

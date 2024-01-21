@@ -218,11 +218,12 @@ fun ListItem(
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // 이미지 크기를 1.5배로 늘림
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground), // Replace with your image resource
                 contentDescription = "Recipe Image",
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(130.dp) // 이 부분을 수정
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
