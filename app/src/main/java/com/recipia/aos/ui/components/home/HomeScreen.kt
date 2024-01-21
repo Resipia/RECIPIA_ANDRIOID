@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
@@ -33,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -85,6 +87,8 @@ fun HomeScreen(
 
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+
+    val lazyListState = rememberLazyListState()
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
@@ -185,9 +189,10 @@ fun HomeScreen(
                     LazyColumn(
                         contentPadding = PaddingValues(
                             top = paddingValues.calculateTopPadding(),
-                            bottom = paddingValues.calculateBottomPadding() + 80.dp
+                            bottom = paddingValues.calculateBottomPadding() + 80.dp,
                         ),
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        state = lazyListState
                     ) {
                         // AutoScrollingSlider를 LazyColumn 아이템으로 추가
                         item {
@@ -212,6 +217,14 @@ fun HomeScreen(
                     }
                 }
             }
+        }
+    }
+
+    // 스크롤 위치가 변경될 때 마다 트리거
+    LaunchedEffect(remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }) {
+        coroutineScope.launch {
+            // 필요한 경우 스크롤 위치 조정
+            // 예: lazyListState.scrollToItem(0)
         }
     }
 }
