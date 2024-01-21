@@ -61,6 +61,7 @@ fun RecipeDetailScreen(
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
 
     Scaffold(
+        containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {
             TopAppBar(
                 title = { Text(text = "레시피 상세보기", style = MaterialTheme.typography.bodyMedium) },

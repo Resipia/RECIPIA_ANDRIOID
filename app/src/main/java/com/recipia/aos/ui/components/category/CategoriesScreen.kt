@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.category
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,9 +59,11 @@ fun CategoriesScreen(
     var selectedSubCategories by remember { mutableStateOf(setOf<Int>()) }
 
     Scaffold(
+        containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {
             TopAppBar(
-                title = {  },
+                modifier = Modifier.background(Color.White), // 여기에 배경색을 하얀색으로 설정,
+                title = { },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.Close, contentDescription = "닫기")
@@ -76,11 +79,15 @@ fun CategoriesScreen(
     ) { innerPadding ->
         Column(
             modifier = Modifier
+                .background(Color.White) // 여기에 배경색을 하얀색으로 설정,
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp) // 좌우 패딩 추가
         ) {
-            Column {
+            Column(
+                modifier = Modifier.background(Color.White) // 내부 Column 배경색 설정
+            ) {
                 groupedSubCategories.forEach { (categoryId, subCategoryList) ->
+
                     // Category 이름 찾기
                     val categoryName = categoryNameMap[categoryId] ?: "Unknown Category"
 
@@ -95,6 +102,7 @@ fun CategoriesScreen(
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .background(Color.White)
                             .padding(bottom = 12.dp)
                     ) {
                         items(subCategoryList.size) { index ->
@@ -122,7 +130,9 @@ fun CategoriesScreen(
                         }
                     }
                 }
+
                 Spacer(modifier = Modifier.padding(20.dp))
+
                 Button(
                     onClick = {
                         viewModel.setSelectedCategories(selectedSubCategories)
@@ -130,6 +140,7 @@ fun CategoriesScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .background(Color.White) // 여기에 배경색을 하얀색으로 설정,
                         .padding(2.dp),
                     shape = RoundedCornerShape(8.dp)
                 ) {

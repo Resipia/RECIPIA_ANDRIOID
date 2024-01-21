@@ -154,10 +154,14 @@ fun HomeScreen(
     }
 
     Scaffold(
+        containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
+        modifier = Modifier.background(Color.White),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate("create-recipe") },
-                modifier = Modifier.offset(y = (-70).dp) // 100dp만큼 위로 오프셋
+                modifier = Modifier
+                    .offset(y = (-70).dp) // 100dp만큼 위로 오프셋
+                    .background(Color.White), // 여기에 배경색을 하얀색으로 설정,
             ) {
                 Icon(Icons.Filled.Add, "글쓰기")
             }
@@ -195,7 +199,9 @@ fun HomeScreen(
                             top = paddingValues.calculateTopPadding(),
                             bottom = paddingValues.calculateBottomPadding() + 80.dp,
                         ),
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White), // 여기에 배경색을 하얀색으로 설정,,
                         state = lazyListState
                     ) {
                         // AutoScrollingSlider를 LazyColumn 아이템으로 추가

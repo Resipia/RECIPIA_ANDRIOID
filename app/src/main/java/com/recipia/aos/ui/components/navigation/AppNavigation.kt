@@ -29,6 +29,7 @@ import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
+import com.recipia.aos.ui.components.recipe.detail.SearchScreen
 import com.recipia.aos.ui.components.signup.EmailValidAndPasswordFormScreen
 import com.recipia.aos.ui.components.signup.PhoneNumberValidAndSignUpAgreeScreen
 import com.recipia.aos.ui.components.signup.ProfileSettingFormScreen
@@ -116,6 +117,10 @@ fun AppNavigation(
 //                    HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel, innerPadding)
                 }
             }
+        }
+        // 검색화면
+        composable("searchScreen") {
+            SearchScreen(navController)
         }
         // 마이페이지
         composable("my-page") {
