@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,13 +25,11 @@ import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,7 +47,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
@@ -59,6 +55,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.recipia.aos.R
+import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookmarkUpdateState
@@ -95,7 +92,7 @@ fun HomeScreen(
             coroutineScope.launch {
                 isRefreshing = true
                 recipeAllListViewModel.refreshItems() // 여기서 refreshItems 메서드 호출
-                while(recipeAllListViewModel.isLoading.value == true) {
+                while (recipeAllListViewModel.isLoading.value == true) {
                     delay(1000)
                 }
                 isRefreshing = false
@@ -161,39 +158,57 @@ fun HomeScreen(
             }
         }
     ) { paddingValues -> // 여기서 innerPadding 대신 paddingValues 사용
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .pullRefresh(pullRefreshState),
-            contentAlignment = Alignment.Center // 여기를 수정
+        Column(
+            modifier = Modifier.padding(innerPadding)
         ) {
+            // 예시 이미지 URL 리스트
+            val sampleImages = listOf(
+                "https://via.placeholder.com/600x200.png?text=First+Image",
+                "https://via.placeholder.com/600x200.png?text=Second+Image",
+                "https://via.placeholder.com/600x200.png?text=Third+Image",
+                "https://via.placeholder.com/600x200.png?text=Fourth+Image",
+                "https://via.placeholder.com/600x200.png?text=Fifth+Image"
+            )
 
-            // 로딩 중이라면 로딩 인디케이터 표시
-            if (isLoading) {
-                AnimatedPreloader(modifier = Modifier.size(100.dp)) // 로딩 바의 크기 조절 가능
-            }
-
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    bottom = innerPadding.calculateBottomPadding() + 80.dp,
-                    top = innerPadding.calculateTopPadding()
-                ),
-                modifier = Modifier.fillMaxSize()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .pullRefresh(pullRefreshState),
+                contentAlignment = Alignment.Center // 여기를 수정
             ) {
-                itemsIndexed(
-                    recipeAllListViewModel.items.value
-                ) { index, item ->
-                    // 각 아이템을 컴포저로 그려내기
-                    ListItem(
-                        item,
-                        bookmarkViewModel,
-                        navController
-                    )
 
-                    // 마지막 아이템에 도달했을 때 추가 데이터 로드
-                    if (index == recipeAllListViewModel.items.value.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
-                        recipeAllListViewModel.loadMoreItems()
+                // 로딩 중이라면 로딩 인디케이터 표시
+                if (isLoading) {
+                    AnimatedPreloader(modifier = Modifier.size(100.dp)) // 로딩 바의 크기 조절 가능
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(
+                            top = paddingValues.calculateTopPadding(),
+                            bottom = paddingValues.calculateBottomPadding() + 80.dp
+                        ),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        // AutoScrollingSlider를 LazyColumn 아이템으로 추가
+                        item {
+                            AutoScrollingSlider(sampleImages)
+                        }
+
+                        itemsIndexed(
+                            recipeAllListViewModel.items.value
+                        ) { index, item ->
+                            // 각 아이템을 컴포저로 그려내기
+                            ListItem(
+                                item,
+                                bookmarkViewModel,
+                                navController
+                            )
+
+                            // 마지막 아이템에 도달했을 때 추가 데이터 로드
+                            if (index == recipeAllListViewModel.items.value.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
+                                recipeAllListViewModel.loadMoreItems()
+                            }
+                        }
                     }
                 }
             }
@@ -238,12 +253,14 @@ fun ListItem(
                 Text(
                     text = item.recipeName,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 2.dp)
                 )
                 Text(
                     text = item.nickname,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 2.dp)
                 )
                 Log.d("ListItem", "After text rendering")
 
@@ -254,7 +271,7 @@ fun ListItem(
                             AssistChip(
                                 onClick = { /* 서브 카테고리 선택 또는 해제 로직 */ },
                                 label = { Text(subCategory, fontSize = 10.sp) },
-                                modifier = Modifier.padding(horizontal = 4.dp)
+                                modifier = Modifier.padding(horizontal = 1.dp)
                             )
                         }
                     }
@@ -293,7 +310,13 @@ fun ListItem(
             }
         }
         // 항목 사이에 구분선 추가
-        androidx.compose.material.Divider()
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth() // 전체 너비를 채우도록 설정
+                .padding(horizontal = 16.dp), // 양쪽에 패딩 적용
+            thickness = 0.5.dp, // 구분선의 두께 설정
+            color = Color.Gray // 구분선의 색상 설정
+        )
     }
 }
 

@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
@@ -42,16 +43,12 @@ fun TopAppBar(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 title = {
-                    Text(
-                        "레시피앱",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate("categories") }) {
