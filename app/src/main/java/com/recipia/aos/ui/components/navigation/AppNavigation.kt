@@ -1,6 +1,7 @@
 package com.recipia.aos.ui.components.navigation
 
 import TokenManager
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -107,6 +109,7 @@ fun AppNavigation(
                 Surface(
                     modifier = Modifier
                         .padding(innerPadding)
+                        .background(Color.White) // 여기에 배경색을 하얀색으로 설정
                         .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -163,7 +164,9 @@ fun HomeScreen(
         }
     ) { paddingValues -> // 여기서 innerPadding 대신 paddingValues 사용
         Column(
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(innerPadding)
+                .background(Color.White) // 여기에 배경색을 하얀색으로 설정
         ) {
             // 예시 이미지 URL 리스트
             val sampleImages = listOf(
@@ -178,6 +181,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .background(Color.White) // 여기에 배경색을 하얀색으로 설정
                     .pullRefresh(pullRefreshState),
                 contentAlignment = Alignment.Center // 여기를 수정
             ) {

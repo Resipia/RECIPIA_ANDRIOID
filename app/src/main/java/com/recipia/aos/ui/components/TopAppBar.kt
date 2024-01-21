@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
@@ -34,15 +35,18 @@ fun TopAppBar(
     navController: NavController,
     viewModel: RecipeAllListViewModel,
     bookmarkViewModel: BookMarkViewModel,
+) {
 
-    ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .background(Color.White),
         topBar = {
             CenterAlignedTopAppBar(
+                modifier = Modifier.background(Color.White), // 여기에 배경색을 하얀색으로 설정,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
