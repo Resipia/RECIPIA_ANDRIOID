@@ -27,19 +27,21 @@ import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
-import com.recipia.aos.ui.components.signup.PhoneNumberValidAndSignUpAgreeScreen
 import com.recipia.aos.ui.components.signup.EmailValidAndPasswordFormScreen
+import com.recipia.aos.ui.components.signup.PhoneNumberValidAndSignUpAgreeScreen
 import com.recipia.aos.ui.components.signup.ProfileSettingFormScreen
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
+import com.recipia.aos.ui.model.factory.MyPageViewModelFactory
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeAllListViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeCreateModelFactory
 import com.recipia.aos.ui.model.factory.RecipeDetailViewModelFactory
 import com.recipia.aos.ui.model.login.LoginViewModel
+import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
@@ -77,6 +79,9 @@ fun AppNavigation(
     val recipeDetailViewModel: RecipeDetailViewModel = viewModel(
         factory = RecipeDetailViewModelFactory(tokenManager)
     )
+    val myPageViewModelFactory: MyPageViewModel = viewModel(
+        factory = MyPageViewModelFactory(tokenManager)
+    )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
     // jwt 존재 여부를 검증한다.
@@ -111,7 +116,7 @@ fun AppNavigation(
         }
         // 마이페이지
         composable("my-page") {
-            MyPageScreen(navController)
+            MyPageScreen(navController, myPageViewModelFactory)
         }
         // 레시피 상세보기 화면
         composable(
