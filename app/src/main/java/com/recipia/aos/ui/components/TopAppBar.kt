@@ -92,11 +92,15 @@ fun TopAppBar(
                     ) {
                         // 드롭다운 메뉴 아이템들
                         DropdownMenuItem(
-                            text = { Text("수정") },
+                            text = { Text("신고하기") },
                             onClick = { /* 수정 처리 */ }
                         )
                         DropdownMenuItem(
-                            text = { Text("설정") },
+                            text = { Text("로그아웃") },
+                            onClick = { /* 설정 처리 */ }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("로그아웃") },
                             onClick = { /* 설정 처리 */ }
                         )
                         DropdownMenuItem(

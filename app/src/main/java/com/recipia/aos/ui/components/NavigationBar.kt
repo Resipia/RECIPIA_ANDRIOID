@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.AddReaction
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -78,9 +81,9 @@ fun BottomNavigationBar(navController: NavController) {
 
     val items = listOf(
         "홈" to Icons.Filled.Home,
-        "위글위글" to Icons.Filled.Settings,
-        "채팅" to Icons.Filled.Email,
-        "마이페이지" to Icons.Filled.Person
+        "위글위글" to Icons.Filled.AddReaction,
+        "채팅" to Icons.Filled.Chat,
+        "마이페이지" to Icons.Filled.AccountCircle
     )
 
     Column {
@@ -106,6 +109,7 @@ fun BottomNavigationBar(navController: NavController) {
                     onClick = {
                         when (label) {
                             "채팅" -> Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
+                            "위글위글" -> Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
                             else -> {
                                 navController.navigate(when (label) {
                                     "홈" -> "home"
