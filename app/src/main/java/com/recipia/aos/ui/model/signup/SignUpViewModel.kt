@@ -201,6 +201,12 @@ class SignUpViewModel : ViewModel() {
         _emailDuplicateCheckResult.value = null
         _isEmailVerified.value = false
         _isPasswordMatching.value = false
+        _isNicknameAvailable.value = false
+        _nicknameDuplicateCheckResult.value = null
+        _profilePictureUri.value = null
+        _oneLineIntroduction.value = ""
+        _gender.value = ""
+        _selectedDate.value = ""
     }
 
     // 이메일 중복 체크 결과를 초기화하는 함수
