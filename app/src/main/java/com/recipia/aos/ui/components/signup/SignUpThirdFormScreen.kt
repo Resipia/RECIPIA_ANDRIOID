@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -144,16 +145,37 @@ fun SignUpThirdFormScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
+            // 문자 수를 계산하여 표시할 변수 추가
+            var charCount = oneLineIntroduction.length
+
             // 한줄 소개 입력 필드
             item {
                 OutlinedTextField(
                     value = oneLineIntroduction,
-                    onValueChange = { oneLineIntroduction = it },
-                    label = { Text("한줄 소개") },
+                    onValueChange = { newValue ->
+                        val byteCount = newValue.toByteArray(Charsets.UTF_8).size
+                        if (byteCount <= 300) {
+                            oneLineIntroduction = newValue
+                            // 문자 수 업데이트
+                            charCount = newValue.length
+                        }
+                    },
+                    label = { Text("한줄 소개") }, // 초기 문자 수 표시
+                    isError = oneLineIntroduction.toByteArray(Charsets.UTF_8).size > 300, // 300바이트를 초과하면 에러 처리
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(oneLineIntroFocusRequester) // focusRequester를 Modifier에 추가
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 실시간으로 문자 수 표시
+                Text(
+                    text = "한줄 소개 (${charCount}/300)",
+                    color = if (charCount > 300) Color.Red else Color.Black, // 300자를 초과하면 빨간색으로 표시
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), // 굵은 스타일 적용
+                    modifier = Modifier.padding(horizontal = 2.dp, vertical = 4.dp) // 텍스트 내부 여백 조정
+                )
+
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
