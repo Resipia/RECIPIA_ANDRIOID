@@ -64,6 +64,9 @@ fun SignUpFirstFormScreen(
     var isDataRetentionConsent by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    // 인증번호 입력 영역 표시 여부를 관리하는 상태
+    var isVerificationCodeVisible by remember { mutableStateOf(false) }
+
     // 이메일 인증 필드
     var timeLeft by remember { mutableIntStateOf(300) } // 5분 = 300초
     var verificationCode by remember { mutableStateOf("") }
@@ -95,6 +98,22 @@ fun SignUpFirstFormScreen(
                 }
             }
         )
+    }
+
+    // 타이머 종료 후 처리
+    LaunchedEffect(key1 = timeLeft) {
+        if (timeLeft > 0) {
+            delay(1000)
+            timeLeft--
+        } else {
+            isVerificationButtonEnabled = false // 타이머가 종료되면 인증하기 버튼 비활성화
+            // 필요하다면 여기에 타이머 종료 관련 추가 로직을 구현
+        }
+    }
+
+    // 전화번호 형식 검증 함수
+    fun isValidPhoneNumber(number: String): Boolean {
+        return number.matches("^[0-9]{9,11}$".toRegex())
     }
 
     Scaffold(
@@ -137,33 +156,44 @@ fun SignUpFirstFormScreen(
                 // 전화번호 입력 필드
                 OutlinedTextField(
                     value = phoneNumber,
-                    onValueChange = { phoneNumber = it },
+                    onValueChange = { input ->
+                        val filteredInput = input.filter { it.isDigit() }
+                        if (filteredInput.length <= 11) {
+                            phoneNumber = filteredInput
+                        }
+                    },
                     label = { Text("전화번호") },
-                    placeholder = { Text("01012345678", style = TextStyle(color = Color.Gray)) }, // placeholder로 변경
+                    placeholder = { Text("01012345678", style = TextStyle(color = Color.Gray)) },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Next
                     ),
-                    readOnly = phoneNumberAuthViewModel.isVerificationSuccess // 인증 성공 시 읽기 전용으로 설정
+                    readOnly = phoneNumberAuthViewModel.isVerificationSuccess
                 )
-                // 인증번호 전송 버튼
+
+                // 인증코드 전송 버튼
                 Button(
                     onClick = {
                         phoneNumberAuthViewModel.phone = phoneNumber // ViewModel에 전화번호 저장
-                        phoneNumberAuthViewModel.sendVerificationCode(phoneNumber) // 인증번호 전송
-                        isTimerRunning = true
-                        isVerificationButtonEnabled = true
+                        phoneNumberAuthViewModel.sendVerificationCode(phoneNumber) // 인증코드 전송
+                        timeLeft = 300 // 타이머를 5분으로 재설정
+                        isTimerRunning = true // 타이머 시작
+                        isVerificationButtonEnabled = true // 인증하기 버튼 활성화
+                        isVerificationCodeVisible = true // 인증코드 입력 영역 표시
                     },
+                    enabled = isValidPhoneNumber(phoneNumber), // 버튼 활성화 여부
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .padding(start = 8.dp) // 오른쪽 여백 추가
                 ) {
-                    Text("인증번호 전송")
+                    Text("인증코드 전송")
                 }
             }
 
-            // 인증번호 전송 버튼 아래의 서버 응답 메시지 표시
+            Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
+
+            // 인증코드 전송 버튼 아래의 서버 응답 메시지 표시
             if (phoneNumberAuthViewModel.responseCode == 400 &&
                 phoneNumberAuthViewModel.verificationSentMessage.isNotEmpty()
             ) {
@@ -187,67 +217,78 @@ fun SignUpFirstFormScreen(
 
             Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
 
-            // 인증번호 입력 영역
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                OutlinedTextField(
-                    value = verificationCode,
-                    onValueChange = { verificationCode = it },
-                    label = { Text("인증번호") },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
-                    ),
-                    readOnly = phoneNumberAuthViewModel.isVerificationSuccess // 인증 성공 시 읽기 전용으로 설정
-                )
-
-                // 인증번호 확인 버튼 클릭 이벤트
-                Button(
-                    onClick = {
-                        // 인증코드 검증 요청하기
-                        phoneNumberAuthViewModel.checkVerificationCode(verificationCode)
-                        if (phoneNumberAuthViewModel.isVerificationSuccess) {
-                            // 인증 성공시 ViewModel에 전화번호 저장
-                            signUpViewModel.updatePhoneNumber(phoneNumber)
-                        }
-                    },
-                    enabled = isVerificationButtonEnabled, // 버튼 활성화 여부
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(start = 8.dp) // 오른쪽 여백 추가
-                ) {
-                    Text("인증하기")
-                }
-            }
-
-            // 인증번호 입력창 아래 타이머와 안내 메시지 표시
-            if (isTimerRunning && !phoneNumberAuthViewModel.isVerificationSuccess) {
+            if (isVerificationCodeVisible) {
+                // 인증코드 입력 영역
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val timerText = "남은 시간: ${timeLeft / 60}:${timeLeft % 60}"
-                    Text(
-                        text = timerText,
-                        color = Color.Red,
-                        style = MaterialTheme.typography.titleSmall
+                    OutlinedTextField(
+                        value = verificationCode,
+                        onValueChange = { verificationCode = it },
+                        label = { Text("인증코드") },
+                        modifier = Modifier.weight(1f),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        ),
+                        readOnly = phoneNumberAuthViewModel.isVerificationSuccess // 인증 성공 시 읽기 전용으로 설정
                     )
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    "인증번호를 받지 못했으면 다시 전송 버튼을 눌러주세요.",
-                    modifier = Modifier.align(Alignment.Start),
-                    fontWeight = FontWeight.Bold
-                )
 
-                LaunchedEffect(key1 = timeLeft) {
-                    while (timeLeft > 0) {
-                        delay(1000)
-                        timeLeft--
+                    // 인증코드 확인 버튼 클릭 이벤트
+                    Button(
+                        onClick = {
+                            // 인증코드 검증 요청하기
+                            phoneNumberAuthViewModel.checkVerificationCode(verificationCode)
+                            if (phoneNumberAuthViewModel.isVerificationSuccess) {
+                                // 인증 성공시 ViewModel에 전화번호 저장
+                                signUpViewModel.updatePhoneNumber(phoneNumber)
+                            }
+                        },
+                        enabled = isVerificationButtonEnabled, // 버튼 활성화 여부
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(start = 8.dp) // 오른쪽 여백 추가
+                    ) {
+                        Text("인증하기")
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
+
+            // 인증코드 입력창 아래 타이머와 안내 메시지 표시
+            if (isTimerRunning) {
+                if (timeLeft > 0) {
+                    // 타이머가 활성화되어 있고 시간이 남아 있는 경우
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // 시간과 분을 00 형식으로 표시
+                        val minutes = timeLeft / 60
+                        val seconds = timeLeft % 60
+                        val timerText = String.format("남은 시간: %02d:%02d", minutes, seconds)
+
+                        Text(
+                            text = timerText,
+                            color = Color.Red,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        "인증코드가 도착하지 않았다면 다시 전송 버튼을 눌러주세요.",
+                        modifier = Modifier.align(Alignment.Start),
+                        fontWeight = FontWeight.Bold
+                    )
+                } else {
+                    // 타이머가 0이 되었을 때
+                    Text(
+                        "인증코드 재전송이 필요합니다.",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Start)
+                    )
                 }
             }
 
