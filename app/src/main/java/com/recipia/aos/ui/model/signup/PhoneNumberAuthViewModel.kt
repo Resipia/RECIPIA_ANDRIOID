@@ -107,4 +107,12 @@ class PhoneNumberAuthViewModel() : ViewModel() {
         verificationSuccessMessage = ""
     }
 
+    // ViewModel 내부의 상태 초기화 함수
+    fun resetVerificationState() {
+        // ViewModel 상태 초기화 로직
+        isVerificationSuccess = false
+        verificationSuccessMessage = ""
+        // 필요한 경우 다른 상태들도 초기화
+    }
+
 }

@@ -164,6 +164,19 @@ fun SignUpFirstFormScreen(
                     onValueChange = { input ->
                         val filteredInput = input.filter { it.isDigit() }
                         if (filteredInput.length <= 11) {
+                            // 전화번호가 변경되고 타이머가 실행 중이라면 초기화
+                            if (phoneNumber != filteredInput && isTimerRunning) {
+                                // 타이머와 관련된 상태 및 서버 응답 메시지 초기화
+                                timeLeft = 0
+                                isTimerRunning = false
+                                isVerificationCodeVisible = false
+                                verificationCode = ""
+                                // ViewModel 상태 초기화
+                                phoneNumberAuthViewModel.resetVerificationState()
+                                // 서버 응답 메시지 초기화
+                                phoneNumberAuthViewModel.verificationSentMessage = ""
+                                phoneNumberAuthViewModel.responseCode = 0
+                            }
                             phoneNumber = filteredInput
                         }
                     },
@@ -199,24 +212,15 @@ fun SignUpFirstFormScreen(
             Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
 
             // 인증코드 전송 버튼 아래의 서버 응답 메시지 표시
-            if (phoneNumberAuthViewModel.responseCode == 400 &&
+            if (phoneNumberAuthViewModel.responseCode != 0 &&
                 phoneNumberAuthViewModel.verificationSentMessage.isNotEmpty()
             ) {
-                Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     phoneNumberAuthViewModel.verificationSentMessage,
-                    color = Color.Red, // 실패 메시지는 빨간색으로
-                    modifier = Modifier.align(Alignment.Start) // 좌측 정렬
-                )
-            } else if (phoneNumberAuthViewModel.responseCode == 200 &&
-                phoneNumberAuthViewModel.verificationSentMessage.isNotEmpty()
-            ) {
-                Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
-                Text(
-                    phoneNumberAuthViewModel.verificationSentMessage,
-                    color = Color(0xFF006633), // 성공 메시지는 지정된 초록색(#006633)으로
-                    fontWeight = FontWeight.Bold, // 볼드 스타일
-                    modifier = Modifier.align(Alignment.Start) // 좌측 정렬
+                    color = if (phoneNumberAuthViewModel.responseCode == 400) Color.Red else Color(0xFF006633),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Start)
                 )
             }
 
