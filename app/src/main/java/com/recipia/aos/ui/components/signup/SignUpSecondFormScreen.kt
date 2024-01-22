@@ -241,6 +241,7 @@ fun SignUpSecondFormScreen(
                         value = email,
                         onValueChange = { newEmail ->
                             email = newEmail
+                            signUpViewModel.resetEmailDuplicateCheck() // 중복 체크 결과 초기화
                             if (emailPattern.matches(newEmail) || newEmail.isEmpty()) {
                                 emailError = "" // 오류 메시지 제거
                             } else {
@@ -372,7 +373,8 @@ fun SignUpSecondFormScreen(
                                 navController.navigate("signUpThirdForm")
                             }
                         },
-                        enabled = (isEmailVerified == true) && (isPasswordMatching == true), // 이메일 인증 및 비밀번호 일치 여부에 따라 버튼 활성화
+                        enabled = (emailDuplicateCheckResult?.contains("사용가능한 이메일입니다.") == true) &&
+                                (isPasswordMatching == true), // 이메일 중복 체크 및 비밀번호 일치 여부에 따라 버튼 활성화
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()

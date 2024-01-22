@@ -141,4 +141,10 @@ class SignUpViewModel : ViewModel() {
         _isPasswordMatching.value = false
     }
 
+    // 이메일 중복 체크 결과를 초기화하는 함수
+    fun resetEmailDuplicateCheck() {
+        _emailDuplicateCheckResult.value = ""
+    }
+
+
 }
