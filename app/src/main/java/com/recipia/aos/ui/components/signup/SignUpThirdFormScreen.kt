@@ -6,10 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,18 +16,15 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -86,15 +80,7 @@ fun SignUpThirdFormScreen(
     // 입력 필드 검증 상태
     val oneLineIntroFocusRequester = remember { FocusRequester() }
 
-//    // 이미지 선택기를 초기화
-//    val imagePickerLauncher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.PickVisualMedia()
-//    ) { uri: Uri? ->
-//        uri?.let {
-//            profilePictureUri = it
-//        }
-//    }
-
+    // 이미지 선택기를 초기화
     val imagePickerLauncher = rememberLauncherForActivityResult(
         CropImageContract()
     ) { result ->
@@ -287,46 +273,6 @@ fun SignUpThirdFormScreen(
         }
     }
 }
-
-// 프로필 사진 입력 필드 컴포저블 함수
-//@Composable
-//fun ProfilePictureInputField(
-//    profilePictureUri: Uri?,
-//    onImageSelected: () -> Unit
-//) {
-//    Box(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(16.dp) // 상단 여백 조정
-//            .height(150.dp) // 박스 높이 조정
-//            .aspectRatio(1f), // 정사각형 비율 유지
-//        contentAlignment = Alignment.Center
-//    ) {
-//        Box(
-//            modifier = Modifier
-//                .size(150.dp) // 프로필 이미지 영역 크기 1.5배로 증가
-//                .border(2.dp, Color.Gray, shape = RoundedCornerShape(75.dp)) // 원형 테두리 크기 조정
-//                .clip(RoundedCornerShape(75.dp)), // 이미지 원형으로 클립
-//            contentAlignment = Alignment.Center
-//        ) {
-//            if (profilePictureUri != null) {
-//                Image(
-//                    painter = rememberAsyncImagePainter(profilePictureUri),
-//                    contentDescription = null,
-//                    modifier = Modifier.fillMaxSize() // 이미지 크기 최대로 조정
-//                )
-//            } else {
-//                IconButton(onClick = { onImageSelected() }) {
-//                    Icon(
-//                        imageVector = Icons.Default.Add,
-//                        contentDescription = "프로필 사진 추가",
-//                        tint = Color.Gray
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
 
 // 프로필 사진 입력 필드 컴포저블 함수
 @Composable
