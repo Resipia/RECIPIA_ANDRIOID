@@ -2,6 +2,7 @@ package com.recipia.aos.ui.api
 
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.singup.EmailAvailableRequestDto
+import com.recipia.aos.ui.dto.singup.NicknameAvailableRequestDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -18,4 +19,9 @@ interface MemberManagementService {
         @Body request: EmailAvailableRequestDto
     ): Response<ResponseDto<Boolean>>
 
+    // 닉네임 중복 체크 요청
+    @POST("/member/management/checkDupNickname")
+    suspend fun checkDuplicateNickname(
+        @Body nicknameRequestDto: NicknameAvailableRequestDto
+    ): Response<ResponseDto<Boolean>>
 }

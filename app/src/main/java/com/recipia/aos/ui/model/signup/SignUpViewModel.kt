@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.recipia.aos.ui.api.MemberManagementService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.singup.EmailAvailableRequestDto
+import com.recipia.aos.ui.dto.singup.NicknameAvailableRequestDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -45,16 +46,21 @@ class SignUpViewModel : ViewModel() {
     val selectedDate: StateFlow<String> = _selectedDate
 
 
-    // 중복 체크 결과를 나타내는 LiveData
+    // 이메일 중복 체크
     val _isEmailAvailable = MutableLiveData<Boolean?>()
-
-    // 중복 체크 결과와 관련된 상태 추가
     val _emailDuplicateCheckResult = MutableLiveData<String?>()
     val emailDuplicateCheckResult: LiveData<String?> = _emailDuplicateCheckResult
 
     // 이메일 인증 성공 여부를 나타내는 LiveData 추가
     private val _isEmailVerified = MutableLiveData(false)
     val isEmailVerified: LiveData<Boolean> = _isEmailVerified
+
+    // 닉네임 중복 체크 결과 관련 LiveData 추가
+    private val _isNicknameAvailable = MutableLiveData<Boolean?>()
+    val isNicknameAvailable: LiveData<Boolean?> = _isNicknameAvailable
+
+    private val _nicknameDuplicateCheckResult = MutableLiveData<String?>()
+    val nicknameDuplicateCheckResult: LiveData<String?> = _nicknameDuplicateCheckResult
 
     // 비밀번호 일치 여부를 나타내는 LiveData 추가
     private val _isPasswordMatching = MutableLiveData(false)
@@ -117,12 +123,29 @@ class SignUpViewModel : ViewModel() {
         _selectedDate.value = newDate
     }
 
-    // 중복 체크 함수
+    // 닉네임 중복 체크 함수
     fun checkDuplicateNickname(nickname: String) {
-        // TODO: Retrofit을 사용하여 API 호출 및 결과를 _isNicknameAvailable에 설정
+        viewModelScope.launch {
+            try {
+                val response = getCheckDuplicateNicknameResult(nickname)
+
+                if (response.isSuccessful) {
+                    val responseDto: ResponseDto<Boolean>? = response.body()
+                    if (responseDto?.result != null) {
+                        _isNicknameAvailable.value = responseDto.result
+                        // 중복 체크 결과 메시지 업데이트
+                        _nicknameDuplicateCheckResult.value = if (responseDto.result) "사용가능한 닉네임입니다." else "이미 존재하는 닉네임입니다."
+                    }
+                } else {
+                    // 오류 처리
+                }
+            } catch (e: Exception) {
+                // 예외 처리
+            }
+        }
     }
 
-    // 중복 체크 함수 수정
+    // 이메일 중복 체크 함수
     fun checkDuplicateEmail(email: String) {
         viewModelScope.launch {
             try {
@@ -154,6 +177,14 @@ class SignUpViewModel : ViewModel() {
         return memberManagementService.checkDuplicateEmail(EmailAvailableRequestDto(email))
     }
 
+    // 닉네임 중복 체크
+    private suspend fun getCheckDuplicateNicknameResult(
+        nickname: String
+    ): Response<ResponseDto<Boolean>> {
+        // Retrofit을 사용하여 API 호출
+        return memberManagementService.checkDuplicateNickname(NicknameAvailableRequestDto(nickname))
+    }
+
     // 비밀번호 일치여부 변경 함수
     fun updatePasswordMatching(isMatching: Boolean) {
         _isPasswordMatching.value = isMatching
@@ -177,5 +208,9 @@ class SignUpViewModel : ViewModel() {
         _emailDuplicateCheckResult.value = ""
     }
 
+    // 닉네임 중복 체크 결과를 초기화하는 함수
+    fun resetNicknameDuplicateCheck() {
+        _nicknameDuplicateCheckResult.value = null
+    }
 
 }
