@@ -5,7 +5,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.recipia.aos.ui.api.LoginService
 import com.recipia.aos.ui.dto.login.LoginResponseDto
-import com.recipia.aos.ui.dto.login.ResponseDto
+import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.login.TokenMemberInfoDto
 import retrofit2.Call
 import retrofit2.Callback

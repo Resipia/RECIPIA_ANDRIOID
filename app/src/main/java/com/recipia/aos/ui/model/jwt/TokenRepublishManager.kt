@@ -3,7 +3,7 @@ package com.recipia.aos.ui.model.jwt
 import TokenManager
 import android.util.Log
 import com.recipia.aos.ui.api.JwtRepublishService
-import com.recipia.aos.ui.dto.login.ResponseDto
+import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.login.jwt.JwtRepublishRequestDto
 import com.recipia.aos.ui.dto.login.jwt.JwtRepublishResponseDto
 import okhttp3.OkHttpClient

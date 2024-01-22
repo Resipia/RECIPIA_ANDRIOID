@@ -2,23 +2,43 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="LoginScreenPreview">
+      <entry key="EmailVerificationScreenPreview">
         <State />
       </entry>
-      <entry key="Preview">
+      <entry key="PreviewDataList">
         <State />
       </entry>
-      <entry key="Preview (1)">
-        <State />
-      </entry>
-      <entry key="PreviewTopBar">
-        <State />
-      </entry>
-      <entry key="RecipeFormPreview">
-        <State />
+      <entry key="PreviewImagePicker">
+        <State>
+          <targetSelectedWithDropDown>
+            <Target>
+              <type value="QUICK_BOOT_TARGET" />
+              <deviceKey>
+                <Key>
+                  <type value="VIRTUAL_DEVICE_PATH" />
+                  <value value="$USER_HOME$/.android/avd/Pixel_7_Pro_API_33.avd" />
+                </Key>
+              </deviceKey>
+            </Target>
+          </targetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2024-01-19T05:12:45.422622Z" />
+        </State>
       </entry>
       <entry key="app">
-        <State />
+        <State>
+          <targetSelectedWithDropDown>
+            <Target>
+              <type value="QUICK_BOOT_TARGET" />
+              <deviceKey>
+                <Key>
+                  <type value="VIRTUAL_DEVICE_PATH" />
+                  <value value="$USER_HOME$/.android/avd/Pixel_7_Pro_API_33.avd" />
+                </Key>
+              </deviceKey>
+            </Target>
+          </targetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2024-01-20T02:16:36.903982Z" />
+        </State>
       </entry>
     </value>
   </component>

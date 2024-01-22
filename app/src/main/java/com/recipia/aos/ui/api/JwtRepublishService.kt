@@ -1,6 +1,6 @@
 package com.recipia.aos.ui.api
 
-import com.recipia.aos.ui.dto.login.ResponseDto
+import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.login.jwt.JwtRepublishRequestDto
 import com.recipia.aos.ui.dto.login.jwt.JwtRepublishResponseDto
 import retrofit2.Call
