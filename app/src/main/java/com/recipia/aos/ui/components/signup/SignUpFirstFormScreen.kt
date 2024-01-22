@@ -129,7 +129,7 @@ fun SignUpFirstFormScreen(
                 modifier = Modifier.background(Color.White),
                 title = {
                     Text(
-                        text = "회원가입",
+                        text = "회원가입 (1/3)",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },

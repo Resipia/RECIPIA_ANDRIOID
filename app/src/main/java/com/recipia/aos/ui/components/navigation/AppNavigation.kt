@@ -168,7 +168,7 @@ fun AppNavigation(
         }
         // 회원가입 3단계: 프로필 세팅 form
         composable("signUpThirdForm") {
-            SignUpThirdFormScreen(navController, signUpViewModel)
+            SignUpThirdFormScreen(navController, signUpViewModel, phoneNumberAuthViewModel)
         }
         // 카테고리 선택 화면
         composable("categories") {

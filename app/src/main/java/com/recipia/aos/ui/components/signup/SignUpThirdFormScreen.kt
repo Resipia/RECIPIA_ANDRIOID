@@ -23,6 +23,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -48,13 +49,15 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.ui.components.signup.function.GenderSelector
 import com.recipia.aos.ui.components.signup.function.MyDatePickerDialog
+import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpThirdFormScreen(
     navController: NavController,
-    signUpViewModel: SignUpViewModel
+    signUpViewModel: SignUpViewModel,
+    phoneNumberAuthViewModel: PhoneNumberAuthViewModel
 ) {
     // 프로필 사진, 한줄 소개, 생년월일, 성별 상태 관리
     var profilePictureUri by remember { mutableStateOf<Uri?>(null) }
@@ -74,10 +77,36 @@ fun SignUpThirdFormScreen(
         }
     }
 
+    // AlertDialog를 표시할지 여부를 관리하는 상태
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("주의") },
+            text = { Text("뒤로 가시면 입력했던 모든 정보가 초기화 되며 다시 회원가입을 진행하셔야 합니다.") },
+            confirmButton = {
+                Button(onClick = {
+                    signUpViewModel.clearData() // SignUpViewModel 초기화
+                    phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
+                    showDialog = false
+                    navController.navigate("login") // "login" 화면으로 이동
+                }) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "회원가입", style = MaterialTheme.typography.bodyMedium) },
+                title = { Text(text = "회원가입 (3/3)", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)

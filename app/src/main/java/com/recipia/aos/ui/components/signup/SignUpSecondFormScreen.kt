@@ -47,7 +47,7 @@ import com.recipia.aos.ui.model.signup.SignUpViewModel
 fun SignUpSecondFormScreen(
     navController: NavController,
     signUpViewModel: SignUpViewModel,
-    phoneNumberAuthViewModel: PhoneNumberAuthViewModel // ViewModel 추가
+    phoneNumberAuthViewModel: PhoneNumberAuthViewModel
 ) {
     // ViewModel에서 각 입력 필드의 현재 값을 가져옴
     val currentName by signUpViewModel.name.collectAsState()
@@ -160,7 +160,7 @@ fun SignUpSecondFormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "회원가입", style = MaterialTheme.typography.bodyMedium) },
+                title = { Text(text = "회원가입 (2/3)", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
                     IconButton(onClick = { showDialog = true }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
