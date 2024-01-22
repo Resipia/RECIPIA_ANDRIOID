@@ -1,6 +1,7 @@
 package com.recipia.aos.ui.components.signup
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -122,8 +123,10 @@ fun SignUpFirstFormScreen(
     }
 
     Scaffold(
+        containerColor = Color.White, // 배경색을 하얀색으로 설정
         topBar = {
             TopAppBar(
+                modifier = Modifier.background(Color.White),
                 title = {
                     Text(
                         text = "회원가입",
@@ -136,10 +139,8 @@ fun SignUpFirstFormScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
         }

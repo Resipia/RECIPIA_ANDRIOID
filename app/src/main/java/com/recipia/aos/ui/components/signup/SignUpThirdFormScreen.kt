@@ -84,7 +84,7 @@ fun SignUpThirdFormScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
