@@ -1,10 +1,15 @@
 package com.recipia.aos.ui.components.signup
 
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,15 +19,18 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,10 +52,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.canhub.cropper.CropImage
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
 import com.recipia.aos.ui.components.signup.function.GenderSelector
 import com.recipia.aos.ui.components.signup.function.MyDatePickerDialog
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
@@ -61,7 +75,10 @@ fun SignUpThirdFormScreen(
     phoneNumberAuthViewModel: PhoneNumberAuthViewModel
 ) {
     // 프로필 사진, 한줄 소개, 생년월일, 성별 상태 관리
+    val context = LocalContext.current
     var profilePictureUri by remember { mutableStateOf<Uri?>(null) }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+
     var oneLineIntroduction by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
@@ -69,12 +86,33 @@ fun SignUpThirdFormScreen(
     // 입력 필드 검증 상태
     val oneLineIntroFocusRequester = remember { FocusRequester() }
 
-    // 이미지 선택기를 초기화
+//    // 이미지 선택기를 초기화
+//    val imagePickerLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.PickVisualMedia()
+//    ) { uri: Uri? ->
+//        uri?.let {
+//            profilePictureUri = it
+//        }
+//    }
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri: Uri? ->
-        uri?.let {
-            profilePictureUri = it
+        CropImageContract()
+    ) { result ->
+        if (result.isSuccessful) {
+            // 크롭된 이미지의 Uri를 받아서 저장
+            profilePictureUri = result.uriContent
+        } else {
+            // 오류 처리
+            val exception = result.error
+        }
+    }
+
+    if (profilePictureUri != null) {
+        bitmap = if (Build.VERSION.SDK_INT < 28) {
+            MediaStore.Images.Media.getBitmap(context.contentResolver, profilePictureUri)
+        } else {
+            val source = ImageDecoder.createSource(context.contentResolver, profilePictureUri!!)
+            ImageDecoder.decodeBitmap(source)
         }
     }
 
@@ -129,17 +167,18 @@ fun SignUpThirdFormScreen(
 
             item { Spacer(modifier = Modifier.height(10.dp)) }
 
-            // 프로필 사진 입력 필드
+            // 프로필 사진 입력 필드 사용하는 부분
             item {
                 ProfilePictureInputField(
                     profilePictureUri = profilePictureUri,
                     onImageSelected = {
-                        imagePickerLauncher.launch(
-                            // 이미지만 선택 가능하도록
-                            PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                            )
-                        )
+                        // CropImageContractOptions 객체를 생성하여 이미지 선택 및 크롭 로직 호출
+                        val cropImageOptions = CropImageContractOptions(CropImage.CancelledResult.uriContent, CropImageOptions())
+                        imagePickerLauncher.launch(cropImageOptions)
+                    },
+                    onImageRemoved = {
+                        // 이미지 제거 로직
+                        profilePictureUri = null
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -250,32 +289,83 @@ fun SignUpThirdFormScreen(
 }
 
 // 프로필 사진 입력 필드 컴포저블 함수
+//@Composable
+//fun ProfilePictureInputField(
+//    profilePictureUri: Uri?,
+//    onImageSelected: () -> Unit
+//) {
+//    Box(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(16.dp) // 상단 여백 조정
+//            .height(150.dp) // 박스 높이 조정
+//            .aspectRatio(1f), // 정사각형 비율 유지
+//        contentAlignment = Alignment.Center
+//    ) {
+//        Box(
+//            modifier = Modifier
+//                .size(150.dp) // 프로필 이미지 영역 크기 1.5배로 증가
+//                .border(2.dp, Color.Gray, shape = RoundedCornerShape(75.dp)) // 원형 테두리 크기 조정
+//                .clip(RoundedCornerShape(75.dp)), // 이미지 원형으로 클립
+//            contentAlignment = Alignment.Center
+//        ) {
+//            if (profilePictureUri != null) {
+//                Image(
+//                    painter = rememberAsyncImagePainter(profilePictureUri),
+//                    contentDescription = null,
+//                    modifier = Modifier.fillMaxSize() // 이미지 크기 최대로 조정
+//                )
+//            } else {
+//                IconButton(onClick = { onImageSelected() }) {
+//                    Icon(
+//                        imageVector = Icons.Default.Add,
+//                        contentDescription = "프로필 사진 추가",
+//                        tint = Color.Gray
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
+
+// 프로필 사진 입력 필드 컴포저블 함수
 @Composable
 fun ProfilePictureInputField(
     profilePictureUri: Uri?,
-    onImageSelected: () -> Unit
+    onImageSelected: () -> Unit,
+    onImageRemoved: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp) // 상단 여백 조정
-            .height(150.dp) // 박스 높이 조정
-            .aspectRatio(1f), // 정사각형 비율 유지
+            .padding(16.dp)
+            .height(150.dp)
+            .aspectRatio(1f),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .size(150.dp) // 프로필 이미지 영역 크기 1.5배로 증가
-                .border(2.dp, Color.Gray, shape = RoundedCornerShape(75.dp)) // 원형 테두리 크기 조정
-                .clip(RoundedCornerShape(75.dp)), // 이미지 원형으로 클립
+                .size(150.dp)
+                .border(2.dp, Color.Gray, shape = CircleShape)
+                .clip(CircleShape),
             contentAlignment = Alignment.Center
         ) {
             if (profilePictureUri != null) {
                 Image(
                     painter = rememberAsyncImagePainter(profilePictureUri),
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize() // 이미지 크기 최대로 조정
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
+                // 여기에 새로운 이미지를 선택할 수 있는 IconButton 추가
+                IconButton(onClick = { onImageSelected() }) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "프로필 사진 변경",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(24.dp) // 아이콘 크기 조정
+                    )
+                }
             } else {
                 IconButton(onClick = { onImageSelected() }) {
                     Icon(
@@ -288,3 +378,4 @@ fun ProfilePictureInputField(
         }
     }
 }
+
