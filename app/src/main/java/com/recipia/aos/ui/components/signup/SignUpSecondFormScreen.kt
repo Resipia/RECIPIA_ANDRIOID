@@ -154,6 +154,9 @@ fun SignUpSecondFormScreen(
         }
     }
 
+    // 이메일 형식을 확인하는 정규식
+    val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+".toRegex()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -232,14 +235,22 @@ fun SignUpSecondFormScreen(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // "이메일" 입력 필드
                     InputField(
                         label = "이메일",
                         value = email,
-                        onValueChange = { email = it },
+                        onValueChange = { newEmail ->
+                            email = newEmail
+                            if (emailPattern.matches(newEmail) || newEmail.isEmpty()) {
+                                emailError = "" // 오류 메시지 제거
+                            } else {
+                                emailError = "잘못된 이메일 형식입니다." // 오류 메시지 설정
+                            }
+                        },
                         focusRequester = emailFocusRequester,
-                        errorMessage = emailError, // 에러 메시지 문자열 전달
-                        onErrorMessageChange = { emailError = it }, // 에러 메시지 업데이트 함수 전달
-                        isEmail = true,  // 이 필드가 이메일 필드임을 표시
+                        errorMessage = emailError, // 현재 오류 메시지
+                        onErrorMessageChange = { emailError = it }, // 오류 메시지 업데이트 콜백
+                        isEmail = true, // 이 필드가 이메일 필드임을 표시
                         modifier = Modifier.weight(0.7f)
                     )
 
