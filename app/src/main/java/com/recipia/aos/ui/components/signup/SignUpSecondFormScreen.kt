@@ -1,16 +1,13 @@
 package com.recipia.aos.ui.components.signup
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -34,8 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.signup.function.InputField
@@ -44,7 +44,7 @@ import com.recipia.aos.ui.model.signup.SignUpViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailValidAndPasswordFormScreen(
+fun SignUpSecondFormScreen(
     navController: NavController,
     signUpViewModel: SignUpViewModel,
     phoneNumberAuthViewModel: PhoneNumberAuthViewModel // ViewModel 추가
@@ -188,7 +188,8 @@ fun EmailValidAndPasswordFormScreen(
                     value = name,
                     onValueChange = { name = it },
                     focusRequester = nameFocusRequester,
-                    errorMessage = nameError
+                    errorMessage = nameError,
+                    onErrorMessageChange = { nameError = it }, // 에러 메시지 업데이트 함수 전달
                 )
             }
 
@@ -205,6 +206,7 @@ fun EmailValidAndPasswordFormScreen(
                         onValueChange = { nickname = it },
                         focusRequester = nicknameFocusRequester,
                         errorMessage = nicknameError,
+                        onErrorMessageChange = { nicknameError = it }, // 에러 메시지 업데이트 함수 전달
                         modifier = Modifier.weight(0.7f)
                     )
 
@@ -235,7 +237,9 @@ fun EmailValidAndPasswordFormScreen(
                         value = email,
                         onValueChange = { email = it },
                         focusRequester = emailFocusRequester,
-                        errorMessage = emailError,
+                        errorMessage = emailError, // 에러 메시지 문자열 전달
+                        onErrorMessageChange = { emailError = it }, // 에러 메시지 업데이트 함수 전달
+                        isEmail = true,  // 이 필드가 이메일 필드임을 표시
                         modifier = Modifier.weight(0.7f)
                     )
 
@@ -260,7 +264,8 @@ fun EmailValidAndPasswordFormScreen(
                         text = emailDuplicateCheckResult!!,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = if (emailDuplicateCheckResult == "사용가능한 이메일입니다.") Color(0xFF006633) else Color.Red,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(9.dp),
                         textAlign = TextAlign.Start
                     )
@@ -274,7 +279,23 @@ fun EmailValidAndPasswordFormScreen(
                     onValueChange = { password = it },
                     focusRequester = passwordFocusRequester,
                     errorMessage = passwordError,
+                    onErrorMessageChange = { passwordError = it },
                     isPassword = true
+                )
+            }
+
+            item {
+                val text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("* 영문 대,소문자, 숫자, 특수문자 포함 8-20자")
+                    }
+                }
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 9.dp)
                 )
             }
 
@@ -286,7 +307,8 @@ fun EmailValidAndPasswordFormScreen(
                     onValueChange = { newPassword ->
                         confirmPassword = newPassword
                         confirmPasswordError = "" // 사용자가 입력할 때마다 에러 메시지 초기화
-                        val isMatching = password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword
+                        val isMatching =
+                            password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword
                         signUpViewModel.updatePasswordMatching(isMatching) // 비밀번호 일치 여부 업데이트
                         if (isMatching) {
                             passwordMatchMessage = "비밀번호가 일치합니다."
@@ -298,7 +320,8 @@ fun EmailValidAndPasswordFormScreen(
                     },
                     focusRequester = confirmPasswordFocusRequester,
                     errorMessage = confirmPasswordError,
-                    isPassword = true
+                    onErrorMessageChange = { confirmPasswordError = it }, // 에러 메시지 업데이트 함수 전달
+                    isPasswordConfirm = true
                 )
 
                 // 비밀번호 일치 메시지 표시
@@ -307,7 +330,9 @@ fun EmailValidAndPasswordFormScreen(
                         text = passwordMatchMessage,
                         color = passwordMatchColor,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.fillMaxWidth().padding(9.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(9.dp),
                         textAlign = TextAlign.Start
                     )
                 }

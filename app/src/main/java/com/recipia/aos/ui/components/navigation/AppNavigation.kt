@@ -30,9 +30,9 @@ import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.recipe.detail.SearchScreen
-import com.recipia.aos.ui.components.signup.EmailValidAndPasswordFormScreen
-import com.recipia.aos.ui.components.signup.PhoneNumberValidAndSignUpAgreeScreen
-import com.recipia.aos.ui.components.signup.ProfileSettingFormScreen
+import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
+import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
+import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
@@ -160,15 +160,15 @@ fun AppNavigation(
         }
         // 회원가입 1단계: 전화번호 인증 및 회원가입 동의 form 화면
         composable("signUpFirstForm") {
-            PhoneNumberValidAndSignUpAgreeScreen(navController, phoneNumberAuthViewModel, signUpViewModel)
+            SignUpFirstFormScreen(navController, phoneNumberAuthViewModel, signUpViewModel)
         }
         // 회원가입 2단계: 이메일, 비밀번호 form 화면
         composable("signUpSecondForm") {
-            EmailValidAndPasswordFormScreen(navController, signUpViewModel, phoneNumberAuthViewModel)
+            SignUpSecondFormScreen(navController, signUpViewModel, phoneNumberAuthViewModel)
         }
         // 회원가입 3단계: 프로필 세팅 form
         composable("signUpThirdForm") {
-            ProfileSettingFormScreen(navController, signUpViewModel)
+            SignUpThirdFormScreen(navController, signUpViewModel)
         }
         // 카테고리 선택 화면
         composable("categories") {

@@ -38,11 +38,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
@@ -53,17 +53,15 @@ import kotlinx.coroutines.delay
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhoneNumberValidAndSignUpAgreeScreen(
+fun SignUpFirstFormScreen(
     navController: NavController,
     phoneNumberAuthViewModel: PhoneNumberAuthViewModel,
     signUpViewModel: SignUpViewModel
 ) {
 
     var isCheckedAll by remember { mutableStateOf(false) }
-    var isCheckedTerms by remember { mutableStateOf(false) }
-    var isCheckedPrivacy by remember { mutableStateOf(false) }
-    var isCheckedOutsourcing by remember { mutableStateOf(false) }
-    var isCheckedOptionalPrivacy by remember { mutableStateOf(false) }
+    var isPersonalInfoConsent by remember { mutableStateOf(false) }
+    var isDataRetentionConsent by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     // 이메일 인증 필드
@@ -141,6 +139,7 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
                     value = phoneNumber,
                     onValueChange = { phoneNumber = it },
                     label = { Text("전화번호") },
+                    placeholder = { Text("01012345678", style = TextStyle(color = Color.Gray)) }, // placeholder로 변경
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number,
@@ -278,20 +277,16 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
                     .fillMaxWidth()
                     .clickable {
                         isCheckedAll = !isCheckedAll
-                        isCheckedTerms = isCheckedAll
-                        isCheckedPrivacy = isCheckedAll
-                        isCheckedOutsourcing = isCheckedAll
-                        isCheckedOptionalPrivacy = isCheckedAll
+                        isPersonalInfoConsent = isCheckedAll
+                        isDataRetentionConsent = isCheckedAll
                     }
             ) {
                 Checkbox(
                     checked = isCheckedAll,
                     onCheckedChange = {
                         isCheckedAll = it
-                        isCheckedTerms = it
-                        isCheckedPrivacy = it
-                        isCheckedOutsourcing = it
-                        isCheckedOptionalPrivacy = it
+                        isPersonalInfoConsent = it
+                        isDataRetentionConsent = it
                     },
                     colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
                 )
@@ -303,38 +298,24 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
                 )
             }
 
-            // 두 번째 체크박스 영역 (이용약관 동의)
-            CheckboxWithViewButton(
-                label = "이용약관 동의 (필수)",
-                isChecked = isCheckedTerms,
-                onCheckedChange = { isCheckedTerms = it }
-            )
-
-            // 세 번째 체크박스 영역 (개인정보 수집 및 이용 동의)
+            // 첫번째 체크박스 영역 (개인정보 수집 및 이용 동의)
             CheckboxWithViewButton(
                 label = "개인정보 수집 및 이용 동의 (필수)",
-                isChecked = isCheckedPrivacy,
-                onCheckedChange = { isCheckedPrivacy = it }
+                isChecked = isPersonalInfoConsent,
+                onCheckedChange = { isPersonalInfoConsent = it }
             )
 
-            // 네 번째 체크박스 영역 (개인정보 처리 위탁 동의)
+            // 두번째 체크박스 영역 (개인정보 보관 및 파기 동의)
             CheckboxWithViewButton(
-                label = "개인정보 처리 위탁 동의 (필수)",
-                isChecked = isCheckedOutsourcing,
-                onCheckedChange = { isCheckedOutsourcing = it }
-            )
-
-            // 다섯 번째 체크박스 영역 (개인정보 수집 및 이용 동의 선택)
-            CheckboxWithViewButton(
-                label = "개인정보 수집 및 이용 동의 (선택)",
-                isChecked = isCheckedOptionalPrivacy,
-                onCheckedChange = { isCheckedOptionalPrivacy = it }
+                label = "개인정보 보관 및 파기 동의 (필수)",
+                isChecked = isDataRetentionConsent,
+                onCheckedChange = { isDataRetentionConsent = it }
             )
 
             // "다음" 버튼을 눌렀을 때의 동작
             val onAgreeButtonClick: () -> Unit = {
                 // 필수 항목을 모두 동의했는지 확인
-                if (isCheckedTerms && isCheckedPrivacy && isCheckedOutsourcing) {
+                if (isPersonalInfoConsent && isDataRetentionConsent) {
                     // 동의한 경우 회원가입 페이지로 이동
                     navController.navigate("signUpSecondForm")
                 } else {
@@ -345,7 +326,7 @@ fun PhoneNumberValidAndSignUpAgreeScreen(
 
             // "다음" 버튼 활성화 여부 결정
             val isAgreeButtonEnabled =
-                phoneNumberAuthViewModel.isVerificationSuccess && isCheckedTerms && isCheckedPrivacy && isCheckedOutsourcing
+                phoneNumberAuthViewModel.isVerificationSuccess && isPersonalInfoConsent && isDataRetentionConsent
 
             // "다음" 버튼 영역
             Row(
