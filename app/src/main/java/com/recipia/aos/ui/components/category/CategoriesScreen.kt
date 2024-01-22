@@ -1,11 +1,12 @@
 package com.recipia.aos.ui.components.category
 
-import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
@@ -25,7 +26,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.dto.Category
@@ -56,38 +59,51 @@ fun CategoriesScreen(
     var selectedSubCategories by remember { mutableStateOf(setOf<Int>()) }
 
     Scaffold(
+        containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {
             TopAppBar(
-                title = { Text("카테고리 선택", style = MaterialTheme.typography.titleLarge) },
+                modifier = Modifier.background(Color.White), // 여기에 배경색을 하얀색으로 설정,
+                title = { },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.Close, contentDescription = "닫기")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
             )
         },
         bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            Column {
+        Column(
+            modifier = Modifier
+                .background(Color.White) // 여기에 배경색을 하얀색으로 설정,
+                .padding(innerPadding)
+                .padding(horizontal = 24.dp) // 좌우 패딩 추가
+        ) {
+            Column(
+                modifier = Modifier.background(Color.White) // 내부 Column 배경색 설정
+            ) {
                 groupedSubCategories.forEach { (categoryId, subCategoryList) ->
+
                     // Category 이름 찾기
                     val categoryName = categoryNameMap[categoryId] ?: "Unknown Category"
+
+                    // 대카테고리 이름 스타일 조정
                     Text(
-                        categoryName,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        categoryNameMap[categoryId] ?: "Unknown Category",
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
+                        modifier = Modifier.padding(vertical = 12.dp)
                     )
+
+                    // 서브 카테고리 리스트 스타일 조정
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp)
+                            .background(Color.White)
+                            .padding(bottom = 12.dp)
                     ) {
                         items(subCategoryList.size) { index ->
                             val subCategory = subCategoryList[index]
@@ -114,7 +130,9 @@ fun CategoriesScreen(
                         }
                     }
                 }
+
                 Spacer(modifier = Modifier.padding(20.dp))
+
                 Button(
                     onClick = {
                         viewModel.setSelectedCategories(selectedSubCategories)
@@ -122,7 +140,9 @@ fun CategoriesScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .background(Color.White) // 여기에 배경색을 하얀색으로 설정,
+                        .padding(2.dp),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text("선택 완료", style = MaterialTheme.typography.labelLarge)
                 }

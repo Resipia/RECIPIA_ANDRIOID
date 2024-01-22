@@ -68,11 +68,11 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
     // Coil for Compose
-    implementation("io.coil-kt:coil-compose:1.4.0")
+    implementation("io.coil-kt:coil-compose:2.2.0")
     implementation("androidx.compose.runtime:runtime-livedata:1.3.2")
 
-    implementation("androidx.compose.material:material:1.1.0")
     val nav_version = "2.5.3"
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation("androidx.compose.foundation:foundation:1.3.1")
@@ -87,5 +87,10 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     // Gson
     implementation("com.google.code.gson:gson:2.8.6")
+
+    implementation("androidx.compose.material:material:1.3.1")
+    implementation("com.airbnb.android:lottie-compose:6.0.1")
+
+//    implementation("com.google.accompanist:accompanist-pager:0.32")
 
 }

@@ -1,7 +1,7 @@
 package com.recipia.aos.ui.api
 
 import com.recipia.aos.ui.dto.login.LoginResponseDto
-import com.recipia.aos.ui.dto.login.ResponseDto
+import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.login.TokenMemberInfoDto
 import retrofit2.Call
 import retrofit2.http.Body

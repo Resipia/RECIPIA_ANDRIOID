@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.dto.recipecreate
+package com.recipia.aos.ui.dto.recipe
 
 data class NutritionalInfoDto(
     val carbohydrates: Int? = 0,  // 탄수화물 함량
