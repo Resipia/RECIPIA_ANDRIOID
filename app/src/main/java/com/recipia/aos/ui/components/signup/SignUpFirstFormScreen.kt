@@ -116,6 +116,11 @@ fun SignUpFirstFormScreen(
         return number.matches("^[0-9]{9,11}$".toRegex())
     }
 
+    // 인증코드 형식 검증 함수
+    fun isValidVerificationCode(code: String): Boolean {
+        return code.matches("^[0-9]{6}$".toRegex())
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -225,7 +230,12 @@ fun SignUpFirstFormScreen(
                 ) {
                     OutlinedTextField(
                         value = verificationCode,
-                        onValueChange = { verificationCode = it },
+                        onValueChange = { input ->
+                            val filteredInput = input.filter { it.isDigit() }
+                            if (filteredInput.length <= 6) {
+                                verificationCode = filteredInput
+                            }
+                        },
                         label = { Text("인증코드") },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions.Default.copy(
@@ -245,7 +255,7 @@ fun SignUpFirstFormScreen(
                                 signUpViewModel.updatePhoneNumber(phoneNumber)
                             }
                         },
-                        enabled = isVerificationButtonEnabled, // 버튼 활성화 여부
+                        enabled = isValidVerificationCode(verificationCode), // 버튼 활성화 여부
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(start = 8.dp) // 오른쪽 여백 추가
@@ -257,56 +267,50 @@ fun SignUpFirstFormScreen(
 
             Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
 
-            // 인증코드 입력창 아래 타이머와 안내 메시지 표시
-            if (isTimerRunning) {
-                if (timeLeft > 0) {
-                    // 타이머가 활성화되어 있고 시간이 남아 있는 경우
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        // 시간과 분을 00 형식으로 표시
-                        val minutes = timeLeft / 60
-                        val seconds = timeLeft % 60
-                        val timerText = String.format("남은 시간: %02d:%02d", minutes, seconds)
-
-                        Text(
-                            text = timerText,
-                            color = Color.Red,
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        "인증코드가 도착하지 않았다면 다시 전송 버튼을 눌러주세요.",
-                        modifier = Modifier.align(Alignment.Start),
-                        fontWeight = FontWeight.Bold
-                    )
-                } else {
-                    // 타이머가 0이 되었을 때
-                    Text(
-                        "인증코드 재전송이 필요합니다.",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Start)
-                    )
-                }
-            }
-
-            // 인증 결과 메시지 표시
-            if (phoneNumberAuthViewModel.verificationSuccessMessage.isNotEmpty()) {
+            // 타이머 및 인증 성공 메시지 처리
+            if (phoneNumberAuthViewModel.isVerificationSuccess) {
+                // 인증 성공 메시지 표시
                 Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
-                val messageColor = if (phoneNumberAuthViewModel.isVerificationSuccess) {
-                    Color(0xFF006633) // 초록색
-                } else {
-                    Color.Red // 빨간색
-                }
-
                 Text(
                     phoneNumberAuthViewModel.verificationSuccessMessage,
-                    color = messageColor,
-                    fontWeight = FontWeight.Bold, // 볼드 스타일
-                    modifier = Modifier.align(Alignment.Start) // 좌측 정렬
+                    color = Color(0xFF006633), // 초록색,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Start)
                 )
+            } else {
+                if (isTimerRunning) {
+                    if (timeLeft > 0) {
+                        // 타이머가 활성화되어 있고 시간이 남아 있는 경우
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // 시간과 분을 00 형식으로 표시
+                            val minutes = timeLeft / 60
+                            val seconds = timeLeft % 60
+                            val timerText = String.format("남은 시간: %02d:%02d", minutes, seconds)
+
+                            Text(
+                                text = timerText,
+                                color = Color.Red,
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            "인증코드가 도착하지 않았다면 다시 전송 버튼을 눌러주세요.",
+                            modifier = Modifier.align(Alignment.Start),
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        // 타이머가 0이 되었을 때
+                        Text(
+                            "인증코드 재전송이 필요합니다.",
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.align(Alignment.Start)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
