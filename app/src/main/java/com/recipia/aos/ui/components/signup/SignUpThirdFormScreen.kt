@@ -108,7 +108,7 @@ fun SignUpThirdFormScreen(
             TopAppBar(
                 title = { Text(text = "회원가입 (3/3)", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { showDialog = true }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                     }
                 },
@@ -197,14 +197,26 @@ fun SignUpThirdFormScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Button(
-                        onClick = { /* 건너뛰기 로직 */ },
+                        onClick = {
+                            // 새로운 데이터 업데이트
+                            signUpViewModel.updateProfilePictureUri(profilePictureUri)
+                            signUpViewModel.updateOneLineIntroduction(oneLineIntroduction)
+                            signUpViewModel.updateGender(gender)
+                            signUpViewModel.updateSelectedDate(selectedDate)
+                        },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("건너뛰기")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
-                        onClick = { /* 회원가입 완료 로직 */ },
+                        onClick = {
+                            // 새로운 데이터 업데이트
+                            signUpViewModel.updateProfilePictureUri(profilePictureUri)
+                            signUpViewModel.updateOneLineIntroduction(oneLineIntroduction)
+                            signUpViewModel.updateGender(gender)
+                            signUpViewModel.updateSelectedDate(selectedDate)
+                        },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("회원가입 완료")

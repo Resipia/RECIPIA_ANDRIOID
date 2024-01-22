@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.model.signup
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,18 +19,31 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class SignUpViewModel : ViewModel() {
 
-    // 각 입력 필드에 대한 StateFlow
+    // 1번째 회원가입 입력 form 데이터
+    private val _phoneNumber = MutableStateFlow("")
+
+    // 2번째 회원가입 입력 form 데이터
     private val _name = MutableStateFlow("")
     private val _nickname = MutableStateFlow("")
     private val _email = MutableStateFlow("")
     private val _password = MutableStateFlow("")
-    private val _phoneNumber = MutableStateFlow("")
+
+    // 3번째 회원가입 입력 form 데이터
+    private val _profilePictureUri = MutableStateFlow<Uri?>(null)
+    private val _oneLineIntroduction = MutableStateFlow("")
+    private val _gender = MutableStateFlow("")
+    private val _selectedDate = MutableStateFlow("")
 
     val name: StateFlow<String> = _name
     val nickname: StateFlow<String> = _nickname
     val email: StateFlow<String> = _email
     val password: StateFlow<String> = _password
     val phoneNumber: StateFlow<String> = _phoneNumber
+    val profilePictureUri: StateFlow<Uri?> = _profilePictureUri
+    val oneLineIntroduction: StateFlow<String> = _oneLineIntroduction
+    val gender: StateFlow<String> = _gender
+    val selectedDate: StateFlow<String> = _selectedDate
+
 
     // 중복 체크 결과를 나타내는 LiveData
     val _isEmailAvailable = MutableLiveData<Boolean?>()
@@ -84,6 +98,23 @@ class SignUpViewModel : ViewModel() {
 
     fun updatePhoneNumber(newPhoneNumber: String) {
         _phoneNumber.value = newPhoneNumber
+    }
+
+    // 새로운 데이터 업데이트 함수들
+    fun updateProfilePictureUri(newUri: Uri?) {
+        _profilePictureUri.value = newUri
+    }
+
+    fun updateOneLineIntroduction(newIntroduction: String) {
+        _oneLineIntroduction.value = newIntroduction
+    }
+
+    fun updateGender(newGender: String) {
+        _gender.value = newGender
+    }
+
+    fun updateSelectedDate(newDate: String) {
+        _selectedDate.value = newDate
     }
 
     // 중복 체크 함수
