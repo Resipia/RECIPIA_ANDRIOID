@@ -51,10 +51,22 @@ fun FollowPageScreen(
         topBar = {
             TopAppBar(
                 modifier = Modifier.background(Color.White),
-                title = { Text(text = "", style = MaterialTheme.typography.bodyMedium) },
+                title = {
+                    Text(
+                        text = "",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = null
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -83,8 +95,21 @@ fun FollowPageScreen(
                     FollowListItem(
                         followData = followData,
                         onFollowClick = { data ->
-                            // 팔로우/언팔로우 액션 처리
-                            // 예: viewModel.followOrUnfollow(data.memberId)
+                            // 팔로우/언팔로우 버튼 클릭 시 실행되는 로직
+                            viewModel.followOrUnfollow(data.memberId) { isSuccess, followId ->
+                                // 요청이 성공적이면 (isSuccess == true)
+                                if (isSuccess) {
+                                    // 현재 리스트에서 클릭된 아이템의 인덱스를 찾음
+                                    val index = viewModel.followList.indexOf(data)
+                                    if (index != -1) {
+                                        // 클릭된 아이템의 팔로우 상태를 업데이트
+                                        val updatedData = data.copy(followId = followId)
+                                        viewModel.followList[index] = updatedData
+                                    }
+                                } else {
+                                    // 요청 실패 시, 에러 메시지 처리 등을 할 수 있음
+                                }
+                            }
                         }
                     )
                 }

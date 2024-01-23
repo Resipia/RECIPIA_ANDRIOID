@@ -188,7 +188,7 @@ fun MyPageScreen(
                     Button(
                         onClick = { /* 팔로우 처리 */ },
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(233,236,239)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(233, 236, 239)),
                         shape = MaterialTheme.shapes.small.copy(CornerSize(10.dp)) // 버튼 모양 변경
                     ) {
                         Icon(
@@ -207,7 +207,7 @@ fun MyPageScreen(
                     Button(
                         onClick = { /* 공유하기 처리 */ },
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(233,236,239)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(233, 236, 239)),
                         shape = MaterialTheme.shapes.small.copy(CornerSize(10.dp)) // 버튼 모양 변경
                     ) {
                         Icon(
@@ -392,7 +392,8 @@ fun MyPageScreen(
                                     },
                                     onError = { errorMessage ->
                                         // 실패시 에러 메시지 표시
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
+                                            .show()
                                     }
                                 )
                             }
@@ -418,7 +419,8 @@ fun MyPageScreen(
                                     },
                                     onError = { errorMessage ->
                                         // 실패시 에러 메시지 표시
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
+                                            .show()
                                     }
                                 )
                             }

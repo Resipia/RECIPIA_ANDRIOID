@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.ui.api.FollowService
 import com.recipia.aos.ui.dto.mypage.follow.FollowListResponseDto
+import com.recipia.aos.ui.dto.mypage.follow.FollowRequestDto
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -62,7 +63,6 @@ class FollowViewModel(
         }
     }
 
-
     // 타입 변경 시 호출되는 함수
     fun changeType(type: String, targetMemberId: Long) {
         if (currentType != type) {
@@ -77,6 +77,28 @@ class FollowViewModel(
     fun loadMore(targetMemberId: Long) {
         currentPage++
         loadFollowList(targetMemberId)
+    }
+
+    // 팔로우/언팔로우 요청 (응답이 1이면 언팔로우, 1보다 크면 팔로우한 pk 반환)
+    fun followOrUnfollow(
+        targetMemberId: Long,
+        onResult: (Boolean, Long?) -> Unit
+    ) {
+        viewModelScope.launch {
+            // 서버에 팔로우/언팔로우 요청을 보냄
+            val response = followService.followOrUnFollow(FollowRequestDto(targetMemberId))
+
+            if (response.isSuccessful && response.body() != null) {
+                // 서버로부터 응답 받음
+                val result = response.body()!!.result
+                // 응답이 1보다 크면 (팔로우한 경우), 결과값으로 followId 반환
+                // 그렇지 않으면 (언팔로우한 경우), null 반환
+                onResult(true, if (result > 1) result else null)
+            } else {
+                // 요청 실패 시, false와 null 반환
+                onResult(false, null)
+            }
+        }
     }
 
 }

@@ -71,10 +71,10 @@ fun FollowListItem(
 
         Spacer(modifier = Modifier.weight(1f)) // 중간 공간을 채우기 위한 Spacer 추가
 
-        // 팔로우 버튼
+        // 팔로우 버튼 (isMe필드로 검증해서 다른 사람 팔로잉 페이지에서 내 계정은 팔로우 버튼 안보이게 하기)
         if (!followData.isMe) {
             FollowButton(
-                isFollowing = followData.followId != null,
+                isFollowing = followData.followId != null, // 이미 팔로우한 상태라면 true
                 onFollowClick = { onFollowClick(followData) }
             )
         }

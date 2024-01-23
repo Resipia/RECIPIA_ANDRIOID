@@ -18,14 +18,12 @@ fun FollowButton(
     onFollowClick: () -> Unit
 ) {
     val buttonText = if (isFollowing) "팔로잉" else "팔로우"
+    val buttonColor = if (isFollowing) Color(206,212,218) else Color(149,117,205) // 팔로잉이면 회색, 아니면 파란색
 
     Button(
-        onClick = {
-            // 클릭 시 API 요청 보내고 팔로잉 상태 변경 로직 구현
-            onFollowClick()
-        },
+        onClick = onFollowClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(206,212,218), // 버튼 배경색
+            containerColor = buttonColor,
             contentColor = Color.Black // 버튼 내부 글자색
         ),
         shape = RoundedCornerShape(4.dp)
