@@ -44,8 +44,19 @@ fun PasswordResetScreen(
     navController: NavController,
     viewModel: ForgotViewModel
 ) {
-    val foundEmail by viewModel.foundEmail.collectAsState() // 이 부분을 수정
+    val foundEmail by viewModel.foundEmail.collectAsState()
     var email by remember { mutableStateOf(foundEmail ?: "") }
+    var isPasswordSent by remember { mutableStateOf(false) }
+    var isEmailReadOnly by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // 상태 초기화 함수
+    fun resetAllStates() {
+        email = foundEmail ?: ""
+        isPasswordSent = false
+        isEmailReadOnly = false
+        errorMessage = null
+    }
 
     Scaffold(
         containerColor = Color.White,
@@ -79,23 +90,81 @@ fun PasswordResetScreen(
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { if (!isEmailReadOnly) email = it },
+                readOnly = isEmailReadOnly,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 label = { Text("이메일 주소") }
             )
 
-            Button(
-                onClick = { /* 다음 화면으로 이동하는 로직 */ },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(206,212,218), // 버튼 배경색
-                    contentColor = Color.Black // 버튼 내부 글자색
-                ),
-                shape = RoundedCornerShape(4.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("비밀번호 찾기")
+            // 비밀번호 찾기
+            if (!isPasswordSent && errorMessage == null) {
+                Button(
+                    onClick = {
+                        viewModel.sendTempPassword(email, { isSuccess ->
+                            if (isSuccess) {
+                                isPasswordSent = true
+                            }
+                        }, { error ->
+                            errorMessage = error
+                        })
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(206, 212, 218), // 버튼 배경색
+                        contentColor = Color.Black // 버튼 내부 글자색
+                    ),
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("비밀번호 찾기")
+                }
+            } else if (errorMessage != null) {
+                // 오류 메시지 및 다시 시도 버튼
+                Text(
+                    text = errorMessage!!,
+                    color = Color.Red, // 실패 메시지는 빨간색으로 표시
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                isEmailReadOnly = true // 오류가 있으면 읽기 전용으로 설정
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        resetAllStates()
+                        isEmailReadOnly = false // 상태 초기화 시 읽기 전용 해제
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(206, 212, 218), // 버튼 배경색
+                        contentColor = Color.Black // 버튼 내부 글자색
+                    ),
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("다시 비밀번호 찾기")
+                }
+            } else if (isPasswordSent) {
+                Text(
+                    text = "임시 비밀번호가 이메일로 전송되었습니다.",
+                    color = Color(0xFF006633), // 성공 메시지는 초록색으로 표시
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                )
+
+                isEmailReadOnly = true // 이메일 입력창을 읽기 전용으로 설정
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { navController.navigate("login") },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(206, 212, 218), // 버튼 배경색
+                        contentColor = Color.Black // 버튼 내부 글자색
+                    ),
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("로그인 하기")
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

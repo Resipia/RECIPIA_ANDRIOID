@@ -78,10 +78,27 @@ class ForgotViewModel : ViewModel() {
         }
     }
 
-    // 비밀번호 찾기
-    fun findPassword() {
+    // 임시 비밀번호 전송
+    fun sendTempPassword(
+        email: String,
+        onResult: (Boolean) -> Unit,
+        onError: (String) -> Unit
+    ) {
         viewModelScope.launch {
-
+            try {
+                val response = getFindPasswordResponse(email)
+                if (response.isSuccessful) {
+                    // 성공적으로 임시 비밀번호 전송
+                    onResult(true)
+                } else {
+                    // 서버에서 오류 응답
+                    Log.d("ListItem", "서버 오류: ${response.code()}")
+                    onError("회원가입되지 않은 이메일입니다.")
+                }
+            } catch (e: Exception) {
+                // 네트워크 오류 처리
+                onError("네트워크 오류가 발생했습니다: ${e.localizedMessage}")
+            }
         }
     }
 
