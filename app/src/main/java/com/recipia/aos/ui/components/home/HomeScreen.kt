@@ -1,7 +1,6 @@
 package com.recipia.aos.ui.components.home
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,16 +22,24 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -58,7 +65,10 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.recipia.aos.R
+import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.HorizontalDivider
+import com.recipia.aos.ui.components.TopAppBar
+import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookmarkUpdateState
@@ -67,13 +77,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
     recipeAllListViewModel: RecipeAllListViewModel,
     bookmarkViewModel: BookMarkViewModel,
-    innerPadding: PaddingValues
 ) {
     /**
      * LiveData에 주로 observeAsState를 사용한다.
@@ -153,7 +162,65 @@ fun HomeScreen(
         }
     }
 
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
+
     Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                modifier = Modifier.background(Color.White), // 여기에 배경색을 하얀색으로 설정,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigate("categories") }) {
+                        Icon(
+                            imageVector = Icons.Filled.Menu,
+                            contentDescription = "메뉴"
+                        )
+                    }
+                },
+                actions = {
+                    // 검색 아이콘 추가
+                    IconButton(onClick = { navController.navigate("searchScreen") }) {
+                        Icon(Icons.Filled.Search, contentDescription = "검색")
+                    }
+
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.MoreVert,
+                            contentDescription = "더보기"
+                        )
+                    }
+
+                    CustomDropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        // 드롭다운 메뉴 아이템들
+                        DropdownMenuItem(
+                            text = { Text("신고하기") },
+                            onClick = { /* 수정 처리 */ }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("로그아웃") },
+                            onClick = { /* 설정 처리 */ }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("로그아웃") },
+                            onClick = { /* 설정 처리 */ }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("피드백 보내기") },
+                            onClick = { /* 피드백 처리 */ }
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
+        },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         modifier = Modifier.background(Color.White),
         floatingActionButton = {
@@ -165,12 +232,13 @@ fun HomeScreen(
             ) {
                 Icon(Icons.Filled.Add, "글쓰기")
             }
-        }
-    ) { paddingValues -> // 여기서 innerPadding 대신 paddingValues 사용
+        },
+        bottomBar = { BottomNavigationBar(navController) }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
-                .background(Color.White) // 여기에 배경색을 하얀색으로 설정
+                .background(Color.White)
+                .fillMaxSize()
         ) {
             // 예시 이미지 URL 리스트
             val sampleImages = listOf(
@@ -184,7 +252,6 @@ fun HomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
                     .background(Color.White) // 여기에 배경색을 하얀색으로 설정
                     .pullRefresh(pullRefreshState),
                 contentAlignment = Alignment.Center // 여기를 수정
@@ -197,7 +264,7 @@ fun HomeScreen(
                     LazyColumn(
                         contentPadding = PaddingValues(
                             top = paddingValues.calculateTopPadding(),
-                            bottom = paddingValues.calculateBottomPadding() + 80.dp,
+                            bottom = paddingValues.calculateBottomPadding(),
                         ),
                         modifier = Modifier
                             .fillMaxSize()
@@ -265,7 +332,6 @@ fun ListItem(
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
-            Log.d("ListItem", "After image loading")
 
             Column(
                 modifier = Modifier
@@ -285,7 +351,6 @@ fun ListItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 2.dp)
                 )
-                Log.d("ListItem", "After text rendering")
 
                 // 서브 카테고리 Assist Chips
                 if (item.subCategoryList.isNotEmpty()) {
@@ -299,7 +364,6 @@ fun ListItem(
                         }
                     }
                 }
-                Log.d("ListItem", "After subcategory rendering")
             }
 
             /**

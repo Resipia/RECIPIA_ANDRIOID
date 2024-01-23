@@ -42,11 +42,7 @@ class MyPageViewModel(
             .create(MyPageService::class.java)
     }
 
-    init {
-        loadMyPageData()
-    }
-
-    private fun loadMyPageData() {
+    fun loadMyPageData() {
         viewModelScope.launch {
             try {
                 val response = myPageService.viewMyPage()

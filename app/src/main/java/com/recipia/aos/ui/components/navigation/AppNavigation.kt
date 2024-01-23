@@ -25,6 +25,7 @@ import com.recipia.aos.ui.components.category.CategoriesScreen
 import com.recipia.aos.ui.components.forgot.email.EmailVerificationForgotIdScreen
 import com.recipia.aos.ui.components.forgot.email.FindEmailScreen
 import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
+import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
@@ -68,8 +69,7 @@ fun AppNavigation(
         factory = RecipeAllListViewModelFactory(tokenManager)
     )
     val loginViewModel: LoginViewModel = viewModel(
-        factory = MyViewModelFactory(LocalContext.current),
-        modelClass = LoginViewModel::class.java
+        factory = MyViewModelFactory(tokenManager),
     )
     val categorySelectionViewModel: CategorySelectionViewModel = viewModel(
         factory = CategorySelectionViewModelFactory()
@@ -106,20 +106,7 @@ fun AppNavigation(
         }
         // 홈 화면(메인 레시피 목록들)
         composable("home") {
-            Scaffold(
-                topBar = { TopAppBar(navController, recipeAllListViewModel, bookmarkViewModel) },
-                bottomBar = { BottomNavigationBar(navController) }
-            ) { innerPadding ->
-                Surface(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .background(Color.White) // 여기에 배경색을 하얀색으로 설정
-                        .fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-//                    HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel, innerPadding)
-                }
-            }
+            HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel)
         }
         // 검색화면
         composable("searchScreen") {

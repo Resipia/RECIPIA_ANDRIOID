@@ -14,7 +14,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class LoginViewModel(
-    appContext: Context
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val retrofit: Retrofit = Retrofit.Builder()
@@ -23,8 +23,6 @@ class LoginViewModel(
         .build()
 
     private val apiService: LoginService = retrofit.create(LoginService::class.java)
-    private val tokenManager =
-        TokenManager(appContext.applicationContext) // Application Context 사용
 
     // 로그인 함수
     fun login(

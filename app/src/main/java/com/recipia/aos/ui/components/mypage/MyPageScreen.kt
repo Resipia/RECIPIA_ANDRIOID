@@ -47,6 +47,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -81,6 +82,11 @@ fun MyPageScreen(
     val iconColor = Color.Gray
 
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
+
+    // 화면이 렌더링될 때 데이터 로딩 시작
+    LaunchedEffect(key1 = true) {
+        myPageViewModel.loadMyPageData()
+    }
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
