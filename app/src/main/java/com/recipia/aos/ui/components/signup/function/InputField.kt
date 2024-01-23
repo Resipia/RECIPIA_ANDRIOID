@@ -48,7 +48,12 @@ fun InputField(
 
 
     Column(
-        modifier = modifier.padding(8.dp)
+        modifier = modifier
+            .padding(
+                start = 8.dp,
+                end = 8.dp,
+                bottom = if (isPasswordConfirm && errorMessage.isNotEmpty()) 100.dp else 8.dp
+            )
     ) {
 
         OutlinedTextField(
@@ -61,10 +66,12 @@ fun InputField(
             },
             label = { Text(text = label) },
             placeholder = if (isEmail) {
-                { Text(
-                    "hello@email.com",
-                    style = TextStyle(color = Color.Gray) // 여기서 회색으로 설정합니다.
-                ) }
+                {
+                    Text(
+                        "hello@email.com",
+                        style = TextStyle(color = Color.Gray) // 여기서 회색으로 설정합니다.
+                    )
+                }
             } else {
                 null
             },
@@ -73,22 +80,31 @@ fun InputField(
                     onErrorMessageChange("잘못된 이메일 형식입니다.")
                     true
                 }
+
                 isPassword && value.isNotEmpty() && !passwordPattern.matches(value) -> {
                     onErrorMessageChange("비밀번호 형식에 맞지 않습니다.")
                     true
                 }
+
                 else -> errorMessage.isNotEmpty()
             },
             visualTransformation = if (isPassword || isPasswordConfirm) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = when {
-                    isPhone -> KeyboardType.Number
-                    isPassword -> KeyboardType.Password
-                    isPasswordConfirm -> KeyboardType.Password
-                    else -> KeyboardType.Text
-                },
-                imeAction = ImeAction.Next
-            ),
+            keyboardOptions =
+            if (isPasswordConfirm) {
+                KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                )
+            } else {
+                KeyboardOptions.Default.copy(
+                    keyboardType = when {
+                        isPhone -> KeyboardType.Number
+                        isPassword -> KeyboardType.Password
+                        isPasswordConfirm -> KeyboardType.Password
+                        else -> KeyboardType.Text
+                    },
+                    imeAction = ImeAction.Next
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester),

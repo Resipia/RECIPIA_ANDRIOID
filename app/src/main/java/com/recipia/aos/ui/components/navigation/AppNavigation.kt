@@ -10,7 +10,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.recipia.aos.ui.components.category.CategoriesScreen
 import com.recipia.aos.ui.components.forgot.email.EmailVerificationForgotIdScreen
 import com.recipia.aos.ui.components.forgot.email.FindEmailScreen
 import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
@@ -18,6 +17,7 @@ import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
+import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.recipe.detail.SearchScreen
@@ -169,8 +169,8 @@ fun AppNavigation(
             SignUpThirdFormScreen(navController, signUpViewModel, phoneNumberAuthViewModel)
         }
         // 카테고리 선택 화면
-        composable("categories") {
-            CategoriesScreen(
+        composable("categorySelect") {
+            CategorySelectScreen(
                 navController = navController,
                 viewModel = categorySelectionViewModel,
                 subCategories = listOf(

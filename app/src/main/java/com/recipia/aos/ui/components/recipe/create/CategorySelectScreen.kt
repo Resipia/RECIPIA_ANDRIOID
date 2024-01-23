@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.category
+package com.recipia.aos.ui.components.recipe.create
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -33,16 +33,12 @@ import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
+import com.recipia.aos.ui.dto.SubCategoryDto
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 
-/**
- * 이 코드는 LazyRow를 사용하여 주어진 서브 카테고리 목록에 대해 FilterChip을 생성합니다.
- * 각 FilterChip은 해당 서브 카테고리의 이름을 표시하며, 선택된 카테고리는 selectedCategories 세트에 저장됩니다.
- * 사용자가 칩을 클릭하면, 선택 상태가 변경되고, 최대 3개의 카테고리만 선택될 수 있도록 로직이 구현되어 있습니다.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoriesScreen(
+fun CategorySelectScreen(
     navController: NavController, // NavController 인자 추가
     viewModel: CategorySelectionViewModel,
     subCategories: List<SubCategory>,
@@ -56,7 +52,8 @@ fun CategoriesScreen(
     val groupedSubCategories = subCategories.groupBy { it.categoryId }
 
     // 선택된 서브 카테고리를 추적하는 상태
-    var selectedSubCategories by remember { mutableStateOf(setOf<Int>()) }
+    var selectedSubCategories by remember { mutableStateOf(setOf<SubCategoryDto>()) }
+
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
@@ -65,7 +62,10 @@ fun CategoriesScreen(
                 modifier = Modifier.background(Color.White), // 여기에 배경색을 하얀색으로 설정,
                 title = { },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        viewModel.selectedCategories.value = emptySet() // 카테고리 선택 초기화
+                        navController.popBackStack()
+                    }) {
                         Icon(Icons.Default.Close, contentDescription = "닫기")
                     }
                 },
@@ -111,18 +111,19 @@ fun CategoriesScreen(
                                 onClick = {
                                     // 선택 로직
                                     val currentSelection = selectedSubCategories.toMutableSet()
-                                    if (subCategory.id in selectedSubCategories) {
-                                        currentSelection.remove(subCategory.id)
+                                    val subCategoryDto = SubCategoryDto(subCategory.id.toLong(), subCategory.name)
+                                    if (currentSelection.any { it.id.toInt() == subCategory.id }) {
+                                        currentSelection.removeIf { it.id.toInt() == subCategory.id }
                                     } else {
                                         if (currentSelection.size < 3) {
-                                            currentSelection.add(subCategory.id)
+                                            currentSelection.add(subCategoryDto)
                                         }
                                     }
                                     selectedSubCategories = currentSelection
                                 },
                                 label = { Text(subCategory.name) },
-                                selected = subCategory.id in selectedSubCategories,
-                                leadingIcon = if (subCategory.id in selectedSubCategories) {
+                                selected = selectedSubCategories.any { it.id == subCategory.id.toLong() },
+                                leadingIcon = if (selectedSubCategories.any { it.id == subCategory.id.toLong() }) {
                                     { Icon(Icons.Filled.Done, contentDescription = "Selected") }
                                 } else null,
                                 modifier = Modifier.padding(horizontal = 4.dp)
@@ -134,6 +135,7 @@ fun CategoriesScreen(
                 Spacer(modifier = Modifier.padding(20.dp))
 
                 Button(
+                    // 선택 완료 버튼 클릭 로직
                     onClick = {
                         viewModel.setSelectedCategories(selectedSubCategories)
                         navController.popBackStack()
