@@ -4,6 +4,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun FollowTabs(
@@ -15,7 +16,10 @@ fun FollowTabs(
 
     val selectedTabIndex = tabs.indexOf(selectedTab).coerceIn(0, tabs.size - 1)
 
-    TabRow(selectedTabIndex = selectedTabIndex) {
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        containerColor = Color.White
+    ) {
         tabs.forEachIndexed { index, text ->
             Tab(
                 selected = index == selectedTabIndex,
