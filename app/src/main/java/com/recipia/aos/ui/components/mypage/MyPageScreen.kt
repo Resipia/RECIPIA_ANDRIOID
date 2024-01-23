@@ -81,7 +81,6 @@ fun MyPageScreen(
     // 색상 정의
     val backgroundColor = Color.White
     val textColor = Color.Black
-    val iconColor = Color.Gray
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
 
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태

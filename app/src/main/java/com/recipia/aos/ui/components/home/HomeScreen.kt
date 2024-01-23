@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,13 +30,16 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -243,7 +247,7 @@ fun HomeScreen(
         modifier = Modifier.background(Color.White),
         floatingActionButton = {
             FloatingActionButton(
-                containerColor = Color(56,142,60),
+                containerColor = Color(56, 142, 60),
                 onClick = { navController.navigate("create-recipe") },
                 modifier = Modifier
                     .height(44.dp) // 높이 설정
@@ -277,7 +281,6 @@ fun HomeScreen(
                     .pullRefresh(pullRefreshState),
                 contentAlignment = Alignment.Center // 여기를 수정
             ) {
-
                 // 로딩 중이라면 로딩 인디케이터 표시
                 if (isLoading) {
                     AnimatedPreloader(modifier = Modifier.size(100.dp)) // 로딩 바의 크기 조절 가능
@@ -292,7 +295,74 @@ fun HomeScreen(
                             .background(Color.White), // 여기에 배경색을 하얀색으로 설정,,
                         state = lazyListState
                     ) {
+                        item {
+                            // 여기에 Box 또는 Column 추가
+                            Column(modifier = Modifier.padding(start = 16.dp)) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth() // fillMaxSize 대신 fillMaxWidth 사용
+                                ) {
+                                    AssistChip(
+                                        onClick = { /* 첫 번째 AssistChip 클릭 시 동작 */ },
+                                        label = {
+                                            Text(
+                                                "카테고리",
+                                                fontSize = 12.sp, // 글씨 크기 조절
+                                            )
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Category,
+                                                contentDescription = "카테고리 아이콘",
+                                                modifier = Modifier
+                                                    .size(18.dp), // 아이콘 크기 조절
+                                                tint = Color.Black // 아이콘 색상을 검은색으로 설정
+                                            )
+                                        },
+                                        colors = AssistChipDefaults.assistChipColors(
+                                            containerColor = Color(238,238,238),
+                                            labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                                        ),
+//                                        elevation = null, // 그림자 제거
+                                        border = null, // 테두리 제거
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp)) // 칩 사이의 간격
+                                    AssistChip(
+                                        onClick = { /* 두 번째 AssistChip 클릭 시 동작 */ },
+                                        label = {
+                                            Text(
+                                                "정렬",
+                                                fontSize = 12.sp, // 글씨 크기 조절
+                                            )
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Sort,
+                                                contentDescription = "정렬 아이콘",
+                                                modifier = Modifier
+                                                    .size(18.dp), // 아이콘 크기 조절
+                                                tint = Color.Black // 아이콘 색상을 검은색으로 설정
+                                            )
+                                        },
+                                        colors = AssistChipDefaults.assistChipColors(
+                                            containerColor = Color(238,238,238),
+                                            labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                                        ),
+                                        elevation = null, // 그림자 제거
+                                        border = null, // 테두리 제거
+                                    )
+                                }
+                            }
 
+//                            // 항목 사이에 구분선 추가
+//                            HorizontalDivider(
+//                                modifier = Modifier
+//                                    .fillMaxWidth() // 전체 너비를 채우도록 설정
+//                                    .padding(horizontal = 16.dp), // 양쪽에 패딩 적용
+//                                thickness = 0.5.dp, // 구분선의 두께 설정
+//                                color = Color.Gray // 구분선의 색상 설정
+//                            )
+                        }
                         itemsIndexed(
                             recipeAllListViewModel.items.value
                         ) { index, item ->
