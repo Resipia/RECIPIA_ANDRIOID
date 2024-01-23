@@ -39,7 +39,6 @@ class ForgotViewModel : ViewModel() {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
-        // 클라이언트에서 보낼 요청을 생성 (여기서 jwt를 헤더에 추가해줌)
         val okHttpClient = OkHttpClient.Builder()
             .addInterceptor(logging)
             .build()

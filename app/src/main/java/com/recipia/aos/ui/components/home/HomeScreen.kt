@@ -227,7 +227,7 @@ fun HomeScreen(
             FloatingActionButton(
                 onClick = { navController.navigate("create-recipe") },
                 modifier = Modifier
-                    .offset(y = (-70).dp) // 100dp만큼 위로 오프셋
+//                    .offset(y = (-70).dp) // 100dp만큼 위로 오프셋
                     .background(Color.White), // 여기에 배경색을 하얀색으로 설정,
             ) {
                 Icon(Icons.Filled.Add, "글쓰기")

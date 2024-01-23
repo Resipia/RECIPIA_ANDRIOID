@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.mypage
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -80,6 +82,7 @@ fun MyPageScreen(
     val backgroundColor = Color.White
     val textColor = Color.Black
     val iconColor = Color.Gray
+    val context = LocalContext.current // 현재 컨텍스트를 가져옴
 
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
 
@@ -372,10 +375,20 @@ fun MyPageScreen(
                     item {
                         FeatureListItem(
                             title = "로그아웃",
-                            icon = Icons.Default.ExitToApp, // 예시 아이콘, 필요에 따라 변경 가능
-                            onClick = { /* 페이지 이동 로직 */ }
+                            icon = Icons.Default.ExitToApp,
+                            onClick = {
+                                myPageViewModel.logout(
+                                    onSuccess = {
+                                        // 성공시 로그인 화면으로 이동
+                                        navController.navigate("login")
+                                    },
+                                    onError = { errorMessage ->
+                                        // 실패시 에러 메시지 표시
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                            }
                         )
-
                         HorizontalDivider(
                             modifier = Modifier
                                 .fillMaxWidth() // 전체 너비를 채우도록 설정
@@ -387,8 +400,19 @@ fun MyPageScreen(
                     item {
                         FeatureListItem(
                             title = "탈퇴",
-                            icon = Icons.Default.Delete, // 예시 아이콘, 필요에 따라 변경 가능
-                            onClick = { /* 페이지 이동 로직 */ }
+                            icon = Icons.Default.Delete,
+                            onClick = {
+                                myPageViewModel.deactivateAccount(
+                                    onSuccess = {
+                                        // 성공시 로그인 화면으로 이동
+                                        navController.navigate("login")
+                                    },
+                                    onError = { errorMessage ->
+                                        // 실패시 에러 메시지 표시
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                            }
                         )
                     }
                 }

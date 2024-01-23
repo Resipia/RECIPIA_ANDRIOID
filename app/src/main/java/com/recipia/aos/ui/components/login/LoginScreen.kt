@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -42,6 +43,8 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var loginError by remember { mutableStateOf("") } // 로그인 오류 메시지 상태
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -64,7 +67,11 @@ fun LoginScreen(
         // 이메일 입력 필드
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                emailError = null
+                if (loginError.isNotEmpty()) loginError = ""
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
@@ -76,10 +83,27 @@ fun LoginScreen(
             )
         )
 
+        emailError?.let {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = it,
+                color = Color.Red,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 2.dp)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+
         // 패스워드 입력 필드
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                passwordError = null
+                if (loginError.isNotEmpty()) loginError = ""
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
@@ -96,19 +120,57 @@ fun LoginScreen(
             )
         )
 
+        passwordError?.let {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = it,
+                color = Color.Red,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 2.dp)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+
+        // 오류 메시지
+        if (loginError.isNotEmpty()) {
+//            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = loginError,
+                color = Color.Red,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.Start) // 왼쪽 정렬
+                    .padding(top = 8.dp, bottom = 8.dp) // 상하 패딩 추가
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // 로그인 버튼
         Button(
             onClick = {
-                viewModel.login(
-                    email = email,
-                    password = password,
-                    onLoginSuccess = {
-                        navController.navigate("home")
-                    },
-                    onLoginFailure = { error -> loginError = error }
-                )
+                emailError = null
+                passwordError = null
+                when {
+                    email.isBlank() && password.isBlank() -> {
+                        emailError = "이메일 입력은 필수입니다."
+                        passwordError = "비밀번호 입력은 필수입니다."
+                    }
+                    email.isBlank() -> emailError = "이메일 입력은 필수입니다."
+                    password.isBlank() -> passwordError = "비밀번호 입력은 필수입니다."
+                    else -> viewModel.login(
+                        email = email,
+                        password = password,
+                        onLoginSuccess = {
+                            navController.navigate("home")
+                        },
+                        onLoginFailure = { error ->
+                            loginError = if (error == "403") "존재하지 않는 계정입니다." else error
+                        }
+                    )
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,11 +182,6 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // 오류 메시지
-        if (loginError.isNotEmpty()) {
-            Text(text = loginError, color = Color.Red)
-        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
