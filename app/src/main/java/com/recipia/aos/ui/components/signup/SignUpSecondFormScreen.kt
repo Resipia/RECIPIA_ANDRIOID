@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.signup
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -47,8 +49,11 @@ import com.recipia.aos.ui.model.signup.SignUpViewModel
 fun SignUpSecondFormScreen(
     navController: NavController,
     signUpViewModel: SignUpViewModel,
-    phoneNumberAuthViewModel: PhoneNumberAuthViewModel // ViewModel 추가
+    phoneNumberAuthViewModel: PhoneNumberAuthViewModel
 ) {
+    // Toast메시지를 위한 context 선언
+    val context = LocalContext.current
+
     // ViewModel에서 각 입력 필드의 현재 값을 가져옴
     val currentName by signUpViewModel.name.collectAsState()
     val currentNickname by signUpViewModel.nickname.collectAsState()
@@ -81,6 +86,7 @@ fun SignUpSecondFormScreen(
     val emailDuplicateCheckResult by signUpViewModel.emailDuplicateCheckResult.observeAsState()
     val isEmailVerified by signUpViewModel.isEmailVerified.observeAsState()
     val isPasswordMatching by signUpViewModel.isPasswordMatching.observeAsState()
+    val nicknameDuplicateCheckResult by signUpViewModel.nicknameDuplicateCheckResult.observeAsState()
 
     // AlertDialog를 표시할지 여부를 관리하는 상태
     var showDialog by remember { mutableStateOf(false) }
@@ -154,17 +160,20 @@ fun SignUpSecondFormScreen(
         }
     }
 
+    // 이메일 형식을 확인하는 정규식
+    val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+".toRegex()
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "회원가입", style = MaterialTheme.typography.bodyMedium) },
+                title = { Text(text = "회원가입 (2/3)", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
                     IconButton(onClick = { showDialog = true }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
@@ -203,7 +212,11 @@ fun SignUpSecondFormScreen(
                     InputField(
                         label = "닉네임",
                         value = nickname,
-                        onValueChange = { nickname = it },
+                        onValueChange = {
+                            nickname = it
+                            signUpViewModel.resetNicknameDuplicateCheck() // 중복 체크 결과 초기화
+                            nicknameError = ""
+                        },
                         focusRequester = nicknameFocusRequester,
                         errorMessage = nicknameError,
                         onErrorMessageChange = { nicknameError = it }, // 에러 메시지 업데이트 함수 전달
@@ -212,8 +225,9 @@ fun SignUpSecondFormScreen(
 
                     Button(
                         onClick = {
-                            // ViewModel의 함수를 호출하여 중복 체크
-                            signUpViewModel.checkDuplicateNickname(nickname)
+                            signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier
                             .weight(0.3f)
@@ -225,6 +239,21 @@ fun SignUpSecondFormScreen(
                 }
             }
 
+            // 닉네임 중복 확인 결과 메시지를 표시하는 Text 컴포넌트
+            item {
+                if (!nicknameDuplicateCheckResult.isNullOrEmpty()) {
+                    Text(
+                        text = nicknameDuplicateCheckResult!!,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = if (nicknameDuplicateCheckResult == "사용가능한 닉네임입니다.") Color(0xFF006633) else Color.Red,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(9.dp),
+                        textAlign = TextAlign.Start
+                    )
+                }
+            }
+
             // "이메일" 입력 필드 및 중복체크 버튼
             item {
                 Row(
@@ -232,20 +261,31 @@ fun SignUpSecondFormScreen(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // "이메일" 입력 필드
                     InputField(
                         label = "이메일",
                         value = email,
-                        onValueChange = { email = it },
+                        onValueChange = { newEmail ->
+                            email = newEmail
+                            signUpViewModel.resetEmailDuplicateCheck() // 중복 체크 결과 초기화
+                            if (emailPattern.matches(newEmail) || newEmail.isEmpty()) {
+                                emailError = "" // 오류 메시지 제거
+                            } else {
+                                emailError = "잘못된 이메일 형식입니다." // 오류 메시지 설정
+                            }
+                        },
                         focusRequester = emailFocusRequester,
-                        errorMessage = emailError, // 에러 메시지 문자열 전달
-                        onErrorMessageChange = { emailError = it }, // 에러 메시지 업데이트 함수 전달
-                        isEmail = true,  // 이 필드가 이메일 필드임을 표시
+                        errorMessage = emailError, // 현재 오류 메시지
+                        onErrorMessageChange = { emailError = it }, // 오류 메시지 업데이트 콜백
+                        isEmail = true, // 이 필드가 이메일 필드임을 표시
                         modifier = Modifier.weight(0.7f)
                     )
 
                     Button(
                         onClick = {
-                            signUpViewModel.checkDuplicateEmail(email)
+                            signUpViewModel.checkDuplicateEmail(email) { errorMessage ->
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier
                             .weight(0.3f)
@@ -351,17 +391,25 @@ fun SignUpSecondFormScreen(
                     Button(
                         onClick = {
                             validateFields()
-                            if (emailError.isBlank() && passwordError.isBlank()) {
+                            if (emailError.isBlank() && passwordError.isBlank() &&
+                                emailDuplicateCheckResult == "사용가능한 이메일입니다." &&
+                                nicknameDuplicateCheckResult == "사용가능한 닉네임입니다." &&
+                                isPasswordMatching == true) {
+
                                 // 데이터 업데이트
                                 signUpViewModel.updateName(name)
                                 signUpViewModel.updateNickname(nickname)
                                 signUpViewModel.updateEmail(email)
                                 signUpViewModel.updatePassword(password)
+
                                 // 다음 화면으로 네비게이션
                                 navController.navigate("signUpThirdForm")
                             }
                         },
-                        enabled = (isEmailVerified == true) && (isPasswordMatching == true), // 이메일 인증 및 비밀번호 일치 여부에 따라 버튼 활성화
+                        enabled = emailError.isBlank() && passwordError.isBlank() &&
+                                emailDuplicateCheckResult == "사용가능한 이메일입니다." &&
+                                nicknameDuplicateCheckResult == "사용가능한 닉네임입니다." &&
+                                isPasswordMatching == true,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()

@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.forgot.email
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,9 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,16 +36,21 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
+/**
+ * 이메일 찾기 화면
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FindIdScreen(
+fun FindEmailScreen(
     navController: NavController
 ) {
     var selectedOption by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
+        containerColor = Color.White,
         topBar = {
             TopAppBar(
+                modifier = Modifier.background(Color.White),
                 title = {
                     Text(
                         text = "이메일 찾기",
@@ -63,10 +71,8 @@ fun FindIdScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
         }
@@ -80,7 +86,7 @@ fun FindIdScreen(
             verticalArrangement = Arrangement.Top
         ) {
             // 내부 컨텐츠
-            RadioOption("이메일 인증", "email", selectedOption) {
+            RadioOption("이름,전화번호로 찾기", "email", selectedOption) {
                 selectedOption = "email"
             }
 
@@ -96,9 +102,14 @@ fun FindIdScreen(
                         "sns" -> navController.navigate("snsVerificationScreen")
                     }
                 },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(206,212,218), // 버튼 배경색
+                    contentColor = Color.Black // 버튼 내부 글자색
+                ),
+                shape = RoundedCornerShape(4.dp),
                 modifier = Modifier
                     .fillMaxWidth() // 최대 너비 설정
-                    .padding(vertical = 16.dp)
+                    .padding(vertical = 25.dp, horizontal = 16.dp) // 버튼에 좌우 패딩 추가
             ) {
                 Text(text = "다음")
             }
@@ -156,5 +167,5 @@ fun RadioOption(
 @Composable
 fun FindIdScreenPreview() {
     val navController = rememberNavController() // 네비게이션 컨트롤러를 위한 임시 객체
-    FindIdScreen(navController)
+    FindEmailScreen(navController)
 }

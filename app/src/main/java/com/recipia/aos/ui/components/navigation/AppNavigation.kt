@@ -23,7 +23,7 @@ import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.TopAppBar
 import com.recipia.aos.ui.components.category.CategoriesScreen
 import com.recipia.aos.ui.components.forgot.email.EmailVerificationForgotIdScreen
-import com.recipia.aos.ui.components.forgot.email.FindIdScreen
+import com.recipia.aos.ui.components.forgot.email.FindEmailScreen
 import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
@@ -43,6 +43,7 @@ import com.recipia.aos.ui.model.factory.MyViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeAllListViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeCreateModelFactory
 import com.recipia.aos.ui.model.factory.RecipeDetailViewModelFactory
+import com.recipia.aos.ui.model.forgot.ForgotViewModel
 import com.recipia.aos.ui.model.login.LoginViewModel
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
@@ -87,6 +88,8 @@ fun AppNavigation(
     )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
+    val forgotViewModel: ForgotViewModel = viewModel()
+
     // jwt 존재 여부를 검증한다.
     val isUserLoggedIn = remember {
         mutableStateOf(tokenManager.hasValidAccessToken())
@@ -148,15 +151,15 @@ fun AppNavigation(
         }
         // ID찾기 화면
         composable("findId") {
-            FindIdScreen(navController)
+            FindEmailScreen(navController)
         }
         // 이메일로 ID찾기 화면
         composable("emailVerificationScreen") {
-            EmailVerificationForgotIdScreen(navController)
+            EmailVerificationForgotIdScreen(navController, forgotViewModel)
         }
         // PASSWORD찾기 화면
         composable("findPassword") {
-            PasswordResetScreen(navController)
+            PasswordResetScreen(navController, forgotViewModel)
         }
         // 회원가입 1단계: 전화번호 인증 및 회원가입 동의 form 화면
         composable("signUpFirstForm") {
@@ -168,7 +171,7 @@ fun AppNavigation(
         }
         // 회원가입 3단계: 프로필 세팅 form
         composable("signUpThirdForm") {
-            SignUpThirdFormScreen(navController, signUpViewModel)
+            SignUpThirdFormScreen(navController, signUpViewModel, phoneNumberAuthViewModel)
         }
         // 카테고리 선택 화면
         composable("categories") {
