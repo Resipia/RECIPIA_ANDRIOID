@@ -59,7 +59,7 @@ fun LoginScreen(
         Text(
             text = "Recipia",
             style = MaterialTheme.typography.h4,
-            color = MaterialTheme.colors.primary
+            color = Color(27,94,32)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -176,9 +176,13 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .height(50.dp),
             shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colors.primary)
+            colors = ButtonDefaults.buttonColors(containerColor = Color(67,160,71))
         ) {
-            Text(text = "로그인", color = Color.White)
+            Text(
+                text = "로그인",
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -203,7 +207,7 @@ fun LoginScreen(
 
             // 비밀번호 찾기 텍스트
             Text(
-                text = "임시 비밀번호",
+                text = "비밀번호 찾기",
                 fontSize = 12.sp,
                 modifier = Modifier.clickable {
                     navController.navigate("findPassword")

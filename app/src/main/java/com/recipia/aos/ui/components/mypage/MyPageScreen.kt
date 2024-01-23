@@ -277,7 +277,7 @@ fun MyPageScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(text = "레시피", color = textColor)
-                        Text(text = "10", color = textColor) // 예시 개수
+                        Text(text = "10", color = textColor) // todo: 레시피 개수가 없음
                         Spacer(modifier = Modifier.height(8.dp)) // 간격 추가
                     }
 
@@ -346,7 +346,9 @@ fun MyPageScreen(
                         FeatureListItem(
                             title = "문의하기",
                             icon = Icons.Default.QuestionAnswer, // 예시 아이콘, 필요에 따라 변경 가능
-                            onClick = { /* 페이지 이동 로직 */ }
+                            onClick = {
+                                Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
+                            }
                         )
 
                         HorizontalDivider(
@@ -377,6 +379,7 @@ fun MyPageScreen(
                             title = "로그아웃",
                             icon = Icons.Default.ExitToApp,
                             onClick = {
+                                // todo: 다이얼로그 띄우기
                                 myPageViewModel.logout(
                                     onSuccess = {
                                         // 성공시 로그인 화면으로 이동
@@ -402,6 +405,7 @@ fun MyPageScreen(
                             title = "탈퇴",
                             icon = Icons.Default.Delete,
                             onClick = {
+                                // todo: 다이얼로그 띄우기
                                 myPageViewModel.deactivateAccount(
                                     onSuccess = {
                                         // 성공시 로그인 화면으로 이동

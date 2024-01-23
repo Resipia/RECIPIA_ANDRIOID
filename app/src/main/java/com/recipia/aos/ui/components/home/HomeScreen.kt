@@ -2,6 +2,10 @@ package com.recipia.aos.ui.components.home
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,11 +13,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -76,7 +83,7 @@ import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -99,6 +106,17 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val lazyListState = rememberLazyListState()
+    val isScrolled = derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }.value
+
+    // `animateDpAsState` 사용하여 부드러운 애니메이션 적용
+    val fabWidth by animateDpAsState(
+        targetValue = if (isScrolled) 50.dp else 90.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = ""
+    )
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
@@ -225,12 +243,24 @@ fun HomeScreen(
         modifier = Modifier.background(Color.White),
         floatingActionButton = {
             FloatingActionButton(
+                containerColor = Color(56,142,60),
                 onClick = { navController.navigate("create-recipe") },
                 modifier = Modifier
-//                    .offset(y = (-70).dp) // 100dp만큼 위로 오프셋
-                    .background(Color.White), // 여기에 배경색을 하얀색으로 설정,
+                    .height(44.dp) // 높이 설정
+                    .width(fabWidth) // 애니메이션화된 너비 사용
+                    .background(Color.White),
+                shape = RoundedCornerShape(16.dp) // 모서리 둥글게
             ) {
-                Icon(Icons.Filled.Add, "글쓰기")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Icon(Icons.Filled.Add, "글쓰기", tint = Color.White)
+                    if (!isScrolled) { // 스크롤 되지 않았을 때만 "작성" 텍스트 표시
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text("작성", fontSize = 16.sp, color = Color.White)
+                    }
+                }
             }
         },
         bottomBar = { BottomNavigationBar(navController) }
@@ -240,15 +270,6 @@ fun HomeScreen(
                 .background(Color.White)
                 .fillMaxSize()
         ) {
-            // 예시 이미지 URL 리스트
-            val sampleImages = listOf(
-                "https://via.placeholder.com/600x200.png?text=First+Image",
-                "https://via.placeholder.com/600x200.png?text=Second+Image",
-                "https://via.placeholder.com/600x200.png?text=Third+Image",
-                "https://via.placeholder.com/600x200.png?text=Fourth+Image",
-                "https://via.placeholder.com/600x200.png?text=Fifth+Image"
-            )
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -271,10 +292,6 @@ fun HomeScreen(
                             .background(Color.White), // 여기에 배경색을 하얀색으로 설정,,
                         state = lazyListState
                     ) {
-                        // AutoScrollingSlider를 LazyColumn 아이템으로 추가
-                        item {
-                            AutoScrollingSlider(sampleImages)
-                        }
 
                         itemsIndexed(
                             recipeAllListViewModel.items.value
