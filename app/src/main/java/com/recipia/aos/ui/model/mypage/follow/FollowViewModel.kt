@@ -50,33 +50,25 @@ class FollowViewModel(
     }
 
     // 팔로잉/팔로워 목록을 로드하는 함수
-    fun loadFollowList(targetMemberId: Long) {
+    fun loadFollowList(targetMemberId: Long, type: String) {
+        currentType = type
+        currentPage = 0
+        followList.clear()
+        fetchFollowList(targetMemberId)
+    }
+
+    private fun fetchFollowList(targetMemberId: Long) {
         viewModelScope.launch {
-
-            // Retrofit 서비스를 이용하여 데이터 로드
             val response = followService.getFollowList(currentPage, 10, targetMemberId, currentType)
-
             if (response.isSuccessful && response.body() != null) {
-                // 받아온 데이터를 followList에 추가
                 followList.addAll(response.body()!!.content)
             }
         }
     }
 
-    // 타입 변경 시 호출되는 함수
-    fun changeType(type: String, targetMemberId: Long) {
-        if (currentType != type) {
-            currentType = type
-            currentPage = 0
-            followList.clear()
-            loadFollowList(targetMemberId)
-        }
-    }
-
-    // 무한 스크롤을 위한 추가 데이터 로딩 함수
     fun loadMore(targetMemberId: Long) {
         currentPage++
-        loadFollowList(targetMemberId)
+        fetchFollowList(targetMemberId)
     }
 
     // 팔로우/언팔로우 요청 (응답이 1이면 언팔로우, 1보다 크면 팔로우한 pk 반환)
@@ -99,6 +91,11 @@ class FollowViewModel(
                 onResult(false, null)
             }
         }
+    }
+
+    // 팔로잉과 팔로워 목록을 초기화하는 함수
+    fun clearFollowList() {
+        followList.clear()
     }
 
 }

@@ -20,10 +20,10 @@ fun FollowTabs(
         selectedTabIndex = selectedTabIndex,
         containerColor = Color.White
     ) {
-        tabs.forEachIndexed { index, text ->
+        tabs.forEach { text ->
             Tab(
-                selected = index == selectedTabIndex,
-                onClick = { onTabSelected(tabToServerTypeMap[tabs[index]] ?: "following") },
+                selected = text == selectedTab,
+                onClick = { onTabSelected(text) },
                 text = { Text(text) }
             )
         }

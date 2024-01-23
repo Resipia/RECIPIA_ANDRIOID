@@ -35,15 +35,13 @@ fun FollowPageScreen(
     navController: NavController,
     viewModel: FollowViewModel,
     targetMemberId: Long,
-    type: String
+    initialType: String // "following" 또는 "follower"
 ) {
     val serverTypeToTabMap = mapOf("following" to "팔로잉", "follower" to "팔로워")
-    val validType = serverTypeToTabMap[type] ?: "팔로잉"
-    var selectedTab by remember { mutableStateOf(validType) }
+    var selectedTab by remember { mutableStateOf(serverTypeToTabMap[initialType] ?: "팔로잉") }
 
-    // 화면이 처음 렌더링될 때 팔로잉 데이터 로딩 시작
-    LaunchedEffect(key1 = true) {
-        viewModel.loadFollowList(targetMemberId)
+    LaunchedEffect(key1 = initialType) {
+        viewModel.loadFollowList(targetMemberId, initialType)
     }
 
     Scaffold(
@@ -60,6 +58,9 @@ fun FollowPageScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
+                            // 리스트를 초기화
+                            viewModel.clearFollowList()
+                            // 뒤로 가기
                             navController.popBackStack()
                         }
                     ) {
@@ -83,9 +84,11 @@ fun FollowPageScreen(
                 .padding(innerPadding) // Scaffold로부터 제공된 패딩 적용
                 .padding(16.dp),
         ) {
-            FollowTabs(selectedTab = selectedTab) { serverType ->
-                selectedTab = serverTypeToTabMap[serverType] ?: "팔로잉"
-                viewModel.changeType(serverType, targetMemberId)
+            // 탭 구성
+            FollowTabs(selectedTab) { newType ->
+                val serverType = serverTypeToTabMap.entries.firstOrNull { it.value == newType }?.key ?: "following"
+                viewModel.loadFollowList(targetMemberId, serverType)
+                selectedTab = newType
             }
             LazyColumn {
                 itemsIndexed(viewModel.followList) { index, followData ->
