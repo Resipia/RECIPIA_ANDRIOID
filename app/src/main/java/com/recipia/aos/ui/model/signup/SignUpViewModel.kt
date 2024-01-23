@@ -124,7 +124,10 @@ class SignUpViewModel : ViewModel() {
     }
 
     // 닉네임 중복 체크 함수
-    fun checkDuplicateNickname(nickname: String) {
+    fun checkDuplicateNickname(
+        nickname: String,
+        onError: (String) -> Unit
+    ) {
         viewModelScope.launch {
             try {
                 val response = getCheckDuplicateNicknameResult(nickname)
@@ -134,19 +137,25 @@ class SignUpViewModel : ViewModel() {
                     if (responseDto?.result != null) {
                         _isNicknameAvailable.value = responseDto.result
                         // 중복 체크 결과 메시지 업데이트
-                        _nicknameDuplicateCheckResult.value = if (responseDto.result) "사용가능한 닉네임입니다." else "이미 존재하는 닉네임입니다."
+                        _nicknameDuplicateCheckResult.value =
+                            if (responseDto.result) "사용가능한 닉네임입니다." else "이미 존재하는 닉네임입니다."
+                    } else {
+                        onError("응답 데이터가 없습니다.")
                     }
                 } else {
-                    // 오류 처리
+                    onError("서버 오류: ${response.code()}")
                 }
             } catch (e: Exception) {
-                // 예외 처리
+                onError("네트워크 오류가 발생했습니다: ${e.localizedMessage}")
             }
         }
     }
 
     // 이메일 중복 체크 함수
-    fun checkDuplicateEmail(email: String) {
+    fun checkDuplicateEmail(
+        email: String,
+        onError: (String) -> Unit
+    ) {
         viewModelScope.launch {
             try {
                 val response = getCheckDuplicateEmailResult(email)
@@ -158,13 +167,17 @@ class SignUpViewModel : ViewModel() {
                         _isEmailVerified.value = responseDto.result
                         _isEmailAvailable.value = responseDto.result
                         // 중복 체크 결과 메시지 업데이트
-                        _emailDuplicateCheckResult.value = if (responseDto.result) "사용가능한 이메일입니다." else "이미 존재하는 이메일입니다."
+                        _emailDuplicateCheckResult.value =
+                            if (responseDto.result) "사용가능한 이메일입니다." else "이미 존재하는 이메일입니다."
+                    } else {
+                        onError("응답 데이터가 없습니다.")
                     }
+
                 } else {
-                    // 오류 처리
+                    onError("서버 오류: ${response.code()}")
                 }
             } catch (e: Exception) {
-                // 예외 처리
+                onError("네트워크 오류가 발생했습니다: ${e.localizedMessage}")
             }
         }
     }

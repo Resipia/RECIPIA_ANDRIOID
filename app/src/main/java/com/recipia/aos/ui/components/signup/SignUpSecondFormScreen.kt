@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.signup
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +51,9 @@ fun SignUpSecondFormScreen(
     signUpViewModel: SignUpViewModel,
     phoneNumberAuthViewModel: PhoneNumberAuthViewModel
 ) {
+    // Toast메시지를 위한 context 선언
+    val context = LocalContext.current
+
     // ViewModel에서 각 입력 필드의 현재 값을 가져옴
     val currentName by signUpViewModel.name.collectAsState()
     val currentNickname by signUpViewModel.nickname.collectAsState()
@@ -220,8 +225,9 @@ fun SignUpSecondFormScreen(
 
                     Button(
                         onClick = {
-                            // ViewModel의 함수를 호출하여 중복 체크
-                            signUpViewModel.checkDuplicateNickname(nickname)
+                            signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier
                             .weight(0.3f)
@@ -277,7 +283,9 @@ fun SignUpSecondFormScreen(
 
                     Button(
                         onClick = {
-                            signUpViewModel.checkDuplicateEmail(email)
+                            signUpViewModel.checkDuplicateEmail(email) { errorMessage ->
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier
                             .weight(0.3f)

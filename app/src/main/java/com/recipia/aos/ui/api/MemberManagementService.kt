@@ -1,6 +1,8 @@
 package com.recipia.aos.ui.api
 
 import com.recipia.aos.ui.dto.ResponseDto
+import com.recipia.aos.ui.dto.forgot.FindEmailRequestDto
+import com.recipia.aos.ui.dto.forgot.TempPasswordRequestDto
 import com.recipia.aos.ui.dto.singup.EmailAvailableRequestDto
 import com.recipia.aos.ui.dto.singup.NicknameAvailableRequestDto
 import retrofit2.Response
@@ -24,4 +26,17 @@ interface MemberManagementService {
     suspend fun checkDuplicateNickname(
         @Body nicknameRequestDto: NicknameAvailableRequestDto
     ): Response<ResponseDto<Boolean>>
+
+    // 이메일 찾기
+    @POST("/member/management/find/email")
+    suspend fun findEmail(
+        @Body dto: FindEmailRequestDto
+    ): Response<ResponseDto<String>>
+
+    // 임시 비밀번호 재발급
+    @POST("/member/management/tempPassword")
+    suspend fun sendTempPassword(
+        @Body dto: TempPasswordRequestDto
+    ): Response<ResponseDto<Void>>
+
 }

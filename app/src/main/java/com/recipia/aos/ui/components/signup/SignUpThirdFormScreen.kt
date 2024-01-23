@@ -153,6 +153,18 @@ fun SignUpThirdFormScreen(
 
             item { Spacer(modifier = Modifier.height(10.dp)) }
 
+            item {
+                // 여기에 "프로필 설정 (선택)" 텍스트 추가
+                Text(
+                    text = "프로필 설정 (선택)",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), // 스타일 설정
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp), // 하단 패딩 추가
+                    color = MaterialTheme.colorScheme.onSurface // 텍스트 색상 설정
+                )
+            }
+
             // 프로필 사진 입력 필드 사용하는 부분
             item {
                 ProfilePictureInputField(
