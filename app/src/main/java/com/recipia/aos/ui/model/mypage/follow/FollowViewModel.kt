@@ -49,15 +49,21 @@ class FollowViewModel(
             .create(FollowService::class.java)
     }
 
-    // 팔로잉/팔로워 목록을 로드하는 함수
-    fun loadFollowList(targetMemberId: Long, type: String) {
+    // 지정된 유형(following 또는 follower)에 따라 팔로잉/팔로워 목록 데이터를 로드한다.
+    fun loadFollowList(
+        targetMemberId: Long,
+        type: String
+    ) {
         currentType = type
         currentPage = 0
         followList.clear()
         fetchFollowList(targetMemberId)
     }
 
-    private fun fetchFollowList(targetMemberId: Long) {
+    // 이 함수는 팔로잉 팔로워 리스트를 실제로 호출해서 받아온 후 followList에 값을 세팅한다.
+    private fun fetchFollowList(
+        targetMemberId: Long
+    ) {
         viewModelScope.launch {
             val response = followService.getFollowList(currentPage, 10, targetMemberId, currentType)
             if (response.isSuccessful && response.body() != null) {
@@ -66,7 +72,10 @@ class FollowViewModel(
         }
     }
 
-    fun loadMore(targetMemberId: Long) {
+    //  무한 스크롤 구현을 위해 추가 데이터를 로드한다.
+    fun loadMore(
+        targetMemberId: Long
+    ) {
         currentPage++
         fetchFollowList(targetMemberId)
     }
