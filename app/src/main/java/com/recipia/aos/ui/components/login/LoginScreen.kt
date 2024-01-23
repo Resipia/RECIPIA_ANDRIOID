@@ -106,7 +106,7 @@ fun LoginScreen(
                     password = password,
                     onLoginSuccess = {
                         navController.navigate("home")
-                    }, // todo 애초에 여기서부터 안탐
+                    },
                     onLoginFailure = { error -> loginError = error }
                 )
             },
@@ -146,7 +146,7 @@ fun LoginScreen(
 
             // 비밀번호 찾기 텍스트
             Text(
-                text = "비밀번호 찾기",
+                text = "임시 비밀번호",
                 fontSize = 12.sp,
                 modifier = Modifier.clickable {
                     navController.navigate("findPassword")

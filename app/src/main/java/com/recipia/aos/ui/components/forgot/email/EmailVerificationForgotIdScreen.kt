@@ -252,7 +252,7 @@ fun EmailVerificationForgotIdScreen(
                                 .weight(1f) // 여기서 weight를 1로 설정
                                 .padding(end = 2.dp) // 오른쪽에 간격 추가
                         ) {
-                            Text("비밀번호 찾기")
+                            Text("임시 비밀번호 발급받기")
                         }
 
                         // 버튼 사이의 간격

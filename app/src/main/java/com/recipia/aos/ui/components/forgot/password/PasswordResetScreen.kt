@@ -63,7 +63,7 @@ fun PasswordResetScreen(
         topBar = {
             TopAppBar(
                 modifier = Modifier.background(Color.White),
-                title = { Text(text = "비밀번호 찾기", style = MaterialTheme.typography.bodyMedium) },
+                title = { Text(text = "임시 비밀번호 발급", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -83,7 +83,7 @@ fun PasswordResetScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "비밀번호를 찾고자 하는 이메일을 입력해 주세요",
+                text = "임시 비밀번호를 발급받을 이메일 정보를 입력해 주세요",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -117,7 +117,7 @@ fun PasswordResetScreen(
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("비밀번호 찾기")
+                    Text("발급하기")
                 }
             } else if (errorMessage != null) {
                 // 오류 메시지 및 다시 시도 버튼
@@ -142,7 +142,7 @@ fun PasswordResetScreen(
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("다시 비밀번호 찾기")
+                    Text("발급 재시도")
                 }
             } else if (isPasswordSent) {
                 Text(
