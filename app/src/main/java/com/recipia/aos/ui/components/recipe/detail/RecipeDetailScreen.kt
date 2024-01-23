@@ -198,6 +198,9 @@ fun RecipeDetailContent(
                             modifier = Modifier.padding(start = 4.dp)
                         )
 
+                        // todo: 여기서 회원 닉네임 누르면 이동시킬때 memberId를 onClick콜백에 담아서 마이페이지 api 요청하도록 하면됨
+//                        recipeDetail.memberId
+
                         // 카테고리 정보
                         Row(
                             modifier = Modifier

@@ -1,26 +1,15 @@
 package com.recipia.aos.ui.components.navigation
 
 import TokenManager
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.recipia.aos.ui.components.BottomNavigationBar
-import com.recipia.aos.ui.components.TopAppBar
 import com.recipia.aos.ui.components.category.CategoriesScreen
 import com.recipia.aos.ui.components.forgot.email.EmailVerificationForgotIdScreen
 import com.recipia.aos.ui.components.forgot.email.FindEmailScreen
@@ -28,17 +17,19 @@ import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
 import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
+import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.recipe.detail.SearchScreen
-import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
 import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
+import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
 import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
+import com.recipia.aos.ui.model.factory.FollowViewModelFactory
 import com.recipia.aos.ui.model.factory.MyPageViewModelFactory
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeAllListViewModelFactory
@@ -47,6 +38,7 @@ import com.recipia.aos.ui.model.factory.RecipeDetailViewModelFactory
 import com.recipia.aos.ui.model.forgot.ForgotViewModel
 import com.recipia.aos.ui.model.login.LoginViewModel
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
+import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
@@ -83,8 +75,11 @@ fun AppNavigation(
     val recipeDetailViewModel: RecipeDetailViewModel = viewModel(
         factory = RecipeDetailViewModelFactory(tokenManager)
     )
-    val myPageViewModelFactory: MyPageViewModel = viewModel(
+    val myPageViewModel: MyPageViewModel = viewModel(
         factory = MyPageViewModelFactory(tokenManager)
+    )
+    val followViewModel: FollowViewModel = viewModel(
+        factory = FollowViewModelFactory(tokenManager)
     )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
@@ -114,7 +109,20 @@ fun AppNavigation(
         }
         // 마이페이지
         composable("my-page") {
-            MyPageScreen(navController, myPageViewModelFactory)
+            MyPageScreen(navController, myPageViewModel)
+        }
+        // 팔로잉/팔로워 페이지
+        composable(
+            route = "followList/{type}/{memberId}",
+            arguments = listOf(
+                navArgument("type") { type = NavType.StringType },
+                navArgument("memberId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val type = backStackEntry.arguments?.getString("type") ?: "following"
+            val memberId = backStackEntry.arguments?.getLong("memberId") ?: 0L
+
+            FollowPageScreen(navController, followViewModel, memberId, type)
         }
         // 레시피 상세보기 화면
         composable(

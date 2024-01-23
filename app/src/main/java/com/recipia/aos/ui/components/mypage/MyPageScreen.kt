@@ -249,7 +249,10 @@ fun MyPageScreen(
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { /* 팔로잉 페이지 이동 로직 */ },
+                            .clickable {
+                                // 팔로잉 리스트 화면으로 이동
+                                navController.navigate("followList/following/${data.memberId}")
+                            },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(text = "팔로잉", color = textColor)
@@ -261,7 +264,10 @@ fun MyPageScreen(
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { /* 팔로워 페이지 이동 로직 */ },
+                            .clickable {
+                                // 팔로잉 리스트 화면으로 이동
+                                navController.navigate("followList/follower/${data.memberId}")
+                            },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(text = "팔로워", color = textColor)
