@@ -18,7 +18,6 @@ fun FollowButton(
     onFollowClick: () -> Unit
 ) {
     val buttonText = if (isFollowing) "팔로잉" else "팔로우"
-    val buttonColor = if (isFollowing) Color.Gray else MaterialTheme.colorScheme.primary
 
     Button(
         onClick = {
