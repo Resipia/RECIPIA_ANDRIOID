@@ -27,11 +27,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ChipDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraEnhance
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -349,7 +352,8 @@ fun CreateRecipeScreen(
 
                 item {
                     Row(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(top = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -384,6 +388,8 @@ fun CreateRecipeScreen(
                 // 영양소 입력 영역
                 if (showNutritionalInfo.value) {
                     item {
+                        Spacer(modifier = Modifier.height(10.dp))
+
                         NutritionalInfoInputScreen(
                             nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
                         ) { updatedInfo ->
@@ -411,9 +417,51 @@ fun CreateRecipeScreen(
 
                 // 카테고리 정보 표시
                 item {
-                    Text("선택된 카테고리: ${viewModel.selectedCategories.value.joinToString { it.subCategoryNm.toString() }}")
-                }
+                    Spacer(modifier = Modifier.height(10.dp))
 
+                    // Text 텍스트 변경
+                    Text(
+                        "선택된 카테고리:",
+                        fontSize = 14.sp, // 글씨 크기 조절
+                        color = Color.Black, // 텍스트 색상 설정
+                        fontWeight = FontWeight.Bold // 텍스트 굵기 설정
+                    )
+
+                    // viewModel에서 선택한 카테고리 값을 가져옴
+                    val selectedCategories = viewModel.selectedCategories.value
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // 선택한 카테고리를 가로로 나열하기 위해 Row 사용
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // 각 AssistChip과 Spacer를 추가
+                        selectedCategories.forEachIndexed { index, category ->
+                            AssistChip(
+                                onClick = { /* 각 AssistChip 클릭 시 동작 */ },
+                                label = {
+                                    Text(
+                                        category.subCategoryNm.toString(),
+                                        fontSize = 12.sp, // 글씨 크기 조절
+                                    )
+                                },
+                                colors = AssistChipDefaults.assistChipColors(
+                                    containerColor = Color(238, 238, 238),
+                                    labelColor = Color.Black, // 내부 텍스트 색상
+                                ),
+                                border = AssistChipDefaults.assistChipBorder(
+                                    borderColor = Color(189,189,189)
+                                )
+                            )
+
+                            // Spacer를 추가하여 간격 설정
+                            if (index < selectedCategories.size - 1) {
+                                Spacer(modifier = Modifier.width(4.dp)) // 원하는 간격 설정
+                            }
+                        }
+                    }
+                }
             }
         }
     }
