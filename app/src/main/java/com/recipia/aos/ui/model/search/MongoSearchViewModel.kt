@@ -41,6 +41,9 @@ class MongoSearchViewModel(
     private val _selectedSearchResults = MutableStateFlow<List<String>>(emptyList())
     val selectedSearchResults = _selectedSearchResults.asStateFlow()
 
+    private val _showSearchResults = MutableStateFlow(true)
+    val showSearchResults = _showSearchResults.asStateFlow()
+
     // retrofit 설정
     val mongoSearchService: MongoSearchService by lazy {
         val logging = HttpLoggingInterceptor().apply {
@@ -95,14 +98,17 @@ class MongoSearchViewModel(
     }
 
     fun onSearchTextChange(text: String) {
-        if (text.isBlank()) {
-            _mongoSearchResults.value = emptyList() // 검색어가 비어있으면 검색 결과를 비움
-        }
+//        if (text.isBlank()) {
+//            _mongoSearchResults.value = emptyList() // 검색어가 비어있으면 검색 결과를 비움
+//        }
         _searchText.value = text
+        _showSearchResults.value = text.isNotEmpty() // 검색어가 있을 때만 결과 표시
     }
 
     fun onSearchResultClick(searchWord: String) {
         _selectedSearchResults.value = _selectedSearchResults.value + searchWord
+        _showSearchResults.value = false // 검색 결과 숨기기
+        _searchText.value = "" // 검색창 입력값 초기화
     }
 
 
