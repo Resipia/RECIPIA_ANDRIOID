@@ -276,6 +276,7 @@ fun SignUpThirdFormScreen(
                                 context,
                                 onSuccess = {
                                     signUpViewModel.clearData() // 데이터 초기화
+                                    phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
                                     navController.navigate("login-success-page")
                                 },
                                 onFailure = { errorMessage ->
@@ -308,6 +309,7 @@ fun SignUpThirdFormScreen(
                                 context,
                                 onSuccess = {
                                     signUpViewModel.clearData() // 데이터 초기화
+                                    phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
                                     navController.navigate("login-success-page")
                                 },
                                 onFailure = { errorMessage ->
