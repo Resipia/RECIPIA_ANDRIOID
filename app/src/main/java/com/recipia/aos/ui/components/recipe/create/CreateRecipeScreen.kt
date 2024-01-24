@@ -326,37 +326,48 @@ fun CreateRecipeScreen(
                         )
                     )
                 }
+                // 재료 버튼
                 item {
-                    OutlinedTextField(
-                        value = recipeCreateModel.ingredient.value,
-                        onValueChange = { newValue ->
-                            recipeCreateModel.ingredient.value = newValue
-                        },
-                        label = { Text("재료") },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    Button(
+                        onClick = { navController.navigate("search-ingredient-Screen") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .height(50.dp),
                         shape = RoundedCornerShape(8.dp), // 모서리 둥글게
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(189, 189, 189), // 포커스가 됐을 때의 테두리 색상
-                            unfocusedBorderColor = Color(189, 189, 189), // 포커스가 해제됐을 때의 테두리 색상
-                        )
-                    )
+                        border = BorderStroke(1.dp, Color(189, 189, 189)), // 태두리 설정
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(
+                                238,
+                                238,
+                                238
+                            )
+                        ),
+                    ) {
+                        Text("재료 검색", fontSize = 14.sp, color = Color.Black)
+                    }
                 }
+
+                // 해시태그 버튼
                 item {
-                    OutlinedTextField(
-                        value = recipeCreateModel.hashtag.value,
-                        onValueChange = { newValue ->
-                            recipeCreateModel.hashtag.value = newValue
-                        },
-                        label = { Text("해시태그") },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    Button(
+                        onClick = { navController.navigate("search-Hashtag-Screen") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .height(50.dp),
                         shape = RoundedCornerShape(8.dp), // 모서리 둥글게
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(189, 189, 189), // 포커스가 됐을 때의 테두리 색상
-                            unfocusedBorderColor = Color(189, 189, 189), // 포커스가 해제됐을 때의 테두리 색상
-                        )
-                    )
+                        border = BorderStroke(1.dp, Color(189, 189, 189)), // 태두리 설정
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(
+                                238,
+                                238,
+                                238
+                            )
+                        ),
+                    ) {
+                        Text("해시태그 검색", fontSize = 14.sp, color = Color.Black)
+                    }
                 }
 
                 item {

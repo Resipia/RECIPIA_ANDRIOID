@@ -20,14 +20,11 @@ import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
-import com.recipia.aos.ui.components.recipe.detail.SearchScreen
-import com.recipia.aos.ui.components.search.MongoSearchScreen
+import com.recipia.aos.ui.components.search.MongoIngredientAndHashTagSearchScreen
 import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSuccessScreen
 import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
-import com.recipia.aos.ui.dto.Category
-import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
@@ -115,8 +112,8 @@ fun AppNavigation(
 //            SearchScreen(navController)
 //        }
         // 검색화면
-        composable("searchScreen") {
-            MongoSearchScreen(navController, mongoSearchViewModel)
+        composable("search-Hashtag-Screen") {
+            MongoIngredientAndHashTagSearchScreen(navController, mongoSearchViewModel)
         }
         // 내가보는 마이페이지
         composable("my-page") {
