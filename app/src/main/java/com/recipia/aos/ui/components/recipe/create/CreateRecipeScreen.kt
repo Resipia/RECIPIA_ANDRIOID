@@ -71,6 +71,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
 import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
+import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 
@@ -326,22 +327,19 @@ fun CreateRecipeScreen(
                         )
                     )
                 }
+
                 // 재료 버튼
                 item {
                     Button(
-                        onClick = { navController.navigate("search-ingredient-Screen") },
+                        onClick = { navController.navigate("search-Screen/${SearchType.INGREDIENT.name}") }, // 백틱(`) 사용
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .height(50.dp),
-                        shape = RoundedCornerShape(8.dp), // 모서리 둥글게
-                        border = BorderStroke(1.dp, Color(189, 189, 189)), // 태두리 설정
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(1.dp, Color(189, 189, 189)),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(
-                                238,
-                                238,
-                                238
-                            )
+                            containerColor = Color(238, 238, 238)
                         ),
                     ) {
                         Text("재료 검색", fontSize = 14.sp, color = Color.Black)
@@ -351,19 +349,15 @@ fun CreateRecipeScreen(
                 // 해시태그 버튼
                 item {
                     Button(
-                        onClick = { navController.navigate("search-Hashtag-Screen") },
+                        onClick = { navController.navigate("search-Screen/${SearchType.HASHTAG.name}") }, // 백틱(`) 사용
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .height(50.dp),
-                        shape = RoundedCornerShape(8.dp), // 모서리 둥글게
-                        border = BorderStroke(1.dp, Color(189, 189, 189)), // 태두리 설정
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(1.dp, Color(189, 189, 189)),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(
-                                238,
-                                238,
-                                238
-                            )
+                            containerColor = Color(238, 238, 238)
                         ),
                     ) {
                         Text("해시태그 검색", fontSize = 14.sp, color = Color.Black)

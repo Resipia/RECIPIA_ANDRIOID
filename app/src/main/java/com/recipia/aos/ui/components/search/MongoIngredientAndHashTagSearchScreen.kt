@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -26,6 +27,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,8 +39,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -53,24 +58,35 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.HorizontalDivider
+import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.search.MongoSearchViewModel
 
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalComposeUiApi::class
+)
 @Composable
 fun MongoIngredientAndHashTagSearchScreen(
     navController: NavController,
-    viewModel: MongoSearchViewModel
+    viewModel: MongoSearchViewModel,
+    type: SearchType
 ) {
+
+    // 내부 상태로 선택된 검색 결과들을 관리
+    val selectedSearchResultsState = remember { mutableStateListOf<String>() }
 
     val searchText by viewModel.searchText.collectAsState()
     val mongoSearchResults by viewModel.mongoSearchResults.collectAsState()
-    val selectedSearchResults by viewModel.selectedSearchResults.collectAsState()
     val showSearchResults by viewModel.showSearchResults.collectAsState()
 
     // 화면 터치로 키보드 없애기 위한 상태
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(type) {
+        viewModel.init(type) // type에 따라 검색 초기화
+    }
 
     Scaffold(
         modifier = Modifier
@@ -84,11 +100,38 @@ fun MongoIngredientAndHashTagSearchScreen(
             TopAppBar(
                 title = { Text(text = "검색") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        mongoSearchResults
+                        selectedSearchResultsState.clear() // 상태 초기화
+                        viewModel.resetTextChange() // 입력 텍스트 초기화
+                        navController.popBackStack()
+                    }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                     }
                 }
             )
+        },
+        bottomBar = {
+            Button(
+                onClick = {
+                    // '선택 완료' 버튼 클릭 로직
+                    viewModel.setSelectedHashtags(selectedSearchResultsState)
+                    navController.popBackStack()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(56, 142, 60)
+                ),
+                shape = MaterialTheme.shapes.small.copy(CornerSize(10.dp))
+            ) {
+                Text(
+                    "선택 완료",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.White
+                )
+            }
         }
     ) { innerPadding ->
         Box(
@@ -111,14 +154,15 @@ fun MongoIngredientAndHashTagSearchScreen(
                             tint = Color.Black
                         )
                     },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        disabledContainerColor = MaterialTheme.colorScheme.surface,
                         focusedIndicatorColor = MaterialTheme.colorScheme.primary, // 포커스 되었을 때 색상
                         unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), // 포커스 아닐 때 색상
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = {
-                            viewModel.addSelectedSearchResult(searchText)
                             viewModel.onSearchTextChange("") // TextField 초기화
                         }
                     ),
@@ -135,7 +179,7 @@ fun MongoIngredientAndHashTagSearchScreen(
                     verticalArrangement = Arrangement.Top,
                     maxItemsInEachRow = Int.MAX_VALUE
                 ) {
-                    selectedSearchResults.forEach { result ->
+                    selectedSearchResultsState.forEach { result ->
                         AssistChip(
                             onClick = {},
                             label = {
@@ -164,7 +208,10 @@ fun MongoIngredientAndHashTagSearchScreen(
                                     .fillMaxWidth()
                                     .padding(20.dp)
                                     .clickable {
-                                        viewModel.onSearchResultClick(hashtag)
+                                        // 여기서 선택한 검색 결과를 상태에 추가
+                                        if (!selectedSearchResultsState.contains(hashtag)) {
+                                            selectedSearchResultsState.add(hashtag)
+                                        }
                                     }
                             )
                             // 항목 사이에 구분선 추가
