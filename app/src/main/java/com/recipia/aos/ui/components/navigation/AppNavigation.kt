@@ -21,6 +21,7 @@ import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.recipe.detail.SearchScreen
+import com.recipia.aos.ui.components.search.MongoSearchScreen
 import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSuccessScreen
@@ -31,6 +32,7 @@ import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
 import com.recipia.aos.ui.model.factory.FollowViewModelFactory
+import com.recipia.aos.ui.model.factory.MongoSearchViewModelFactory
 import com.recipia.aos.ui.model.factory.MyPageViewModelFactory
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
 import com.recipia.aos.ui.model.factory.RecipeAllListViewModelFactory
@@ -44,6 +46,7 @@ import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
+import com.recipia.aos.ui.model.search.MongoSearchViewModel
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
 
@@ -82,6 +85,9 @@ fun AppNavigation(
     val followViewModel: FollowViewModel = viewModel(
         factory = FollowViewModelFactory(tokenManager)
     )
+    val mongoSearchViewModel: MongoSearchViewModel = viewModel(
+        factory = MongoSearchViewModelFactory(tokenManager)
+    )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
     val forgotViewModel: ForgotViewModel = viewModel()
@@ -105,8 +111,12 @@ fun AppNavigation(
             HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel)
         }
         // 검색화면
+//        composable("searchScreen") {
+//            SearchScreen(navController)
+//        }
+        // 검색화면
         composable("searchScreen") {
-            SearchScreen(navController)
+            MongoSearchScreen(navController, mongoSearchViewModel)
         }
         // 내가보는 마이페이지
         composable("my-page") {

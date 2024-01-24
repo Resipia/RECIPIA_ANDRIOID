@@ -2,27 +2,17 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="EmailVerificationScreenPreview">
+      <entry key="PreviewCompose">
         <State />
       </entry>
       <entry key="PreviewDataList">
         <State />
       </entry>
-      <entry key="PreviewImagePicker">
-        <State>
-          <targetSelectedWithDropDown>
-            <Target>
-              <type value="QUICK_BOOT_TARGET" />
-              <deviceKey>
-                <Key>
-                  <type value="VIRTUAL_DEVICE_PATH" />
-                  <value value="$USER_HOME$/.android/avd/Pixel_7_Pro_API_33.avd" />
-                </Key>
-              </deviceKey>
-            </Target>
-          </targetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-01-19T05:12:45.422622Z" />
-        </State>
+      <entry key="PreviewMySearchScreen">
+        <State />
+      </entry>
+      <entry key="PreviewSearchScreen">
+        <State />
       </entry>
       <entry key="PreviewTest">
         <State />
