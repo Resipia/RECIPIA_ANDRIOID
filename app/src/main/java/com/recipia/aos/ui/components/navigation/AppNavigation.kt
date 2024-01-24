@@ -178,30 +178,6 @@ fun AppNavigation(
             CategorySelectScreen(
                 navController = navController,
                 viewModel = categorySelectionViewModel,
-                subCategories = listOf(
-                    SubCategory(1, "김치찌개", 1),
-                    SubCategory(2, "된장찌개", 1),
-                    SubCategory(3, "비빔밥", 1),
-                    SubCategory(4, "불고기", 1),
-                    SubCategory(5, "짜장면", 2),
-                    SubCategory(6, "짬뽕", 2),
-                    SubCategory(7, "마파두부", 2),
-                    SubCategory(8, "꿔바로우", 2),
-                    SubCategory(9, "초밥", 3),
-                    SubCategory(10, "라멘", 3),
-                    SubCategory(11, "돈부리", 3),
-                    SubCategory(12, "우동", 3),
-                    SubCategory(13, "파스타", 4),
-                    SubCategory(14, "스테이크", 4),
-                    SubCategory(15, "피자", 4),
-                    SubCategory(16, "샐러드", 4)
-                ),
-                categories = listOf(
-                    Category(1, "한식"),
-                    Category(2, "중식"),
-                    Category(3, "일식"),
-                    Category(4, "양식")
-                ),
                 onSelectedCategories = { selectedIds ->
                     println("선택된 서브 카테고리 ID: $selectedIds")
                     // 여기에서 선택된 ID들을 처리하는 로직을 추가할 수 있음

@@ -5,11 +5,9 @@ import android.widget.Toast
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -78,7 +75,6 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.recipia.aos.R
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.HorizontalDivider
-import com.recipia.aos.ui.components.TopAppBar
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel

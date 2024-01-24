@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ChipDefaults
@@ -198,9 +199,17 @@ fun CreateRecipeScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(56, 142, 60)
+                    ),
+                    shape = MaterialTheme.shapes.small.copy(CornerSize(10.dp))
                 ) {
-                    Text("작성 완료")
+                    Text(
+                        "작성 완료",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Color.White
+                    )
                 }
             }
         ) { innerPadding ->
@@ -222,9 +231,9 @@ fun CreateRecipeScreen(
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White, // 배경색을 흰색으로 변경
-                            contentColor = Color(238,238,238) // 텍스트 색상을 회색으로 변경
+                            contentColor = Color(238, 238, 238) // 텍스트 색상을 회색으로 변경
                         ),
-                        border = BorderStroke(1.dp, Color(189,189,189)), // 태두리 설정
+                        border = BorderStroke(1.dp, Color(189, 189, 189)), // 태두리 설정
                         onClick = {
                             multiplePhotosPickerLauncher.launch(
                                 // 이미지만 선택 가능하도록
@@ -359,26 +368,38 @@ fun CreateRecipeScreen(
                     ) {
                         Button(
                             onClick = { showNutritionalInfo.value = !showNutritionalInfo.value },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(238,238,238)),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(
+                                    238,
+                                    238,
+                                    238
+                                )
+                            ),
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(end = 8.dp)
                                 .height(48.dp), // 높이 지정
                             shape = RoundedCornerShape(8.dp), // 모서리 둥글게
-                            border = BorderStroke(1.dp, Color(189,189,189)), // 태두리 설정
+                            border = BorderStroke(1.dp, Color(189, 189, 189)), // 태두리 설정
                         ) {
                             Text("영양소 입력", fontSize = 14.sp, color = Color.Black)
                         }
 
                         Button(
                             onClick = { navController.navigate("categorySelect") },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(238,238,238)),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(
+                                    238,
+                                    238,
+                                    238
+                                )
+                            ),
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(start = 8.dp)
                                 .height(48.dp), // 높이 지정
                             shape = RoundedCornerShape(8.dp), // 모서리 둥글게
-                            border = BorderStroke(1.dp, Color(189,189,189)), // 태두리 설정
+                            border = BorderStroke(1.dp, Color(189, 189, 189)), // 태두리 설정
                         ) {
                             Text("카테고리 선택", fontSize = 14.sp, color = Color.Black)
                         }
@@ -451,7 +472,7 @@ fun CreateRecipeScreen(
                                     labelColor = Color.Black, // 내부 텍스트 색상
                                 ),
                                 border = AssistChipDefaults.assistChipBorder(
-                                    borderColor = Color(189,189,189)
+                                    borderColor = Color(189, 189, 189)
                                 )
                             )
 
