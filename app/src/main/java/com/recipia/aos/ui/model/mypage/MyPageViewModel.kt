@@ -5,7 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.ui.api.MyPageService
-import com.recipia.aos.ui.dto.mypage.MyPageViewResponse
+import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
+import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -19,8 +20,8 @@ class MyPageViewModel(
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
-    private val _myPageData = MutableLiveData<MyPageViewResponse?>()
-    val myPageData: MutableLiveData<MyPageViewResponse?> = _myPageData
+    private val _myPageData = MutableLiveData<MyPageViewResponseDto?>()
+    val myPageData: MutableLiveData<MyPageViewResponseDto?> = _myPageData
 
 
     // 북마크 요청 refrofit 설정 (로깅 인터셉터 추가)
@@ -46,10 +47,12 @@ class MyPageViewModel(
     }
 
     // 마이페이지 정보 로딩
-    fun loadMyPageData() {
+    fun loadMyPageData(
+        targetMemberId: Long
+    ) {
         viewModelScope.launch {
             try {
-                val response = myPageService.viewMyPage()
+                val response = myPageService.viewMyPage(ViewMyPageRequestDto(targetMemberId))
                 if (response.isSuccessful) {
                     _myPageData.value = response.body()?.result
                 } else {

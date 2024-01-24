@@ -1,31 +1,26 @@
 package com.recipia.aos.ui.components.mypage
 
+import TokenManager
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
@@ -37,7 +32,6 @@ import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -69,12 +63,19 @@ import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.components.recipe.detail.FeatureListItem
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
+import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 
+/**
+ *
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyPageScreen(
     navController: NavController,
-    myPageViewModel: MyPageViewModel
+    myPageViewModel: MyPageViewModel,
+    followViewModel: FollowViewModel,
+    tokenManager: TokenManager,
+    targetMemberId: Long? = null
 ) {
     val myPageData by myPageViewModel.myPageData.observeAsState()
 
@@ -85,9 +86,34 @@ fun MyPageScreen(
 
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
 
+    // 팔로우 버튼 상태 관리
+    var followButtonText by remember { mutableStateOf("팔로우") }
+    var followButtonColor by remember { mutableStateOf(Color(149, 117, 205)) }
+
+    val targetId = targetMemberId ?: tokenManager.loadMemberId() // memberId 결정
+
     // 화면이 렌더링될 때 데이터 로딩 시작
-    LaunchedEffect(key1 = true) {
-        myPageViewModel.loadMyPageData()
+    LaunchedEffect(key1 = targetId) { // memberId를 기반으로 데이터 로딩
+        myPageViewModel.loadMyPageData(targetId)
+    }
+
+    // 데이터가 로드되면 팔로우 버튼 상태 업데이트
+    myPageData?.let { data ->
+        if (data.me) {
+            // 내 마이페이지인 경우 버튼 숨김 처리
+            followButtonText = ""
+        } else {
+            // 다른 사용자의 마이페이지인 경우
+            if (data.followId != null) {
+                // 이미 팔로우한 경우
+                followButtonText = "팔로잉"
+                followButtonColor = Color(206, 212, 218)
+            } else {
+                // 아직 팔로우하지 않은 경우
+                followButtonText = "팔로우"
+                followButtonColor = Color(149, 117, 205)
+            }
+        }
     }
 
     Scaffold(
@@ -170,10 +196,12 @@ fun MyPageScreen(
                             color = textColor
                         )
                         Spacer(modifier = Modifier.height(8.dp)) // 닉네임과 한 줄 소개 사이 공간
-                        Text(
-                            text = data.introduction,
-                            color = textColor
-                        )
+                        data.introduction?.let {
+                            Text(
+                                text = it,
+                                color = textColor
+                            )
+                        }
                     }
                 }
 
@@ -185,20 +213,38 @@ fun MyPageScreen(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                 ) {
-                    Button(
-                        onClick = { /* 팔로우 처리 */ },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(233, 236, 239)),
-                        shape = MaterialTheme.shapes.small.copy(CornerSize(10.dp)) // 버튼 모양 변경
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.People,
-                            contentDescription = "팔로우",
-                            modifier = Modifier.size(20.dp),
-                            tint = Color.Black
-                        )
-                        Spacer(modifier = Modifier.width(8.dp)) // 아이콘과 텍스트 사이 간격
-                        Text("팔로우", fontSize = 16.sp, color = Color.Black) // 텍스트 색상 변경
+                    // isMe가 true이면 버튼을 렌더링하지 않음
+                    if (!data.me) {
+                        Button(
+                            onClick = {
+                                // 팔로우/언팔로우 처리
+                                followViewModel.followOrUnfollow(
+                                    targetMemberId = myPageData?.memberId ?: 0,
+                                    onResult = { success, newFollowId ->
+                                        if (success) {
+                                            if (newFollowId != null) {
+                                                myPageData?.followId = newFollowId
+                                            } // 팔로우 ID 업데이트
+                                            myPageViewModel.loadMyPageData(targetId) // 마이페이지 데이터 재로딩
+                                        } else {
+                                            Toast.makeText(context, "작업 실패", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                )
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = followButtonColor),
+                            shape = MaterialTheme.shapes.small.copy(CornerSize(10.dp))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.People,
+                                contentDescription = "팔로우",
+                                modifier = Modifier.size(20.dp),
+                                tint = Color.Black
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(followButtonText, fontSize = 16.sp, color = Color.Black)
+                        }
                     }
 
                     Spacer(modifier = Modifier.width(8.dp)) // 버튼 사이 간격

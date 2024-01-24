@@ -1,8 +1,10 @@
 package com.recipia.aos.ui.api
 
 import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.mypage.MyPageViewResponse
+import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
+import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.POST
 
 /**
@@ -12,8 +14,10 @@ interface MyPageService {
 
     // 마이페이지 보기
     @POST("/member/myPage/view")
-    suspend fun viewMyPage()
-    : Response<ResponseDto<MyPageViewResponse>>
+    suspend fun viewMyPage(
+        @Body dto: ViewMyPageRequestDto
+    )
+    : Response<ResponseDto<MyPageViewResponseDto>>
 
     // 로그아웃
     @POST("/member/auth/logout")

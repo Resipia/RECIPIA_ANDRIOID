@@ -107,9 +107,14 @@ fun AppNavigation(
         composable("searchScreen") {
             SearchScreen(navController)
         }
-        // 마이페이지
+        // 내가보는 마이페이지
         composable("my-page") {
-            MyPageScreen(navController, myPageViewModel)
+            MyPageScreen(navController, myPageViewModel, followViewModel, tokenManager)
+        }
+        // 남의 마이페이지 (RecipeDetailViewModel에서 memberId 사용)
+        composable("other-user-page/{memberId}") { backStackEntry ->
+            val memberId = backStackEntry.arguments?.getString("memberId")?.toLongOrNull()
+            MyPageScreen(navController, myPageViewModel, followViewModel, tokenManager, memberId)
         }
         // 팔로잉/팔로워 페이지
         composable(
