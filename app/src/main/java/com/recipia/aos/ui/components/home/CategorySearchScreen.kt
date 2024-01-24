@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.category
+package com.recipia.aos.ui.components.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -33,6 +33,7 @@ import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
+import com.recipia.aos.ui.dto.SubCategoryDto
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 
 /**
@@ -42,7 +43,7 @@ import com.recipia.aos.ui.model.category.CategorySelectionViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoriesScreen(
+fun CategorySearchScreen(
     navController: NavController, // NavController 인자 추가
     viewModel: CategorySelectionViewModel,
     subCategories: List<SubCategory>,
@@ -56,7 +57,8 @@ fun CategoriesScreen(
     val groupedSubCategories = subCategories.groupBy { it.categoryId }
 
     // 선택된 서브 카테고리를 추적하는 상태
-    var selectedSubCategories by remember { mutableStateOf(setOf<Int>()) }
+    var selectedSubCategories by remember { mutableStateOf(setOf<SubCategoryDto>()) }
+
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
@@ -111,18 +113,19 @@ fun CategoriesScreen(
                                 onClick = {
                                     // 선택 로직
                                     val currentSelection = selectedSubCategories.toMutableSet()
-                                    if (subCategory.id in selectedSubCategories) {
-                                        currentSelection.remove(subCategory.id)
+                                    val subCategoryDto = SubCategoryDto(subCategory.id.toLong(), subCategory.name)
+                                    if (currentSelection.any { it.id.toInt() == subCategory.id }) {
+                                        currentSelection.removeIf { it.id.toInt() == subCategory.id }
                                     } else {
                                         if (currentSelection.size < 3) {
-                                            currentSelection.add(subCategory.id)
+                                            currentSelection.add(subCategoryDto)
                                         }
                                     }
                                     selectedSubCategories = currentSelection
                                 },
                                 label = { Text(subCategory.name) },
-                                selected = subCategory.id in selectedSubCategories,
-                                leadingIcon = if (subCategory.id in selectedSubCategories) {
+                                selected = selectedSubCategories.any { it.id == subCategory.id.toLong() }, // 수정된 부분
+                                leadingIcon = if (selectedSubCategories.any { it.id == subCategory.id.toLong() }) {
                                     { Icon(Icons.Filled.Done, contentDescription = "Selected") }
                                 } else null,
                                 modifier = Modifier.padding(horizontal = 4.dp)
@@ -134,6 +137,7 @@ fun CategoriesScreen(
                 Spacer(modifier = Modifier.padding(20.dp))
 
                 Button(
+                    // 선택 완료 버튼 클릭 로직
                     onClick = {
                         viewModel.setSelectedCategories(selectedSubCategories)
                         navController.popBackStack()

@@ -5,6 +5,7 @@ import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
 
 data class RecipeDetailViewResponseDto(
     val id: Long,
+    val memberId: Long,
     val recipeName: String,
     val recipeDesc: String,
     val timeTaken: Int,

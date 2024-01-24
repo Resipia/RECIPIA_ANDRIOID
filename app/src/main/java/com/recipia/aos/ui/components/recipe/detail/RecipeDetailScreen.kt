@@ -3,6 +3,7 @@ package com.recipia.aos.ui.components.recipe.detail
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -106,6 +107,7 @@ fun RecipeDetailScreen(
         RecipeDetailContent(
             recipeId = recipeId,
             recipeDetailViewModel = recipeDetailViewModel,
+            navController = navController,
             paddingValues = innerPadding
         )
     }
@@ -117,6 +119,7 @@ fun RecipeDetailScreen(
 fun RecipeDetailContent(
     recipeId: Long,
     recipeDetailViewModel: RecipeDetailViewModel,
+    navController: NavController,
     paddingValues: PaddingValues
 ) {
     // 레시피 상세 정보 로드
@@ -128,7 +131,6 @@ fun RecipeDetailContent(
     val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
     val isLoading = recipeDetailViewModel.isLoading.observeAsState()
 
-
     if (isLoading.value == true) {
         // 로딩 인디케이터 표시
         CircularProgressIndicator()
@@ -136,7 +138,7 @@ fun RecipeDetailContent(
         recipeDetailState.value?.let { recipeDetail ->
             Column(
                 modifier = Modifier
-                    .padding(paddingValues) // Apply PaddingValues here
+                    .padding(paddingValues)
                     .padding(horizontal = 16.dp)
             ) {
 
@@ -145,7 +147,7 @@ fun RecipeDetailContent(
                     initialPage = 0,
                     initialPageOffsetFraction = 0f
                 ) {
-                    recipeDetail.recipeFileUrlList.size // Provide pageCount here
+                    recipeDetail.recipeFileUrlList.size
                 }
 
                 HorizontalPager(
@@ -176,6 +178,11 @@ fun RecipeDetailContent(
 
                 // 작성자 정보
                 Row(
+                    modifier = Modifier
+                        .clickable {
+                            // 여기서 navController를 사용하여 MyPageScreen으로 이동
+                            navController.navigate("other-user-page/${recipeDetail.memberId}")
+                        },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // 프로필 이미지
@@ -197,6 +204,9 @@ fun RecipeDetailContent(
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.padding(start = 4.dp)
                         )
+
+                        // todo: 여기서 회원 닉네임 누르면 이동시킬때 memberId를 onClick콜백에 담아서 마이페이지 api 요청하도록 하면됨
+//                        recipeDetail.memberId
 
                         // 카테고리 정보
                         Row(

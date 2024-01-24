@@ -1,8 +1,10 @@
 package com.recipia.aos.ui.components.home
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,11 +12,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,16 +27,27 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -58,7 +73,9 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.recipia.aos.R
+import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.HorizontalDivider
+import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.dto.RecipeMainListResponseDto
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookmarkUpdateState
@@ -66,14 +83,13 @@ import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterialApi::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
     recipeAllListViewModel: RecipeAllListViewModel,
     bookmarkViewModel: BookMarkViewModel,
-    innerPadding: PaddingValues
 ) {
     /**
      * LiveData에 주로 observeAsState를 사용한다.
@@ -90,6 +106,17 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val lazyListState = rememberLazyListState()
+    val isScrolled = derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }.value
+
+    // `animateDpAsState` 사용하여 부드러운 애니메이션 적용
+    val fabWidth by animateDpAsState(
+        targetValue = if (isScrolled) 50.dp else 90.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = ""
+    )
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
@@ -153,43 +180,103 @@ fun HomeScreen(
         }
     }
 
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
+
     Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                modifier = Modifier.background(Color.White), // 여기에 배경색을 하얀색으로 설정,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigate("categories") }) {
+                        Icon(
+                            imageVector = Icons.Filled.Menu,
+                            contentDescription = "메뉴"
+                        )
+                    }
+                },
+                actions = {
+                    // 검색 아이콘 추가
+                    IconButton(onClick = { navController.navigate("searchScreen") }) {
+                        Icon(Icons.Filled.Search, contentDescription = "검색")
+                    }
+
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.MoreVert,
+                            contentDescription = "더보기"
+                        )
+                    }
+
+                    CustomDropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        // 드롭다운 메뉴 아이템들
+                        DropdownMenuItem(
+                            text = { Text("신고하기") },
+                            onClick = { /* 수정 처리 */ }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("로그아웃") },
+                            onClick = { /* 설정 처리 */ }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("로그아웃") },
+                            onClick = { /* 설정 처리 */ }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("피드백 보내기") },
+                            onClick = { /* 피드백 처리 */ }
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
+        },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         modifier = Modifier.background(Color.White),
         floatingActionButton = {
             FloatingActionButton(
+                containerColor = Color(56, 142, 60),
                 onClick = { navController.navigate("create-recipe") },
                 modifier = Modifier
-                    .offset(y = (-70).dp) // 100dp만큼 위로 오프셋
-                    .background(Color.White), // 여기에 배경색을 하얀색으로 설정,
+                    .height(44.dp) // 높이 설정
+                    .width(fabWidth) // 애니메이션화된 너비 사용
+                    .background(Color.White),
+                shape = RoundedCornerShape(16.dp) // 모서리 둥글게
             ) {
-                Icon(Icons.Filled.Add, "글쓰기")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Icon(Icons.Filled.Add, "글쓰기", tint = Color.White)
+                    if (!isScrolled) { // 스크롤 되지 않았을 때만 "작성" 텍스트 표시
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text("작성", fontSize = 16.sp, color = Color.White)
+                    }
+                }
             }
-        }
-    ) { paddingValues -> // 여기서 innerPadding 대신 paddingValues 사용
+        },
+        bottomBar = { BottomNavigationBar(navController) }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
-                .background(Color.White) // 여기에 배경색을 하얀색으로 설정
+                .background(Color.White)
+                .fillMaxSize()
         ) {
-            // 예시 이미지 URL 리스트
-            val sampleImages = listOf(
-                "https://via.placeholder.com/600x200.png?text=First+Image",
-                "https://via.placeholder.com/600x200.png?text=Second+Image",
-                "https://via.placeholder.com/600x200.png?text=Third+Image",
-                "https://via.placeholder.com/600x200.png?text=Fourth+Image",
-                "https://via.placeholder.com/600x200.png?text=Fifth+Image"
-            )
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
                     .background(Color.White) // 여기에 배경색을 하얀색으로 설정
                     .pullRefresh(pullRefreshState),
                 contentAlignment = Alignment.Center // 여기를 수정
             ) {
-
                 // 로딩 중이라면 로딩 인디케이터 표시
                 if (isLoading) {
                     AnimatedPreloader(modifier = Modifier.size(100.dp)) // 로딩 바의 크기 조절 가능
@@ -197,18 +284,81 @@ fun HomeScreen(
                     LazyColumn(
                         contentPadding = PaddingValues(
                             top = paddingValues.calculateTopPadding(),
-                            bottom = paddingValues.calculateBottomPadding() + 80.dp,
+                            bottom = paddingValues.calculateBottomPadding(),
                         ),
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color.White), // 여기에 배경색을 하얀색으로 설정,,
                         state = lazyListState
                     ) {
-                        // AutoScrollingSlider를 LazyColumn 아이템으로 추가
                         item {
-                            AutoScrollingSlider(sampleImages)
-                        }
+                            // 여기에 Box 또는 Column 추가
+                            Column(modifier = Modifier.padding(start = 16.dp)) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth() // fillMaxSize 대신 fillMaxWidth 사용
+                                ) {
+                                    AssistChip(
+                                        onClick = { /* 첫 번째 AssistChip 클릭 시 동작 */ },
+                                        label = {
+                                            Text(
+                                                "카테고리",
+                                                fontSize = 12.sp, // 글씨 크기 조절
+                                            )
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Category,
+                                                contentDescription = "카테고리 아이콘",
+                                                modifier = Modifier
+                                                    .size(18.dp), // 아이콘 크기 조절
+                                                tint = Color.Black // 아이콘 색상을 검은색으로 설정
+                                            )
+                                        },
+                                        colors = AssistChipDefaults.assistChipColors(
+                                            containerColor = Color(238,238,238),
+                                            labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                                        ),
+//                                        elevation = null, // 그림자 제거
+                                        border = null, // 테두리 제거
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp)) // 칩 사이의 간격
+                                    AssistChip(
+                                        onClick = { /* 두 번째 AssistChip 클릭 시 동작 */ },
+                                        label = {
+                                            Text(
+                                                "정렬",
+                                                fontSize = 12.sp, // 글씨 크기 조절
+                                            )
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Sort,
+                                                contentDescription = "정렬 아이콘",
+                                                modifier = Modifier
+                                                    .size(18.dp), // 아이콘 크기 조절
+                                                tint = Color.Black // 아이콘 색상을 검은색으로 설정
+                                            )
+                                        },
+                                        colors = AssistChipDefaults.assistChipColors(
+                                            containerColor = Color(238,238,238),
+                                            labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                                        ),
+                                        elevation = null, // 그림자 제거
+                                        border = null, // 테두리 제거
+                                    )
+                                }
+                            }
 
+//                            // 항목 사이에 구분선 추가
+//                            HorizontalDivider(
+//                                modifier = Modifier
+//                                    .fillMaxWidth() // 전체 너비를 채우도록 설정
+//                                    .padding(horizontal = 16.dp), // 양쪽에 패딩 적용
+//                                thickness = 0.5.dp, // 구분선의 두께 설정
+//                                color = Color.Gray // 구분선의 색상 설정
+//                            )
+                        }
                         itemsIndexed(
                             recipeAllListViewModel.items.value
                         ) { index, item ->
@@ -265,7 +415,6 @@ fun ListItem(
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
-            Log.d("ListItem", "After image loading")
 
             Column(
                 modifier = Modifier
@@ -285,7 +434,6 @@ fun ListItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 2.dp)
                 )
-                Log.d("ListItem", "After text rendering")
 
                 // 서브 카테고리 Assist Chips
                 if (item.subCategoryList.isNotEmpty()) {
@@ -299,7 +447,6 @@ fun ListItem(
                         }
                     }
                 }
-                Log.d("ListItem", "After subcategory rendering")
             }
 
             /**

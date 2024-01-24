@@ -1,6 +1,12 @@
 package com.recipia.aos.ui.model.signup
 
+import android.content.ContentUris
+import android.content.Context
+import android.database.Cursor
 import android.net.Uri
+import android.os.Build
+import android.provider.DocumentsContract
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,19 +15,28 @@ import com.recipia.aos.ui.api.MemberManagementService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.singup.EmailAvailableRequestDto
 import com.recipia.aos.ui.dto.singup.NicknameAvailableRequestDto
+import com.recipia.aos.ui.dto.singup.SignUpRequestDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
+import java.io.FileOutputStream
 
 class SignUpViewModel : ViewModel() {
 
     // 1번째 회원가입 입력 form 데이터
     private val _phoneNumber = MutableStateFlow("")
+    private val _isPersonalInfoConsent = MutableStateFlow(false)
+    private val _isDataRetentionConsent = MutableStateFlow(false)
 
     // 2번째 회원가입 입력 form 데이터
     private val _name = MutableStateFlow("")
@@ -220,6 +235,8 @@ class SignUpViewModel : ViewModel() {
         _oneLineIntroduction.value = ""
         _gender.value = ""
         _selectedDate.value = ""
+        _isPersonalInfoConsent.value = false
+        _isDataRetentionConsent.value = false
     }
 
     // 이메일 중복 체크 결과를 초기화하는 함수
@@ -230,6 +247,102 @@ class SignUpViewModel : ViewModel() {
     // 닉네임 중복 체크 결과를 초기화하는 함수
     fun resetNicknameDuplicateCheck() {
         _nicknameDuplicateCheckResult.value = null
+    }
+
+    // Boolean 값을 'Y' 또는 'N'으로 변환하는 함수
+    private fun booleanToYN(value: Boolean): String {
+        return if (value) "Y" else "N"
+    }
+
+    // 개인정보 수집 및 이용 동의 상태 업데이트 함수
+    fun updatePersonalInfoConsent(consent: Boolean) {
+        _isPersonalInfoConsent.value = consent
+    }
+
+    // 개인정보 보관 및 파기 동의 상태 업데이트 함수
+    fun updateDataRetentionConsent(consent: Boolean) {
+        _isDataRetentionConsent.value = consent
+    }
+
+    // 서버로 회원가입 데이터 전송
+    fun signUp(
+        context: Context,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                // 입력 데이터를 RequestBody 객체로 변환
+                val emailBody = _email.value.toRequestBody("text/plain".toMediaType())
+                val passwordBody = _password.value.toRequestBody("text/plain".toMediaType())
+                val nameBody = _name.value.toRequestBody("text/plain".toMediaType())
+                val nicknameBody = _nickname.value.toRequestBody("text/plain".toMediaType())
+                val telNo = _phoneNumber.value.toRequestBody("text/plain".toMediaType())
+                val introductionBody = _oneLineIntroduction.value.toRequestBody("text/plain".toMediaType())
+                val genderBody = _gender.value.toRequestBody("text/plain".toMediaType())
+                val selectedDateBody = _selectedDate.value.toRequestBody("text/plain".toMediaType())
+                val personalInfoConsentBody = booleanToYN(_isPersonalInfoConsent.value).toRequestBody("text/plain".toMediaType())
+                val dataRetentionConsentBody = booleanToYN(_isDataRetentionConsent.value).toRequestBody("text/plain".toMediaType())
+
+                // 프로필 이미지 처리
+                val profileImagePart = _profilePictureUri.value?.let { uri ->
+                    uriToMultipartBodyPart(uri, context)
+                }
+
+                // Retrofit 서비스 호출
+                val response = memberManagementService.signUp(
+                    email = emailBody,
+                    password = passwordBody,
+                    fullName = nameBody,
+                    nickname = nicknameBody,
+                    introduction = introductionBody,
+                    telNo = telNo,
+                    address1 = null,
+                    address2 = null,
+                    profileImage = profileImagePart,
+                    isPersonalInfoConsent = personalInfoConsentBody,
+                    isDataRetentionConsent = dataRetentionConsentBody,
+                    birth = selectedDateBody,
+                    gender = genderBody
+                )
+
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    Log.d("회원가입 실패", "Response received: ${response.errorBody()?.string()}")
+                    onFailure("회원가입에 실패했습니다.")
+                }
+
+            } catch (e: Exception) {
+                onFailure("네트워크 오류가 발생했습니다: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    // Uri를 MultipartBody.Part로 변환하는 함수
+    private fun uriToMultipartBodyPart(uri: Uri, context: Context): MultipartBody.Part? {
+        val file = uriToFile(uri, context) ?: return null
+        val requestBody = file.asRequestBody("image/jpeg".toMediaType())
+        return MultipartBody.Part.createFormData("profileImage", file.name, requestBody)
+    }
+
+    // Uri를 파일로 변환하는 함수
+
+    private fun uriToFile(uri: Uri, context: Context): File? {
+        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            // 임시 파일 생성
+            val tempFile = File.createTempFile("temp_image", ".jpg", context.cacheDir).apply {
+                deleteOnExit()
+            }
+
+            FileOutputStream(tempFile).use { fileOutputStream ->
+                // InputStream의 내용을 파일에 복사
+                inputStream.copyTo(fileOutputStream)
+            }
+
+            return tempFile
+        }
+        return null
     }
 
 }

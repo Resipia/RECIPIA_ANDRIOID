@@ -65,7 +65,7 @@ class RecipeCreateModel(
             .create(CreateRecipeService::class.java)
     }
 
-    // 서버로 데이터를 전송하고 응답을 처리한다.
+       // 서버로 데이터를 전송하고 응답을 처리한다.
     fun sendRecipeToServer(
         requestDto: RecipeCreateUpdateRequestDto,
         imageUris: List<Uri?>,
