@@ -97,24 +97,6 @@ fun MyPageScreen(
         myPageViewModel.loadMyPageData(targetId)
     }
 
-    // 데이터가 로드되면 팔로우 버튼 상태 업데이트
-    myPageData?.let { data ->
-        if (data.me) {
-            // 내 마이페이지인 경우 버튼 숨김 처리
-            followButtonText = ""
-        } else {
-            // 다른 사용자의 마이페이지인 경우
-            if (data.followId != null) {
-                // 이미 팔로우한 경우
-                followButtonText = "팔로잉"
-                followButtonColor = Color(206, 212, 218)
-            } else {
-                // 아직 팔로우하지 않은 경우
-                followButtonText = "팔로우"
-                followButtonColor = Color(149, 117, 205)
-            }
-        }
-    }
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
@@ -191,7 +173,7 @@ fun MyPageScreen(
                     // 닉네임, 한 줄 소개
                     Column {
                         Text(
-                            text = data.nickname,
+                            text = data.nickname ?: "익명 사용자", // nickname이 null인 경우 대체 텍스트 사용
                             fontWeight = FontWeight.Bold,
                             color = textColor
                         )
@@ -222,10 +204,22 @@ fun MyPageScreen(
                                     targetMemberId = myPageData?.memberId ?: 0,
                                     onResult = { success, newFollowId ->
                                         if (success) {
-                                            if (newFollowId != null) {
-                                                myPageData?.followId = newFollowId
-                                            } // 팔로우 ID 업데이트
-                                            myPageViewModel.loadMyPageData(targetId) // 마이페이지 데이터 재로딩
+                                            // 팔로우 상태에 따라 버튼 상태 변경
+                                            val isNowFollowing = newFollowId != null
+                                            followButtonText = if (isNowFollowing) "팔로잉" else "팔로우"
+                                            followButtonColor = if (isNowFollowing) Color(206, 212, 218) else Color(149, 117, 205)
+
+                                            // 데이터 재로딩 전에 상태 업데이트
+                                            if (isNowFollowing) {
+                                                if (newFollowId != null) {
+                                                    myPageData?.followId = newFollowId
+                                                }
+                                            } else {
+                                                myPageData?.followId = 0L
+                                            }
+
+                                            // 데이터 재로딩
+                                            myPageViewModel.loadMyPageData(targetId)
                                         } else {
                                             Toast.makeText(context, "작업 실패", Toast.LENGTH_SHORT).show()
                                         }
