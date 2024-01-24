@@ -366,7 +366,12 @@ fun SignUpFirstFormScreen(
             val onAgreeButtonClick: () -> Unit = {
                 // 필수 항목을 모두 동의했는지 확인
                 if (isPersonalInfoConsent && isDataRetentionConsent) {
-                    // 동의한 경우 회원가입 페이지로 이동
+                    // 동의 상태를 ViewModel에 저장
+                    signUpViewModel.updatePersonalInfoConsent(isPersonalInfoConsent)
+                    signUpViewModel.updateDataRetentionConsent(isDataRetentionConsent)
+                    signUpViewModel.updatePhoneNumber(phoneNumber)
+
+                    // 동의한 경우 다음 단계로 이동
                     navController.navigate("signUpSecondForm")
                 } else {
                     // 필수 항목 중 하나라도 동의하지 않은 경우 토스트 메시지 표시

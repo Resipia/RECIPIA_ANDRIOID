@@ -5,6 +5,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -257,11 +258,30 @@ fun SignUpThirdFormScreen(
                 ) {
                     Button(
                         onClick = {
-                            // 새로운 데이터 업데이트
+                            // 성별 데이터 변환 및 업데이트
+                            val genderCode = when (gender) {
+                                "남성" -> "M"
+                                "여성" -> "F"
+                                else -> ""
+                            }
+                            signUpViewModel.updateGender(genderCode)
+
+                            // 기타 데이터 업데이트
                             signUpViewModel.updateProfilePictureUri(profilePictureUri)
                             signUpViewModel.updateOneLineIntroduction(oneLineIntroduction)
-                            signUpViewModel.updateGender(gender)
                             signUpViewModel.updateSelectedDate(selectedDate)
+
+                            // 회원가입 요청
+                            signUpViewModel.signUp(
+                                context,
+                                onSuccess = {
+                                    signUpViewModel.clearData() // 데이터 초기화
+                                    navController.navigate("login-success-page")
+                                },
+                                onFailure = { errorMessage ->
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                }
+                            )
                         },
                         modifier = Modifier.weight(1f)
                     ) {
@@ -270,11 +290,30 @@ fun SignUpThirdFormScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            // 새로운 데이터 업데이트
+                            // 성별 데이터 변환 및 업데이트
+                            val genderCode = when (gender) {
+                                "남성" -> "M"
+                                "여성" -> "F"
+                                else -> ""
+                            }
+                            signUpViewModel.updateGender(genderCode)
+
+                            // 기타 데이터 업데이트
                             signUpViewModel.updateProfilePictureUri(profilePictureUri)
                             signUpViewModel.updateOneLineIntroduction(oneLineIntroduction)
-                            signUpViewModel.updateGender(gender)
                             signUpViewModel.updateSelectedDate(selectedDate)
+
+                            // 회원가입 요청
+                            signUpViewModel.signUp(
+                                context,
+                                onSuccess = {
+                                    signUpViewModel.clearData() // 데이터 초기화
+                                    navController.navigate("login-success-page")
+                                },
+                                onFailure = { errorMessage ->
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                }
+                            )
                         },
                         modifier = Modifier.weight(1f)
                     ) {

@@ -23,6 +23,7 @@ import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.recipe.detail.SearchScreen
 import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
+import com.recipia.aos.ui.components.signup.SignUpSuccessScreen
 import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
@@ -172,6 +173,10 @@ fun AppNavigation(
         // 회원가입 3단계: 프로필 세팅 form
         composable("signUpThirdForm") {
             SignUpThirdFormScreen(navController, signUpViewModel, phoneNumberAuthViewModel)
+        }
+        // 회원가입 4단계: 성공 페이지
+        composable("login-success-page") {
+            SignUpSuccessScreen(navController)
         }
         // 카테고리 선택 화면
         composable("categorySelect") {
