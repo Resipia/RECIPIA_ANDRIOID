@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
-import com.recipia.aos.ui.components.mypage.detail.FollowAndShareButtons
 import com.recipia.aos.ui.components.mypage.detail.FollowStatsSection
 import com.recipia.aos.ui.components.mypage.detail.MyPageFeatureItem
 import com.recipia.aos.ui.components.mypage.detail.PersonalInfoSection
@@ -121,19 +120,9 @@ fun MyPageScreen(
             // 무한 스크롤
             LazyColumn(modifier = Modifier.padding(innerPadding)) {
 
-                // 프로필 이미지, 닉네임, 한줄소개
+                // 프로필 이미지, 닉네임, 팔로우 버튼, 한줄소개
                 item {
-                    ProfileSection(myPageViewModel = myPageViewModel)
-                }
-
-                // 팔로우, 공유하기 버튼
-                item {
-                    FollowAndShareButtons(
-                        myPageViewModel = myPageViewModel,
-                        followViewModel = followViewModel,
-                        targetId = targetMemberId ?: 0L,
-                        context = LocalContext.current
-                    )
+                    ProfileSection(myPageViewModel, followViewModel, targetId)
                 }
 
                 // 생년월일, 성별

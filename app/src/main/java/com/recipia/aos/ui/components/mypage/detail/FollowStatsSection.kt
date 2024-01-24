@@ -54,10 +54,11 @@ fun FollowStatsSection(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "팔로잉", color = textColor)
+            Spacer(modifier = Modifier.height(5.dp)) // 간격 추가
             if (myPageData != null) {
                 Text(text = "${myPageData.followingCount}", color = textColor)
             }
-            Spacer(modifier = Modifier.height(8.dp)) // 간격 추가
+            Spacer(modifier = Modifier.height(4.dp)) // 간격 추가
         }
 
         // 팔로워 영역
@@ -73,10 +74,11 @@ fun FollowStatsSection(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "팔로워", color = textColor)
+            Spacer(modifier = Modifier.height(5.dp)) // 간격 추가
             if (myPageData != null) {
                 Text(text = "${myPageData.followerCount}", color = textColor)
             }
-            Spacer(modifier = Modifier.height(8.dp)) // 간격 추가
+            Spacer(modifier = Modifier.height(4.dp)) // 간격 추가
         }
 
         // 레시피 영역
@@ -87,8 +89,9 @@ fun FollowStatsSection(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "레시피", color = textColor)
+            Spacer(modifier = Modifier.height(5.dp)) // 간격 추가
             Text(text = "10", color = textColor) // todo: 레시피 개수가 없음
-            Spacer(modifier = Modifier.height(8.dp)) // 간격 추가
+            Spacer(modifier = Modifier.height(4.dp)) // 간격 추가
         }
 
         // 위글위글 영역
@@ -99,8 +102,9 @@ fun FollowStatsSection(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "위글위글", color = textColor)
+            Spacer(modifier = Modifier.height(5.dp)) // 간격 추가
             Text(text = "0", color = textColor) // 고정된 숫자
-            Spacer(modifier = Modifier.height(8.dp)) // 간격 추가
+            Spacer(modifier = Modifier.height(4.dp)) // 간격 추가
         }
     }
 }
