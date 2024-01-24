@@ -111,5 +111,12 @@ class MongoSearchViewModel(
         _searchText.value = "" // 검색창 입력값 초기화
     }
 
+    // 사용자가 입력한 값 추가
+    fun addSelectedSearchResult(searchWord: String) {
+        if (searchWord.isNotBlank()) {
+            _selectedSearchResults.value = _selectedSearchResults.value + searchWord
+        }
+    }
+
 
 }
