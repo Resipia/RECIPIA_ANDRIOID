@@ -86,11 +86,9 @@ fun CreateRecipeScreen(
     recipeCreateModel: RecipeCreateModel
 ) {
 
-    val recipeName = recipeCreateModel.recipeName.value
-    val recipeDesc = recipeCreateModel.recipeDesc.value
-    val timeTaken = recipeCreateModel.timeTaken.value
-    val ingredient = recipeCreateModel.ingredient.value
-    val hashtag = recipeCreateModel.hashtag.value
+    var recipeName = recipeCreateModel.recipeName.value
+    var recipeDesc = recipeCreateModel.recipeDesc.value
+    var timeTaken = recipeCreateModel.timeTaken.value
     val nutritionalInfoList = recipeCreateModel.nutritionalInfoList
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
     val showNutritionalInfo = mutableStateOf(false)
@@ -143,8 +141,14 @@ fun CreateRecipeScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = {
-                            categorySelectionViewModel.selectedCategories.value =
-                                emptySet() // 카테고리 선택 초기화
+                            selectedImageUris.clear() // 이미지 제거
+                            recipeCreateModel.recipeName.value = ""
+                            recipeCreateModel.recipeDesc.value = ""
+                            recipeCreateModel.timeTaken.value = ""
+                            mongoSearchViewModel.resetSelectedIngredients()
+                            mongoSearchViewModel.resetSelectedHashtags()
+                            categorySelectionViewModel.selectedCategories.value = emptySet()
+                            nutritionalInfoList.clear()
                             navController.popBackStack()
                         }) {
                             Icon(Icons.Default.Close, contentDescription = "닫기")

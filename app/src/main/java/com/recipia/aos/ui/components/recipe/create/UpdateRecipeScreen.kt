@@ -191,6 +191,7 @@ fun UpdateRecipeScreen(
                             categorySelectionViewModel.selectedCategories.value = emptySet() // 카테고리 선택 초기화
                             mongoSearchViewModel.changeInitialized() // 몽고db 검색 초기값 세팅 후 initial값 변경
                             categorySelectionViewModel.changeInitialized() // 카테고리 초기값 세팅 후 initial값 변경
+                            selectedImageUris.clear() // 이미지 제거
                             navController.popBackStack()
                         }) {
                             Icon(Icons.Default.Close, contentDescription = "닫기")

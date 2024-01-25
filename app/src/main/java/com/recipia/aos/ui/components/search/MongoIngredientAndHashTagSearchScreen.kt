@@ -5,6 +5,7 @@
 
 package com.recipia.aos.ui.components.search
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +51,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -71,6 +73,8 @@ fun MongoIngredientAndHashTagSearchScreen(
     mongoViewModel: MongoSearchViewModel,
     type: SearchType
 ) {
+
+    val context = LocalContext.current
 
     val searchText by mongoViewModel.searchText.collectAsState()
     val mongoSearchResults by mongoViewModel.mongoSearchResults.collectAsState()
@@ -194,14 +198,22 @@ fun MongoIngredientAndHashTagSearchScreen(
                     keyboardActions = KeyboardActions(
                         onDone = {
                             if (searchText.isNotBlank()) {
-                                if (type == SearchType.INGREDIENT && !selectedIngredients.contains(searchText)) {
-                                    selectedIngredients.add(searchText) // 재료 리스트에 추가
-                                } else if (type == SearchType.HASHTAG && !selectedHashtags.contains(searchText)) {
-                                    selectedHashtags.add(searchText) // 해시태그 리스트에 추가
+                                // 정규 표현식으로 완전한 한글, 영문, 숫자만 허용
+                                if (!searchText.matches(Regex("^[가-힣a-zA-Z0-9\\s]+$"))) {
+                                    keyboardController?.hide() // 키보드를 먼저 숨깁니다.
+                                    Toast.makeText(context, "유효하지 않은 입력입니다. (자음, 모음 단독 사용 불가)", Toast.LENGTH_SHORT).show()
+                                    mongoViewModel.onSearchTextChange("") // 입력 필드 초기화
+                                } else {
+                                    // 기존 로직
+                                    if (type == SearchType.INGREDIENT && !selectedIngredients.contains(searchText)) {
+                                        selectedIngredients.add(searchText) // 재료 리스트에 추가
+                                    } else if (type == SearchType.HASHTAG && !selectedHashtags.contains(searchText)) {
+                                        selectedHashtags.add(searchText) // 해시태그 리스트에 추가
+                                    }
+                                    mongoViewModel.onSearchTextChange("") // 입력 필드 초기화
+                                    keyboardController?.hide() // 키보드 숨기기
+                                    focusManager.clearFocus() // 포커스 해제
                                 }
-                                mongoViewModel.onSearchTextChange("") // 입력 필드 초기화
-                                keyboardController?.hide() // 키보드 숨기기
-                                focusManager.clearFocus() // 포커스 해제
                             }
                         }
                     ),
