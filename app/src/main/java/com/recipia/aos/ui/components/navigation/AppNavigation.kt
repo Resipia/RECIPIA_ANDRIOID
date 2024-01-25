@@ -13,6 +13,7 @@ import androidx.navigation.navArgument
 import com.recipia.aos.ui.components.forgot.email.EmailVerificationForgotIdScreen
 import com.recipia.aos.ui.components.forgot.email.FindEmailScreen
 import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
+import com.recipia.aos.ui.components.home.CategorySelectRecipeScreen
 import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
@@ -114,10 +115,17 @@ fun AppNavigation(
         composable("home") {
             HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel)
         }
-        // 검색화면
-//        composable("searchScreen") {
-//            SearchScreen(navController)
-//        }
+        // 카테고리 조건 조회
+        composable("category-recipe-search") {
+            CategorySelectRecipeScreen(
+                navController,
+                categorySelectionViewModel,
+                onSelectedCategories = { selectedIds ->
+                    println("선택된 서브 카테고리 ID: $selectedIds")
+                    // 여기에서 선택된 ID들을 처리하는 로직을 추가할 수 있음
+                }
+            )
+        }
         // 검색화면
         composable(
             route = "search-Screen/{type}",

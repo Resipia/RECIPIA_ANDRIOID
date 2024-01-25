@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -245,7 +246,7 @@ fun CategorySelectScreen(
                                     },
                                     selected = selectedSubCategories.any { it.id == subCategory.id.toLong() },
                                     leadingIcon = if (selectedSubCategories.any { it.id == subCategory.id.toLong() }) {
-                                        { Icon(Icons.Filled.Done, contentDescription = "Selected") }
+                                        { Icon(Icons.Filled.Done, contentDescription = "Selected", modifier = Modifier.size(16.dp)) }
                                     } else null,
                                     modifier = Modifier.padding(end = 8.dp, bottom = 8.dp), // 각 칩의 간격 조절
                                     colors = FilterChipDefaults.filterChipColors(

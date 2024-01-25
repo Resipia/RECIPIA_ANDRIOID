@@ -240,7 +240,7 @@ fun HomeScreen(
                         // 로고 텍스트
                         Text(
                             text = "Recipia",
-                            style = MaterialTheme.typography.titleSmall,
+                            style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
@@ -346,15 +346,15 @@ fun HomeScreen(
                             Column(modifier = Modifier.padding(start = 16.dp)) {
                                 Row(
                                     modifier = Modifier
-                                        .fillMaxWidth() // fillMaxSize 대신 fillMaxWidth 사용
+                                        .fillMaxWidth()
+                                        .padding(top = 8.dp)
                                 ) {
                                     AssistChip(
-                                        onClick = { /* 첫 번째 AssistChip 클릭 시 동작 */ },
+                                        onClick = {
+                                            navController.navigate("category-recipe-search")
+                                        },
                                         label = {
-                                            Text(
-                                                "카테고리",
-                                                fontSize = 12.sp, // 글씨 크기 조절
-                                            )
+                                            Text("카테고리", fontSize = 12.sp)
                                         },
                                         leadingIcon = {
                                             Icon(
@@ -376,10 +376,7 @@ fun HomeScreen(
                                     AssistChip(
                                         onClick = { /* 두 번째 AssistChip 클릭 시 동작 */ },
                                         label = {
-                                            Text(
-                                                "정렬",
-                                                fontSize = 12.sp, // 글씨 크기 조절
-                                            )
+                                            Text("정렬", fontSize = 12.sp)
                                         },
                                         leadingIcon = {
                                             Icon(
