@@ -110,6 +110,7 @@ class CommentViewModel(
     fun clearComments() {
         _comments.value = null
         currentPage = 0
+        initialLoadDone = false
     }
 
 }
