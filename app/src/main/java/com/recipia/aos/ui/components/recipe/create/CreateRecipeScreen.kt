@@ -190,7 +190,7 @@ fun CreateRecipeScreen(
                             )
 
                             // 모델을 사용하여 서버로 데이터와 이미지 전송
-                            recipeCreateModel.sendRecipeToServer(
+                            recipeCreateModel.createRecipeRequest(
                                 requestDto = requestDto,
                                 imageUris = selectedImageUris,
                                 context = context,

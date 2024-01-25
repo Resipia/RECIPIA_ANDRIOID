@@ -65,8 +65,8 @@ class RecipeCreateModel(
             .create(CreateRecipeService::class.java)
     }
 
-       // 서버로 데이터를 전송하고 응답을 처리한다.
-    fun sendRecipeToServer(
+    // 레시피 생성하는 요청을 서버로 보낸다.
+    fun createRecipeRequest(
         requestDto: RecipeCreateUpdateRequestDto,
         imageUris: List<Uri?>,
         context: Context,
@@ -122,6 +122,71 @@ class RecipeCreateModel(
             }
         })
     }
+
+    // 레시피 수정하는 요청을 서버로 보낸다.
+    fun updateRecipeRequest(
+        requestDto: RecipeCreateUpdateRequestDto,
+        imageUris: List<Uri?>,
+        context: Context,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val imageParts = imageUris.mapNotNull { uri ->
+            uri?.let { nonNullableUri ->
+                uriToMultipartBodyPart(nonNullableUri, context)
+            }
+        }
+
+        val idString = requestDto.id.toString()
+        val recipeId = idString.toRequestBody("text/plain".toMediaTypeOrNull())
+        val recipeName = requestDto.recipeName.toRequestBody("text/plain".toMediaTypeOrNull())
+        val recipeDesc = requestDto.recipeDesc.toRequestBody("text/plain".toMediaTypeOrNull())
+        val timeTaken = requestDto.timeTaken.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val ingredient = requestDto.ingredient.toRequestBody("text/plain".toMediaTypeOrNull())
+        val hashtag = requestDto.hashtag.toRequestBody("text/plain".toMediaTypeOrNull())
+        val nutritionalInfoId = requestDto.nutritionalInfo?.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val carbohydrates = requestDto.nutritionalInfo?.carbohydrates.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val fat = requestDto.nutritionalInfo?.fat.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val minerals = requestDto.nutritionalInfo?.minerals.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val protein = requestDto.nutritionalInfo?.protein.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val vitamins = requestDto.nutritionalInfo?.vitamins.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val subCategoryId = requestDto.subCategoryDtoList.firstOrNull()?.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+
+        recipeService.updateRecipe(
+            recipeId,
+            recipeName,
+            recipeDesc,
+            timeTaken,
+            ingredient,
+            hashtag,
+            nutritionalInfoId,
+            carbohydrates,
+            fat,
+            minerals,
+            protein,
+            vitamins,
+            subCategoryId,
+            imageParts
+        ).enqueue(object : Callback<ResponseDto<Void>> {
+            override fun onResponse(
+                call: Call<ResponseDto<Void>>,
+                response: Response<ResponseDto<Void>>
+            ) {
+                if (response.isSuccessful) {
+                    response.body()?.result
+                    onSuccess()
+                } else {
+                    onError("서버 오류: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseDto<Void>>, t: Throwable) {
+                onError("네트워크 오류: ${t.message}")
+            }
+        })
+    }
+
+
 
     // 이미지 URI를 실제 파일 경로로 변환하는 함수
     private fun uriToFilePath(context: Context, uri: Uri): String? {

@@ -292,7 +292,11 @@ fun RecipeDetailContent(
                 // 영양 정보
                 recipeDetail.nutritionalInfoDto?.let { info ->
                     Text(
-                        text = "영양 정보: 탄수화물 ${info.carbohydrates}, 단백질 ${info.protein}, 지방 ${info.fat}",
+                        text = "영양 정보: 탄수화물 ${info.carbohydrates}," +
+                                " 단백질 ${info.protein}," +
+                                " 지방 ${info.fat}," +
+                                " 비타민 ${info.vitamins}," +
+                                " 미네랄 ${info.minerals}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

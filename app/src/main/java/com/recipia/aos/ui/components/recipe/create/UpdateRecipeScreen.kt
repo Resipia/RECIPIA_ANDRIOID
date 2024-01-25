@@ -223,17 +223,17 @@ fun UpdateRecipeScreen(
                                 timeTaken = timeTaken.value.toIntOrNull() ?: 0,
                                 ingredient = ingredientsString,
                                 hashtag = hashtagsString,
-                                nutritionalInfo = nutritionalInfo.value, // 수정된 영양 정보
+                                nutritionalInfo = nutritionalInfo.value, // 수정된 영양 정보 (여기에 id값 넣어줘야함)
                                 subCategoryDtoList = subCategoryDtoList,
                                 deleteFileOrder = listOf()
                             )
 
                             // 모델을 사용하여 서버로 데이터와 이미지 전송
-                            recipeCreateModel.sendRecipeToServer(
+                            recipeCreateModel.updateRecipeRequest(
                                 requestDto = requestDto,
                                 imageUris = selectedImageUris,
                                 context = context,
-                                onSuccess = { recipeId ->
+                                onSuccess = {
                                     // 서버로 데이터 전송 성공 후에 상태 초기화
                                     recipeCreateModel.recipeName.value = ""
                                     recipeCreateModel.recipeDesc.value = ""
@@ -252,7 +252,7 @@ fun UpdateRecipeScreen(
                                     Toast.makeText(context, "레시피 업데이트 성공", Toast.LENGTH_SHORT).show()
 
                                     // 레시피 상세보기 화면으로 네비게이션
-                                    navController.navigate("recipeDetail/$recipeId")
+                                    navController.navigate("recipeDetail/${recipeDetailViewModel?.recipeDetail?.value?.id}")
                                 }
                             ) { errorMessage ->
                                 Toast.makeText(context, "레시피 업데이트 실패: $errorMessage", Toast.LENGTH_LONG).show()
