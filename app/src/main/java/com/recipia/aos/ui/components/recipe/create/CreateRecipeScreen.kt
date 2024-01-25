@@ -173,21 +173,25 @@ fun CreateRecipeScreen(
 
                         // 유효성 검증 실시
                         if (isRecipeNameValid.value && isRecipeDescValid.value && isCategorySelected.value) {
+
                             // 데이터 전송 로직
-                            val lastNutritionalInfo =
-                                nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
+                            val lastNutritionalInfo = nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
                             val subCategoryDtoList =
                                 categorySelectionViewModel.createSubCategoryDtoList(
                                     categorySelectionViewModel.selectedCategories.value
                                 )
+
+                            // 'selectedIngredients'와 'selectedHashtags'를 문자열로 변환
+                            val ingredientsString = selectedIngredients.joinToString(separator = ", ")
+                            val hashtagsString = selectedHashtags.joinToString(separator = ", ")
 
                             val requestDto = RecipeCreateUpdateRequestDto(
                                 id = null,
                                 recipeName = recipeName,
                                 recipeDesc = recipeDesc,
                                 timeTaken = timeTaken.toIntOrNull() ?: 0,
-                                ingredient = ingredient,
-                                hashtag = hashtag,
+                                ingredient = ingredientsString,
+                                hashtag = hashtagsString,
                                 nutritionalInfo = lastNutritionalInfo,
                                 subCategoryDtoList = subCategoryDtoList,
                                 deleteFileOrder = listOf()
@@ -198,7 +202,7 @@ fun CreateRecipeScreen(
                                 requestDto = requestDto,
                                 imageUris = selectedImageUris,
                                 context = context,
-                                onSuccess = {
+                                onSuccess = { recipeId ->
                                     // 서버로 데이터 전송 성공 후에 상태 초기화
                                     recipeCreateModel.recipeName.value = ""
                                     recipeCreateModel.recipeDesc.value = ""
@@ -208,9 +212,14 @@ fun CreateRecipeScreen(
                                     nutritionalInfoList.clear()
                                     recipeCreateModel.selectedImageUris = mutableStateListOf<Uri?>()
                                     categorySelectionViewModel.selectedCategories.value = emptySet()
+                                    // MongoSearchViewModel 내의 선택된 재료와 해시태그를 초기화
+                                    mongoSearchViewModel.resetSelectedIngredients()
+                                    mongoSearchViewModel.resetSelectedHashtags()
 
                                     Toast.makeText(context, "레시피 생성 성공", Toast.LENGTH_SHORT).show()
-                                    // 추가적인 성공 로직
+
+                                    // 레시피 상세보기 화면으로 네비게이션
+                                    navController.navigate("recipeDetail/$recipeId")
                                 }
                             ) { errorMessage ->
                                 Toast.makeText(context, "레시피 생성 실패: $errorMessage", Toast.LENGTH_LONG).show()
