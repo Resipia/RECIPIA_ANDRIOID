@@ -1,6 +1,7 @@
 package com.recipia.aos.ui.model.search
 
 import TokenManager
+import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.ui.api.MongoSearchService
@@ -153,6 +154,27 @@ class MongoSearchViewModel(
     // 연관 검색어 목록을 초기화하는 함수
     fun clearMongoSearchResults() {
         _mongoSearchResults.value = emptyList()
+    }
+
+    // 초기화 상태 플래그
+    var isInitialized = false
+
+    // 업데이트 페이지에서 뒤로가면 초기 상태 초기화하기
+    fun changeInitialized() {
+        isInitialized = false
+    }
+
+    // 재료와 해시태그 초기화 메소드 (레시피 수정에서 사용)
+    fun initializeSelectedIngredientsAndHashtags(
+        initialIngredients: List<String>,
+        initialHashtags: List<String>
+    ) {
+        if (!isInitialized) {
+            // 초기화 로직
+            _selectedIngredients.value = initialIngredients.toMutableStateList()
+            _selectedHashtags.value = initialHashtags.toMutableStateList()
+            isInitialized = true
+        }
     }
 
 

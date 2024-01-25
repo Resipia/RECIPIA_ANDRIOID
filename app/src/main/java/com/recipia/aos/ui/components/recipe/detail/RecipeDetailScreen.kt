@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.recipe.detail
 
+import TokenManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -16,13 +17,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,10 +43,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.ui.components.HorizontalDivider
@@ -63,9 +60,15 @@ fun RecipeDetailScreen(
     recipeId: Long,
     recipeDetailViewModel: RecipeDetailViewModel,
     commentViewModel: CommentViewModel,
-    navController: NavController
+    navController: NavController,
+    tokenManager: TokenManager
 ) {
-    var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
+    var menuExpanded by remember { mutableStateOf(false) }
+    val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
+
+    // 레시피 상세 정보의 상태를 관찰
+    val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
+
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
@@ -91,11 +94,19 @@ fun RecipeDetailScreen(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false }
                     ) {
-                        // 드롭다운 메뉴 아이템들
-                        DropdownMenuItem(
-                            text = { Text("수정") },
-                            onClick = { /* 수정 처리 */ }
-                        )
+                        // 레시피 작성자가 현재 로그인한 사용자와 같은 경우에만 수정 및 삭제 옵션을 보여줌
+                        if (recipeDetailState.value?.memberId == currentUserMemberId) {
+                            DropdownMenuItem(
+                                text = { Text("레시피 수정") },
+                                onClick = {
+                                    navController.navigate("update-recipe")
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("레시피 삭제") },
+                                onClick = { /* 삭제 처리 */ }
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text("설정") },
                             onClick = { /* 설정 처리 */ }

@@ -19,6 +19,7 @@ import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
+import com.recipia.aos.ui.components.recipe.create.UpdateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.search.MongoIngredientAndHashTagSearchScreen
 import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
@@ -156,11 +157,13 @@ fun AppNavigation(
             route = "recipeDetail/{recipeId}",
             arguments = listOf(navArgument("recipeId") { type = NavType.LongType })
         ) { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L
             RecipeDetailScreen(
-                recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L,
-                recipeDetailViewModel,
-                commentViewModel,
-                navController
+                recipeId = recipeId,
+                recipeDetailViewModel = recipeDetailViewModel,
+                commentViewModel = commentViewModel,
+                navController = navController,
+                tokenManager = tokenManager
             )
         }
         // 레시피 생성하기
@@ -170,6 +173,16 @@ fun AppNavigation(
                 categorySelectionViewModel,
                 mongoSearchViewModel,
                 recipeCreateModel
+            )
+        }
+        // 레시피 수정하기
+        composable("update-recipe") {
+            UpdateRecipeScreen(
+                navController = navController,
+                recipeDetailViewModel = recipeDetailViewModel,
+                categorySelectionViewModel = categorySelectionViewModel,
+                mongoSearchViewModel = mongoSearchViewModel,
+                recipeCreateModel = recipeCreateModel
             )
         }
         // ID찾기 화면
