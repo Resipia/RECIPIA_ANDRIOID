@@ -13,6 +13,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,16 +30,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ChipDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraEnhance
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,10 +46,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -60,7 +61,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -74,19 +74,23 @@ import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
 import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
+import com.recipia.aos.ui.model.search.MongoSearchViewModel
 
 
 /**
  * 레시피 생성 필드
  */
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class,
+    ExperimentalLayoutApi::class
+)
 @Composable
 fun CreateRecipeScreen(
     navController: NavController,
-    viewModel: CategorySelectionViewModel,
-    recipeCreateModel: RecipeCreateModel,
-    tokenManager: TokenManager
+    categorySelectionViewModel: CategorySelectionViewModel,
+    mongoSearchViewModel: MongoSearchViewModel,
+    recipeCreateModel: RecipeCreateModel
 ) {
 
     val recipeName = recipeCreateModel.recipeName.value
@@ -97,13 +101,13 @@ fun CreateRecipeScreen(
     val nutritionalInfoList = recipeCreateModel.nutritionalInfoList
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
     val showNutritionalInfo = mutableStateOf(false)
-
-    // 여기에서 레시피 생성 모델 인스턴스 생성
-    val model = RecipeCreateModel(tokenManager)
-
+    // mongo Model에서 데이터를 가져온다.
+    val selectedIngredients by mongoSearchViewModel.selectedIngredients.collectAsState()
+    val selectedHashtags by mongoSearchViewModel.selectedHashtags.collectAsState()
     // 선택한 이미지 URI
     var selectedImageUris = recipeCreateModel.selectedImageUris
 
+    // 사진 선택기 선언
     val multiplePhotosPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(
             maxItems = 10
@@ -114,6 +118,7 @@ fun CreateRecipeScreen(
         }
     )
 
+    // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Box(
@@ -140,7 +145,8 @@ fun CreateRecipeScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = {
-                            viewModel.selectedCategories.value = emptySet() // 카테고리 선택 초기화
+                            categorySelectionViewModel.selectedCategories.value =
+                                emptySet() // 카테고리 선택 초기화
                             navController.popBackStack()
                         }) {
                             Icon(Icons.Default.Close, contentDescription = "닫기")
@@ -159,7 +165,9 @@ fun CreateRecipeScreen(
                         val lastNutritionalInfo =
                             nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
                         val subCategoryDtoList =
-                            viewModel.createSubCategoryDtoList(viewModel.selectedCategories.value)
+                            categorySelectionViewModel.createSubCategoryDtoList(
+                                categorySelectionViewModel.selectedCategories.value
+                            )
 
                         val requestDto = RecipeCreateUpdateRequestDto(
                             id = null,
@@ -174,7 +182,7 @@ fun CreateRecipeScreen(
                         )
 
                         // 모델을 사용하여 서버로 데이터와 이미지 전송
-                        model.sendRecipeToServer(
+                        recipeCreateModel.sendRecipeToServer(
                             requestDto = requestDto,
                             imageUris = selectedImageUris,
                             context = context,
@@ -187,7 +195,7 @@ fun CreateRecipeScreen(
                                 recipeCreateModel.hashtag.value = ""
                                 nutritionalInfoList.clear()
                                 recipeCreateModel.selectedImageUris = mutableStateListOf<Uri?>()
-                                viewModel.selectedCategories.value = emptySet()
+                                categorySelectionViewModel.selectedCategories.value = emptySet()
 
                                 Toast.makeText(context, "레시피 생성 성공", Toast.LENGTH_SHORT).show()
                                 // 추가적인 성공 로직
@@ -346,6 +354,32 @@ fun CreateRecipeScreen(
                     }
                 }
 
+                // 선택된 재료를 AssistChip으로 표시
+                item {
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+//                            .padding(start = 16.dp, top = 4.dp, end = 16.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalArrangement = Arrangement.Top,
+                        maxItemsInEachRow = Int.MAX_VALUE
+                    ) {
+                        selectedIngredients.forEach { ingredient ->
+                            ElevatedAssistChip(
+                                onClick = {},
+                                label = { Text(ingredient) },
+                                colors = AssistChipDefaults.assistChipColors(
+                                    containerColor = Color(200,230,201),
+                                    labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                                )
+//                            elevation = null, // 그림자 제거
+//                            border = null, // 테두리 제거
+                            )
+                            Spacer(modifier = Modifier.width(4.dp)) // 여백 추가
+                        }
+                    }
+                }
+
                 // 해시태그 버튼
                 item {
                     Button(
@@ -361,6 +395,32 @@ fun CreateRecipeScreen(
                         ),
                     ) {
                         Text("해시태그 검색", fontSize = 14.sp, color = Color.Black)
+                    }
+                }
+
+                // 선택된 해시태그를 AssistChip으로 표시
+                item {
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+//                            .padding(start = 16.dp, top = 4.dp, end = 16.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalArrangement = Arrangement.Top,
+                        maxItemsInEachRow = Int.MAX_VALUE
+                    ) {
+                        selectedHashtags.forEach { hashtag ->
+                            ElevatedAssistChip(
+                                onClick = {},
+                                label = { Text(hashtag) },
+                                colors = AssistChipDefaults.assistChipColors(
+                                    containerColor = Color(200,230,201),
+                                    labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                                )
+//                            elevation = null, // 그림자 제거
+//                            border = null, // 테두리 제거
+                            )
+                            Spacer(modifier = Modifier.width(4.dp)) // 여백 추가
+                        }
                     }
                 }
 
@@ -454,7 +514,7 @@ fun CreateRecipeScreen(
                     )
 
                     // viewModel에서 선택한 카테고리 값을 가져옴
-                    val selectedCategories = viewModel.selectedCategories.value
+                    val selectedCategories = categorySelectionViewModel.selectedCategories.value
 
                     Spacer(modifier = Modifier.height(6.dp))
 

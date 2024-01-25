@@ -84,6 +84,10 @@ fun MongoIngredientAndHashTagSearchScreen(
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
+    // 추가한 재료, 해시태그 상태를 저장할 변수
+    val selectedIngredients = remember { mutableStateListOf<String>() }
+    val selectedHashtags = remember { mutableStateListOf<String>() }
+
     LaunchedEffect(type) {
         viewModel.init(type) // type에 따라 검색 초기화
     }
@@ -101,8 +105,12 @@ fun MongoIngredientAndHashTagSearchScreen(
                 title = { Text(text = "검색") },
                 navigationIcon = {
                     IconButton(onClick = {
-                        mongoSearchResults
-                        selectedSearchResultsState.clear() // 상태 초기화
+                        // 현재 검색 유형에 따라 상태 초기화
+                        if (type == SearchType.INGREDIENT) {
+                            viewModel.resetSelectedIngredients()
+                        } else if (type == SearchType.HASHTAG) {
+                            viewModel.resetSelectedHashtags()
+                        }
                         viewModel.resetTextChange() // 입력 텍스트 초기화
                         navController.popBackStack()
                     }) {
@@ -114,8 +122,12 @@ fun MongoIngredientAndHashTagSearchScreen(
         bottomBar = {
             Button(
                 onClick = {
-                    // '선택 완료' 버튼 클릭 로직
-                    viewModel.setSelectedHashtags(selectedSearchResultsState)
+                    // 현재 검색 유형에 따라 저장
+                    if (type == SearchType.INGREDIENT) {
+                        viewModel.setSelectedIngredients(selectedIngredients)
+                    } else if (type == SearchType.HASHTAG) {
+                        viewModel.setSelectedHashtags(selectedHashtags)
+                    }
                     navController.popBackStack()
                 },
                 modifier = Modifier
@@ -158,17 +170,33 @@ fun MongoIngredientAndHashTagSearchScreen(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                         disabledContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary, // 포커스 되었을 때 색상
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), // 포커스 아닐 때 색상
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = {
-                            viewModel.onSearchTextChange("") // TextField 초기화
+                            if (searchText.isNotBlank()) {
+                                if (type == SearchType.INGREDIENT && !selectedIngredients.contains(searchText)) {
+                                    selectedIngredients.add(searchText) // 재료 리스트에 추가
+                                } else if (type == SearchType.HASHTAG && !selectedHashtags.contains(searchText)) {
+                                    selectedHashtags.add(searchText) // 해시태그 리스트에 추가
+                                }
+                                viewModel.onSearchTextChange("") // 입력 필드 초기화
+                                keyboardController?.hide() // 키보드 숨기기
+                                focusManager.clearFocus() // 포커스 해제
+                            }
                         }
                     ),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                     shape = RoundedCornerShape(8.dp), // 모서리 둥글게
                 )
+
+                // 검색 유형에 따른 상태 리스트 선택
+                val selectedResults = when (type) {
+                    SearchType.INGREDIENT -> selectedIngredients
+                    SearchType.HASHTAG -> selectedHashtags
+                    else -> listOf() // 기본적으로 빈 리스트
+                }
 
                 // 선택된 검색 결과들을 AssistChip으로 표시
                 FlowRow(
@@ -179,7 +207,7 @@ fun MongoIngredientAndHashTagSearchScreen(
                     verticalArrangement = Arrangement.Top,
                     maxItemsInEachRow = Int.MAX_VALUE
                 ) {
-                    selectedSearchResultsState.forEach { result ->
+                    selectedResults.forEach { result ->
                         AssistChip(
                             onClick = {},
                             label = {
@@ -199,19 +227,29 @@ fun MongoIngredientAndHashTagSearchScreen(
                     }
                 }
 
+                // 만약 검색 결과가 있다면 하단에 연관 검색어창을 보여준다.
                 if (showSearchResults) {
                     LazyColumn {
-                        items(mongoSearchResults) { hashtag ->
+                        // 검색 결과는 해시태그, 재료에따라 다르게 상태를 저장한다.
+                        items(mongoSearchResults) { result ->
                             Text(
-                                text = hashtag,
+                                text = result,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(20.dp)
                                     .clickable {
-                                        // 여기서 선택한 검색 결과를 상태에 추가
-                                        if (!selectedSearchResultsState.contains(hashtag)) {
-                                            selectedSearchResultsState.add(hashtag)
+                                        if (type == SearchType.INGREDIENT) {
+                                            if (!selectedIngredients.contains(result)) {
+                                                selectedIngredients.add(result) // 재료 리스트에 추가
+                                            }
+                                        } else if (type == SearchType.HASHTAG) {
+                                            if (!selectedHashtags.contains(result)) {
+                                                selectedHashtags.add(result) // 해시태그 리스트에 추가
+                                            }
                                         }
+                                        viewModel.clearMongoSearchResults() // 연관 검색어 목록 초기화
+                                        viewModel.resetTextChange() // 입력 텍스트 초기화
+                                        keyboardController?.hide() // 키보드 숨기기
                                     }
                             )
                             // 항목 사이에 구분선 추가

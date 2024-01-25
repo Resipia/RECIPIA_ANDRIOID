@@ -34,30 +34,25 @@ class MongoSearchViewModel(
     private val _searchType = MutableStateFlow(SearchType.HASHTAG)
     val searchType = _searchType.asStateFlow()
 
-    // 선택된 재료 결과를 저장하는 상태
-    private val _selectedIngredientResults = MutableStateFlow<List<String>>(emptyList())
-    val selectedIngredientResults = _selectedIngredientResults.asStateFlow()
-
-    // 선택된 해시태그 결과를 저장하는 상태
-    private val _selectedHashTagResults = MutableStateFlow<List<String>>(emptyList())
-    val selectedHashTagResults = _selectedHashTagResults.asStateFlow()
-
     // 검색 텍스트
     private val _searchText = MutableStateFlow("")
-    private val _searchResults = MutableStateFlow<List<String>>(emptyList())
-
     val searchText = _searchText.asStateFlow()
-    val searchResults = _searchResults.asStateFlow()
 
+    // 몽고DB 검색 결과
     private val _mongoSearchResults = MutableStateFlow<List<String>>(emptyList())
     val mongoSearchResults = _mongoSearchResults.asStateFlow()
 
-    // 선택된 검색 결과들을 저장하는 리스트
-    private val _selectedSearchResults = MutableStateFlow<List<String>>(emptyList())
-    val selectedSearchResults = _selectedSearchResults.asStateFlow()
-
+    // 검색어 결과 상태
     private val _showSearchResults = MutableStateFlow(true)
     val showSearchResults = _showSearchResults.asStateFlow()
+
+    // 사용자가 선택한 재료를 저장하는 상태
+    private val _selectedIngredients = MutableStateFlow<List<String>>(emptyList())
+    val selectedIngredients = _selectedIngredients.asStateFlow()
+
+    // 사용자가 선택한 해시태그를 저장하는 상태
+    private val _selectedHashtags = MutableStateFlow<List<String>>(emptyList())
+    val selectedHashtags = _selectedHashtags.asStateFlow()
 
     // retrofit 설정
     val mongoSearchService: MongoSearchService by lazy {
@@ -81,6 +76,7 @@ class MongoSearchViewModel(
             .create(MongoSearchService::class.java)
     }
 
+    // 검색어를 서버에 요청하는 메서드
     @OptIn(FlowPreview::class)
     fun init(type: SearchType) {
         _searchText
@@ -104,7 +100,11 @@ class MongoSearchViewModel(
             .launchIn(viewModelScope)
     }
 
-    fun parseMongoSearchResult(jsonString: String, type: SearchType): String? {
+    // 재료, 해시태그에 따라 Json 파싱 실시
+    fun parseMongoSearchResult(
+        jsonString: String,
+        type: SearchType
+    ): String? {
         return try {
             val jsonObject = JSONObject(jsonString)
             val key = when (type) {
@@ -124,6 +124,7 @@ class MongoSearchViewModel(
         _mongoSearchResults.value = emptyList()
     }
 
+    // 검색어 텍스트가 바뀔때마다 동작
     fun onSearchTextChange(text: String) {
         _searchText.value = text
         _showSearchResults.value = text.isNotEmpty() // 검색어가 있을 때만 결과 표시
@@ -131,28 +132,27 @@ class MongoSearchViewModel(
 
     // 사용자가 선택 완료 버튼을 눌렀을 때 선택된 해시태그를 세팅하는 함수
     fun setSelectedHashtags(selectedHashtags: List<String>) {
-        // 선택된 해시태그들을 처리하는 로직
-        // 예: 데이터 저장소에 저장, 다른 ViewModel에 전달 등
-        // 이 예제에서는 로그로 출력
-        selectedHashtags.forEach { hashtag ->
-            println("선택된 해시태그: $hashtag")
-        }
-        // 선택된 해시태그들을 _selectedSearchResults 상태에 저장
-        _selectedSearchResults.value = selectedHashtags
+        _selectedHashtags.value = selectedHashtags
     }
 
-    // 검색 유형 변경 함수
-    fun changeSearchType(newType: SearchType) {
-        _searchType.value = newType
+    // 사용자가 선택 완료 버튼을 눌렀을 때 선택된 재료를 세팅하는 함수
+    fun setSelectedIngredients(selectedIngredients: List<String>) {
+        _selectedIngredients.value = selectedIngredients
     }
 
-    // 검색 결과 추가 함수 (재료 또는 해시태그에 따라 다른 상태 업데이트)
-    fun addSearchResult(result: String) {
-        when(_searchType.value) {
-            SearchType.INGREDIENT -> _selectedIngredientResults.value = _selectedIngredientResults.value + result
-            SearchType.HASHTAG -> _selectedHashTagResults.value = _selectedHashTagResults.value + result
-            else -> {}
-        }
+    // 재료 결과값 리셋
+    fun resetSelectedIngredients() {
+        _selectedIngredients.value = emptyList()
+    }
+
+    // 해시태그 결과값 리셋
+    fun resetSelectedHashtags() {
+        _selectedHashtags.value = emptyList()
+    }
+
+    // 연관 검색어 목록을 초기화하는 함수
+    fun clearMongoSearchResults() {
+        _mongoSearchResults.value = emptyList()
     }
 
 

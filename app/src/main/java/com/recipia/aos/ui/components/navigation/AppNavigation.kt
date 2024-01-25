@@ -162,8 +162,8 @@ fun AppNavigation(
             CreateRecipeScreen(
                 navController,
                 categorySelectionViewModel,
-                recipeCreateModel,
-                tokenManager
+                mongoSearchViewModel,
+                recipeCreateModel
             )
         }
         // ID찾기 화면
