@@ -70,7 +70,7 @@ class RecipeCreateModel(
         requestDto: RecipeCreateUpdateRequestDto,
         imageUris: List<Uri?>,
         context: Context,
-        onSuccess: () -> Unit,
+        onSuccess: (Long) -> Unit, // Long 타입의 recipeId를 인자로 받는 콜백
         onError: (String) -> Unit
     ) {
         val imageParts = imageUris.mapNotNull { uri ->
@@ -110,7 +110,8 @@ class RecipeCreateModel(
                 response: Response<ResponseDto<Long>>
             ) {
                 if (response.isSuccessful) {
-                    onSuccess()
+                    val recipeId = response.body()?.result ?: 0L // recipeId 추출
+                    onSuccess(recipeId) // recipeId를 전달
                 } else {
                     onError("서버 오류: ${response.errorBody()?.string()}")
                 }

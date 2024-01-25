@@ -202,7 +202,7 @@ fun HomeScreen(
                 },
                 actions = {
                     // 검색 아이콘 추가
-                    IconButton(onClick = { navController.navigate("searchScreen") }) {
+                    IconButton(onClick = { navController.navigate("search-Hashtag-Screen") }) {
                         Icon(Icons.Filled.Search, contentDescription = "검색")
                     }
 
