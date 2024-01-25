@@ -53,6 +53,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -106,6 +107,11 @@ fun CreateRecipeScreen(
     val selectedHashtags by mongoSearchViewModel.selectedHashtags.collectAsState()
     // 선택한 이미지 URI
     var selectedImageUris = recipeCreateModel.selectedImageUris
+
+    // 필수 필드에 대한 유효성 상태
+    val isRecipeNameValid = remember { mutableStateOf(true) }
+    val isRecipeDescValid = remember { mutableStateOf(true) }
+    val isCategorySelected = remember { mutableStateOf(true) }
 
     // 사진 선택기 선언
     val multiplePhotosPickerLauncher = rememberLauncherForActivityResult(
@@ -161,49 +167,54 @@ fun CreateRecipeScreen(
             bottomBar = {
                 Button(
                     onClick = {
-                        // 데이터 전송 로직
-                        val lastNutritionalInfo =
-                            nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
-                        val subCategoryDtoList =
-                            categorySelectionViewModel.createSubCategoryDtoList(
-                                categorySelectionViewModel.selectedCategories.value
+                        isRecipeNameValid.value = recipeName.isNotBlank()
+                        isRecipeDescValid.value = recipeDesc.isNotBlank()
+                        isCategorySelected.value = categorySelectionViewModel.selectedCategories.value.isNotEmpty()
+
+                        // 유효성 검증 실시
+                        if (isRecipeNameValid.value && isRecipeDescValid.value && isCategorySelected.value) {
+                            // 데이터 전송 로직
+                            val lastNutritionalInfo =
+                                nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
+                            val subCategoryDtoList =
+                                categorySelectionViewModel.createSubCategoryDtoList(
+                                    categorySelectionViewModel.selectedCategories.value
+                                )
+
+                            val requestDto = RecipeCreateUpdateRequestDto(
+                                id = null,
+                                recipeName = recipeName,
+                                recipeDesc = recipeDesc,
+                                timeTaken = timeTaken.toIntOrNull() ?: 0,
+                                ingredient = ingredient,
+                                hashtag = hashtag,
+                                nutritionalInfo = lastNutritionalInfo,
+                                subCategoryDtoList = subCategoryDtoList,
+                                deleteFileOrder = listOf()
                             )
 
-                        val requestDto = RecipeCreateUpdateRequestDto(
-                            id = null,
-                            recipeName = recipeName,
-                            recipeDesc = recipeDesc,
-                            timeTaken = timeTaken.toIntOrNull() ?: 0,
-                            ingredient = ingredient,
-                            hashtag = hashtag,
-                            nutritionalInfo = lastNutritionalInfo,
-                            subCategoryDtoList = subCategoryDtoList,
-                            deleteFileOrder = listOf()
-                        )
+                            // 모델을 사용하여 서버로 데이터와 이미지 전송
+                            recipeCreateModel.sendRecipeToServer(
+                                requestDto = requestDto,
+                                imageUris = selectedImageUris,
+                                context = context,
+                                onSuccess = {
+                                    // 서버로 데이터 전송 성공 후에 상태 초기화
+                                    recipeCreateModel.recipeName.value = ""
+                                    recipeCreateModel.recipeDesc.value = ""
+                                    recipeCreateModel.timeTaken.value = ""
+                                    recipeCreateModel.ingredient.value = ""
+                                    recipeCreateModel.hashtag.value = ""
+                                    nutritionalInfoList.clear()
+                                    recipeCreateModel.selectedImageUris = mutableStateListOf<Uri?>()
+                                    categorySelectionViewModel.selectedCategories.value = emptySet()
 
-                        // 모델을 사용하여 서버로 데이터와 이미지 전송
-                        recipeCreateModel.sendRecipeToServer(
-                            requestDto = requestDto,
-                            imageUris = selectedImageUris,
-                            context = context,
-                            onSuccess = {
-                                // 서버로 데이터 전송 성공 후에 상태 초기화
-                                recipeCreateModel.recipeName.value = ""
-                                recipeCreateModel.recipeDesc.value = ""
-                                recipeCreateModel.timeTaken.value = ""
-                                recipeCreateModel.ingredient.value = ""
-                                recipeCreateModel.hashtag.value = ""
-                                nutritionalInfoList.clear()
-                                recipeCreateModel.selectedImageUris = mutableStateListOf<Uri?>()
-                                categorySelectionViewModel.selectedCategories.value = emptySet()
-
-                                Toast.makeText(context, "레시피 생성 성공", Toast.LENGTH_SHORT).show()
-                                // 추가적인 성공 로직
+                                    Toast.makeText(context, "레시피 생성 성공", Toast.LENGTH_SHORT).show()
+                                    // 추가적인 성공 로직
+                                }
+                            ) { errorMessage ->
+                                Toast.makeText(context, "레시피 생성 실패: $errorMessage", Toast.LENGTH_LONG).show()
                             }
-                        ) { errorMessage ->
-                            Toast.makeText(context, "레시피 생성 실패: $errorMessage", Toast.LENGTH_LONG)
-                                .show()
-                            // 추가적인 실패 로직
                         }
                     },
                     modifier = Modifier
@@ -282,11 +293,14 @@ fun CreateRecipeScreen(
                                 .toMutableList() as SnapshotStateList<Uri?> // 변경
                     }
                 }
+
+                // 레시피 이름 작성 필드
                 item {
                     OutlinedTextField(
                         value = recipeCreateModel.recipeName.value,
-                        onValueChange = { newValue ->
-                            recipeCreateModel.recipeName.value = newValue
+                        onValueChange = {
+                            recipeCreateModel.recipeName.value = it
+                            isRecipeNameValid.value = it.isNotBlank() // 유효성 검사
                         },
                         label = { Text("레시피 이름 (*)") },
                         modifier = Modifier.fillMaxWidth(),
@@ -297,12 +311,18 @@ fun CreateRecipeScreen(
                             unfocusedBorderColor = Color(189, 189, 189), // 포커스가 해제됐을 때의 테두리 색상
                         )
                     )
+                    if (!isRecipeNameValid.value) {
+                        Text("필수 입력값입니다.", color = Color.Red)
+                    }
                 }
+
+                // 레시피 설명 작성 필드
                 item {
                     OutlinedTextField(
                         value = recipeCreateModel.recipeDesc.value,
-                        onValueChange = { newValue ->
-                            recipeCreateModel.recipeDesc.value = newValue
+                        onValueChange = {
+                            recipeCreateModel.recipeDesc.value = it
+                            isRecipeDescValid.value = it.isNotBlank() // 유효성 검사
                         },
                         label = { Text("레시피 설명 (*)") },
                         modifier = Modifier
@@ -315,7 +335,12 @@ fun CreateRecipeScreen(
                             unfocusedBorderColor = Color(189, 189, 189), // 포커스가 해제됐을 때의 테두리 색상
                         )
                     )
+                    if (!isRecipeDescValid.value) {
+                        Text("필수 입력값입니다.", color = Color.Red)
+                    }
                 }
+
+                // 소요 시간 작성 필드
                 item {
                     OutlinedTextField(
                         value = recipeCreateModel.timeTaken.value,
@@ -441,14 +466,16 @@ fun CreateRecipeScreen(
                     ) {
                         Text("카테고리 선택 (*)", fontSize = 14.sp, color = Color.Black)
                     }
+                    // 카테고리 선택 경고 메시지 표시 조건 수정
+                    if (!isCategorySelected.value) {
+                        Text("카테고리 선택은 필수입니다.", color = Color.Red)
+                    }
                 }
 
                 // 카테고리 정보 표시
                 item {
                     // viewModel에서 선택한 카테고리 값을 가져옴
                     val selectedCategories = categorySelectionViewModel.selectedCategories.value
-
-                    Spacer(modifier = Modifier.height(4.dp))
 
                     // 선택한 카테고리를 가로로 나열하기 위해 Row 사용
                     Row(
