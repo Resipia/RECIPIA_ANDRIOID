@@ -108,6 +108,11 @@ fun HomeScreen(
     val lazyListState = rememberLazyListState()
     val isScrolled = derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }.value
 
+    // 홈 화면이 로딩될때마다 페이지 reload
+    LaunchedEffect(key1 = true) {
+        recipeAllListViewModel.refreshItems()
+    }
+
     // `animateDpAsState` 사용하여 부드러운 애니메이션 적용
     val fabWidth by animateDpAsState(
         targetValue = if (isScrolled) 50.dp else 90.dp,
@@ -168,10 +173,10 @@ fun HomeScreen(
         recipeAllListViewModel.resetLoadFailed() // 경고창을 한 번만 표시하도록 상태를 리셋
     }
 
-    // 화면이 렌더링될 때 데이터 로딩 시작
-    LaunchedEffect(key1 = true) {
-        recipeAllListViewModel.loadMoreItems()
-    }
+//    // 화면이 렌더링될 때 데이터 로딩 시작
+//    LaunchedEffect(key1 = true) {
+//        recipeAllListViewModel.loadMoreItems()
+//    }
 
     // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
     if (navigateToLogin) {

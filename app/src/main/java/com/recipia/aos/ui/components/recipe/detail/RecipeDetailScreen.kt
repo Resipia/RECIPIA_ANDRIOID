@@ -1,6 +1,7 @@
 package com.recipia.aos.ui.components.recipe.detail
 
 import TokenManager
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -20,7 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -63,12 +67,49 @@ fun RecipeDetailScreen(
     navController: NavController,
     tokenManager: TokenManager
 ) {
+    val context = LocalContext.current
     var menuExpanded by remember { mutableStateOf(false) }
     val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
 
     // 레시피 상세 정보의 상태를 관찰
     val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
 
+    // AlertDialog를 표시할지 여부를 관리하는 상태
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("레시피 삭제") },
+            text = { Text("정말 작성한 레시피를 삭제하시겠습니까?") },
+            confirmButton = {
+                Button(onClick = {
+                    recipeDetailViewModel.deleteRecipe(
+                        recipeId = recipeId,
+                        onSuccess = {
+                            // 삭제 성공 시 처리, 예를 들어 홈 화면으로 이동
+                            Toast.makeText(context, "레시피가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                            // 현재 화면을 스택에서 제거하고 홈 화면으로 이동
+                            navController.popBackStack()
+                            navController.navigate("home")
+                        },
+                        onError = { errorMessage ->
+                            // 오류 발생 시 처리
+                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                    showDialog = false
+                }) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
+    }
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
@@ -77,7 +118,10 @@ fun RecipeDetailScreen(
                 title = { Text(text = "레시피 상세보기", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
                     IconButton(onClick = {
-                        commentViewModel.clearComments() // 댓글 목록 초기화
+                        // 댓글 목록 초기화
+                        commentViewModel.clearComments()
+                        // 현재 화면을 스택에서 제거하고 홈 화면으로 이동
+                        navController.popBackStack()
                         navController.navigate("home")
                     }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로 가기")
@@ -96,15 +140,19 @@ fun RecipeDetailScreen(
                     ) {
                         // 레시피 작성자가 현재 로그인한 사용자와 같은 경우에만 수정 및 삭제 옵션을 보여줌
                         if (recipeDetailState.value?.memberId == currentUserMemberId) {
+                            // 레시피 수정하기
                             DropdownMenuItem(
                                 text = { Text("레시피 수정") },
                                 onClick = {
                                     navController.navigate("update-recipe")
                                 }
                             )
+                            // 레시피 삭제 버튼
                             DropdownMenuItem(
                                 text = { Text("레시피 삭제") },
-                                onClick = { /* 삭제 처리 */ }
+                                onClick = {
+                                    showDialog = true
+                                }
                             )
                         }
                         DropdownMenuItem(
