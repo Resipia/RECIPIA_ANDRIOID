@@ -246,6 +246,8 @@ fun UpdateRecipeScreen(
                                     // MongoSearchViewModel 내의 선택된 재료와 해시태그를 초기화
                                     mongoSearchViewModel.resetSelectedIngredients()
                                     mongoSearchViewModel.resetSelectedHashtags()
+                                    mongoSearchViewModel.changeInitialized() // 몽고db 검색 초기값 세팅 후 initial값 변경
+                                    categorySelectionViewModel.changeInitialized() // 카테고리 초기값 세팅 후 initial값 변경
 
                                     Toast.makeText(context, "레시피 업데이트 성공", Toast.LENGTH_SHORT).show()
 
@@ -266,7 +268,7 @@ fun UpdateRecipeScreen(
                     shape = MaterialTheme.shapes.small.copy(CornerSize(10.dp))
                 ) {
                     Text(
-                        "작성 완료",
+                        "수정하기",
                         style = MaterialTheme.typography.labelLarge,
                         color = Color.White
                     )
