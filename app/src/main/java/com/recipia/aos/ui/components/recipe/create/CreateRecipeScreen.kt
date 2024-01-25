@@ -288,7 +288,7 @@ fun CreateRecipeScreen(
                         onValueChange = { newValue ->
                             recipeCreateModel.recipeName.value = newValue
                         },
-                        label = { Text("레시피 이름") },
+                        label = { Text("레시피 이름 (*)") },
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                         shape = RoundedCornerShape(8.dp), // 모서리 둥글게
@@ -304,7 +304,7 @@ fun CreateRecipeScreen(
                         onValueChange = { newValue ->
                             recipeCreateModel.recipeDesc.value = newValue
                         },
-                        label = { Text("레시피 설명") },
+                        label = { Text("레시피 설명 (*)") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(150.dp),
@@ -338,11 +338,12 @@ fun CreateRecipeScreen(
 
                 // 재료 버튼
                 item {
+                    Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = { navController.navigate("search-Screen/${SearchType.INGREDIENT.name}") }, // 백틱(`) 사용
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                            .padding(vertical = 4.dp)
                             .height(50.dp),
                         shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(1.dp, Color(189, 189, 189)),
@@ -369,7 +370,7 @@ fun CreateRecipeScreen(
                                 onClick = {},
                                 label = { Text(ingredient) },
                                 colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = Color(200,230,201),
+                                    containerColor = Color(200, 230, 201),
                                     labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
                                 )
 //                            elevation = null, // 그림자 제거
@@ -386,7 +387,7 @@ fun CreateRecipeScreen(
                         onClick = { navController.navigate("search-Screen/${SearchType.HASHTAG.name}") }, // 백틱(`) 사용
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                            .padding(vertical = 4.dp)
                             .height(50.dp),
                         shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(1.dp, Color(189, 189, 189)),
@@ -413,7 +414,7 @@ fun CreateRecipeScreen(
                                 onClick = {},
                                 label = { Text("#${hashtag}") },
                                 colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = Color(200,230,201),
+                                    containerColor = Color(200, 230, 201),
                                     labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
                                 )
 //                            elevation = null, // 그림자 제거
@@ -424,50 +425,77 @@ fun CreateRecipeScreen(
                     }
                 }
 
+                // 카테고리 선택 버튼
                 item {
-                    Row(
+                    Button(
+                        onClick = { navController.navigate("categorySelect") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .padding(vertical = 4.dp)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(1.dp, Color(189, 189, 189)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(238, 238, 238)
+                        )
                     ) {
-                        Button(
-                            onClick = { showNutritionalInfo.value = !showNutritionalInfo.value },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(
-                                    238,
-                                    238,
-                                    238
-                                )
-                            ),
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 8.dp)
-                                .height(48.dp), // 높이 지정
-                            shape = RoundedCornerShape(8.dp), // 모서리 둥글게
-                            border = BorderStroke(1.dp, Color(189, 189, 189)), // 태두리 설정
-                        ) {
-                            Text("영양소 입력", fontSize = 14.sp, color = Color.Black)
-                        }
+                        Text("카테고리 선택 (*)", fontSize = 14.sp, color = Color.Black)
+                    }
+                }
 
-                        Button(
-                            onClick = { navController.navigate("categorySelect") },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(
-                                    238,
-                                    238,
-                                    238
+                // 카테고리 정보 표시
+                item {
+                    // viewModel에서 선택한 카테고리 값을 가져옴
+                    val selectedCategories = categorySelectionViewModel.selectedCategories.value
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // 선택한 카테고리를 가로로 나열하기 위해 Row 사용
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // 각 AssistChip과 Spacer를 추가
+                        selectedCategories.forEachIndexed { index, category ->
+                            ElevatedAssistChip(
+                                onClick = { /* 각 AssistChip 클릭 시 동작 */ },
+                                label = {
+                                    Text(
+                                        category.subCategoryNm.toString(),
+                                        fontSize = 12.sp, // 글씨 크기 조절
+                                    )
+                                },
+                                colors = AssistChipDefaults.assistChipColors(
+                                    containerColor = Color(200, 230, 201),
+                                    labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                                ),
+                                border = AssistChipDefaults.assistChipBorder(
+                                    borderColor = Color(189, 189, 189)
                                 )
-                            ),
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 8.dp)
-                                .height(48.dp), // 높이 지정
-                            shape = RoundedCornerShape(8.dp), // 모서리 둥글게
-                            border = BorderStroke(1.dp, Color(189, 189, 189)), // 태두리 설정
-                        ) {
-                            Text("카테고리 선택", fontSize = 14.sp, color = Color.Black)
+                            )
+
+                            // Spacer를 추가하여 간격 설정
+                            if (index < selectedCategories.size - 1) {
+                                Spacer(modifier = Modifier.width(4.dp)) // 원하는 간격 설정
+                            }
                         }
+                    }
+                }
+
+                // 영양소 입력 버튼
+                item {
+                    Button(
+                        onClick = { showNutritionalInfo.value = !showNutritionalInfo.value },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(1.dp, Color(189, 189, 189)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(238, 238, 238)
+                        )
+                    ) {
+                        Text("영양소 입력", fontSize = 14.sp, color = Color.Black)
                     }
                 }
 
@@ -497,54 +525,6 @@ fun CreateRecipeScreen(
 
                             // 생성된 NutritionalInfoDto 객체를 nutritionalInfoList에 추가
                             nutritionalInfoList.add(nutritionalInfoDto)
-                        }
-                    }
-                }
-
-                // 카테고리 정보 표시
-                item {
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    // Text 텍스트 변경
-                    Text(
-                        "선택된 카테고리:",
-                        fontSize = 14.sp, // 글씨 크기 조절
-                        color = Color.Black, // 텍스트 색상 설정
-                        fontWeight = FontWeight.Bold // 텍스트 굵기 설정
-                    )
-
-                    // viewModel에서 선택한 카테고리 값을 가져옴
-                    val selectedCategories = categorySelectionViewModel.selectedCategories.value
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    // 선택한 카테고리를 가로로 나열하기 위해 Row 사용
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // 각 AssistChip과 Spacer를 추가
-                        selectedCategories.forEachIndexed { index, category ->
-                            AssistChip(
-                                onClick = { /* 각 AssistChip 클릭 시 동작 */ },
-                                label = {
-                                    Text(
-                                        category.subCategoryNm.toString(),
-                                        fontSize = 12.sp, // 글씨 크기 조절
-                                    )
-                                },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = Color(238, 238, 238),
-                                    labelColor = Color.Black, // 내부 텍스트 색상
-                                ),
-                                border = AssistChipDefaults.assistChipBorder(
-                                    borderColor = Color(189, 189, 189)
-                                )
-                            )
-
-                            // Spacer를 추가하여 간격 설정
-                            if (index < selectedCategories.size - 1) {
-                                Spacer(modifier = Modifier.width(4.dp)) // 원하는 간격 설정
-                            }
                         }
                     }
                 }
