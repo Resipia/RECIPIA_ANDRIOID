@@ -77,8 +77,8 @@ fun RecipeDetailScreen(
                 title = { Text(text = "레시피 상세보기", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
                     IconButton(onClick = {
-                        navController.popBackStack()
                         commentViewModel.clearComments() // 댓글 목록 초기화
+                        navController.navigate("home")
                     }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로 가기")
                     }

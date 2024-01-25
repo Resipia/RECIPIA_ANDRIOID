@@ -49,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -90,22 +91,17 @@ fun UpdateRecipeScreen(
 ) {
 
     // 상태 변수를 사용하여 각 필드에 데이터 바인딩
-    val recipeName = remember { mutableStateOf(
+    val recipeName = rememberSaveable { mutableStateOf(
         recipeDetailViewModel?.recipeDetail?.value?.recipeName ?: "") }
 
-    val recipeDesc = remember { mutableStateOf(
+    val recipeDesc = rememberSaveable { mutableStateOf(
         recipeDetailViewModel?.recipeDetail?.value?.recipeDesc ?: "") }
 
-    val timeTaken = remember { mutableStateOf(
+    val timeTaken = rememberSaveable { mutableStateOf(
         recipeDetailViewModel?.recipeDetail?.value?.timeTaken.toString()) }
 
-    val ingredient = remember { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.ingredient ?: "") }
-
-    val hashtag = remember { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.hashtag ?: "") }
-
-    var selectedImageUris = remember { mutableStateListOf<Uri?>() } // 이미지 URI 목록
+    // 기존 이미지 URL들을 Uri 객체로 변환하여 저장할 리스트
+    val selectedImageUris = remember { mutableStateListOf<Uri?>() }
 
     val nutritionalInfo = remember { mutableStateOf(
         recipeDetailViewModel?.recipeDetail?.value?.nutritionalInfoDto ?: NutritionalInfoDto()) } // 영양 정보 상태 변수
@@ -126,21 +122,30 @@ fun UpdateRecipeScreen(
         return this.split(", ").filter { it.isNotBlank() }
     }
 
+    // 초기 재료/해시태그 값 세팅
     LaunchedEffect(key1 = Unit) {
         val initialIngredients = recipeDetailViewModel?.recipeDetail?.value?.ingredient?.toList() ?: emptyList()
         val initialHashtags = recipeDetailViewModel?.recipeDetail?.value?.hashtag?.toList() ?: emptyList()
         mongoSearchViewModel.initializeSelectedIngredientsAndHashtags(initialIngredients, initialHashtags)
     }
 
+    // 초기 카테고리 값 세팅
     LaunchedEffect(key1 = recipeDetailViewModel?.recipeDetail?.value?.id) {
         // List를 Set으로 변환하여 ViewModel에 설정
         categorySelectionViewModel.initializeCategories(selectedCategoriesBefore.value.toSet())
     }
 
+    // 초기 이미지에 기존 저장되어있던 이미지 정보 추가
+    LaunchedEffect(key1 = recipeDetailViewModel?.recipeDetail) {
+        recipeDetailViewModel?.recipeDetail?.value?.recipeFileUrlList?.forEach { fileResponse ->
+            selectedImageUris.add(Uri.parse(fileResponse.preUrl))
+        }
+    }
+
     // selectedCategories의 현재 값을 가져옴
     val selectedCategories = categorySelectionViewModel.selectedCategories.value
 
-    // mongo Model에서 데이터를 가져온다. todo: 이거 상세보기에서 받은 데이터로 바꿔서 세팅해줘야함
+    // mongo Model에서 데이터를 가져온다.
     val selectedIngredients by mongoSearchViewModel.selectedIngredients.collectAsState()
     val selectedHashtags by mongoSearchViewModel.selectedHashtags.collectAsState()
 
@@ -149,9 +154,10 @@ fun UpdateRecipeScreen(
         contract = ActivityResultContracts.PickMultipleVisualMedia(
             maxItems = 10
         ),
-        onResult = {
-            selectedImageUris.clear()
-            selectedImageUris.addAll(it)
+        onResult = {uris ->
+//            selectedImageUris.clear()
+            // 기존 이미지를 유지하면서 새로운 이미지 추가
+            selectedImageUris.addAll(uris)
         }
     )
 
@@ -330,9 +336,7 @@ fun UpdateRecipeScreen(
                     // 이미지 썸네일 목록
                     ImageThumbnails(selectedImageUris) { removedUri ->
                         // 이미지 제거
-                        selectedImageUris =
-                            selectedImageUris.filter { it != removedUri }
-                                .toMutableList() as SnapshotStateList<Uri?> // 변경
+                        selectedImageUris.remove(removedUri)
                     }
                 }
 

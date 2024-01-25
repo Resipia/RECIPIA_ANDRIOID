@@ -111,7 +111,7 @@ fun CreateRecipeScreen(
             maxItems = 10
         ),
         onResult = {
-            recipeCreateModel.selectedImageUris.clear()
+//            recipeCreateModel.selectedImageUris.clear()
             recipeCreateModel.selectedImageUris.addAll(it)
         }
     )
@@ -289,9 +289,7 @@ fun CreateRecipeScreen(
                     // 이미지 썸네일 목록
                     ImageThumbnails(selectedImageUris) { removedUri ->
                         // 이미지 제거
-                        selectedImageUris =
-                            selectedImageUris.filter { it != removedUri }
-                                .toMutableList() as SnapshotStateList<Uri?> // 변경
+                        selectedImageUris.remove(removedUri)
                     }
                 }
 
