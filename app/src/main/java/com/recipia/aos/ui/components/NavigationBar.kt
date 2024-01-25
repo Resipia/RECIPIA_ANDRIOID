@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddReaction
@@ -21,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -28,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.ai.client.generativeai.Chat
+import com.recipia.aos.ui.components.home.ElevatedDivider
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 @Composable
@@ -61,8 +66,12 @@ fun NavigationBar(
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(
+    navController: NavController,
+    snackbarHostState: SnackbarHostState
+) {
     val selectedItem = remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     // 아이콘 색상 정의
@@ -87,18 +96,20 @@ fun BottomNavigationBar(navController: NavController) {
     )
 
     Column {
+
         // 상단 경계선 추가
-        Divider(
-            color = Color.LightGray,
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
+        ElevatedDivider(
+            color = Color(238, 238, 238),
+            thickness = 1.5.dp,
+            elevation = 20.dp
         )
 
-        // NavigationBar 스타일을 수정
+        // NavigationBar 스타일을 수정 (높이 추가)
         NavigationBar(
-            containerColor = Color.White, // 배경색을 하얀색으로 설정
-            contentColor = unselectedIconColor, // 기본 아이콘 색상 설정
-            tonalElevation = 0.dp // 그림자 없음
+            modifier = Modifier.height(80.dp), // 여기서 높이를 조정합니다.
+            containerColor = Color.White,
+            contentColor = unselectedIconColor,
+            tonalElevation = 1.dp
         ) {
             items.forEachIndexed { index, pair ->
                 val (label, icon) = pair
@@ -108,14 +119,23 @@ fun BottomNavigationBar(navController: NavController) {
                     selected = selectedItem.value == index,
                     onClick = {
                         when (label) {
-                            "채팅" -> Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
-                            "위글위글" -> Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
+                            "채팅", "위글위글" -> {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "준비중인 서비스입니다.",
+//                                        actionLabel = "확인"
+                                    )
+                                }
+                            }
+
                             else -> {
-                                navController.navigate(when (label) {
-                                    "홈" -> "home"
-                                    "마이페이지" -> "my-page"
-                                    else -> "home"
-                                }) {
+                                navController.navigate(
+                                    when (label) {
+                                        "홈" -> "home"
+                                        "마이페이지" -> "my-page"
+                                        else -> "home"
+                                    }
+                                ) {
                                     launchSingleTop = true
                                 }
                             }

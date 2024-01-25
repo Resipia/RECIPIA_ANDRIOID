@@ -22,6 +22,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -69,8 +71,13 @@ fun MyPageScreen(
     LaunchedEffect(key1 = targetId) { // memberId를 기반으로 데이터 로딩
         myPageViewModel.loadMyPageData(targetId)
     }
+    // 스낵바 설정
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {
             TopAppBar(
@@ -112,7 +119,7 @@ fun MyPageScreen(
                 )
             )
         },
-        bottomBar = { BottomNavigationBar(navController) }
+        bottomBar = { BottomNavigationBar(navController, snackbarHostState) }
     ) { innerPadding ->
 
         myPageData?.let { data ->

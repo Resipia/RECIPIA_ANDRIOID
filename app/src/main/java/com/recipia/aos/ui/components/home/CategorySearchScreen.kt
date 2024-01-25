@@ -17,6 +17,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -59,8 +61,13 @@ fun CategorySearchScreen(
     // 선택된 서브 카테고리를 추적하는 상태
     var selectedSubCategories by remember { mutableStateOf(setOf<SubCategoryDto>()) }
 
+    // 스낵바 설정
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {
             TopAppBar(
@@ -77,7 +84,7 @@ fun CategorySearchScreen(
                 ),
             )
         },
-        bottomBar = { BottomNavigationBar(navController) }
+        bottomBar = { BottomNavigationBar(navController, snackbarHostState) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -113,7 +120,8 @@ fun CategorySearchScreen(
                                 onClick = {
                                     // 선택 로직
                                     val currentSelection = selectedSubCategories.toMutableSet()
-                                    val subCategoryDto = SubCategoryDto(subCategory.id.toLong(), subCategory.name)
+                                    val subCategoryDto =
+                                        SubCategoryDto(subCategory.id.toLong(), subCategory.name)
                                     if (currentSelection.any { it.id.toInt() == subCategory.id }) {
                                         currentSelection.removeIf { it.id.toInt() == subCategory.id }
                                     } else {
