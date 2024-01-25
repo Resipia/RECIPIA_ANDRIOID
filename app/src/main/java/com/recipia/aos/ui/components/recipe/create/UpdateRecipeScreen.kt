@@ -110,7 +110,7 @@ fun UpdateRecipeScreen(
     val nutritionalInfo = remember { mutableStateOf(
         recipeDetailViewModel?.recipeDetail?.value?.nutritionalInfoDto ?: NutritionalInfoDto()) } // 영양 정보 상태 변수
 
-    val selectedCategories = remember { mutableStateOf(
+    val selectedCategoriesBefore = remember { mutableStateOf(
         recipeDetailViewModel?.recipeDetail?.value?.subCategoryDtoList ?: emptyList()) }  // 선택된 카테고리 상태 변수
 
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
@@ -131,6 +131,14 @@ fun UpdateRecipeScreen(
         val initialHashtags = recipeDetailViewModel?.recipeDetail?.value?.hashtag?.toList() ?: emptyList()
         mongoSearchViewModel.initializeSelectedIngredientsAndHashtags(initialIngredients, initialHashtags)
     }
+
+    LaunchedEffect(key1 = recipeDetailViewModel?.recipeDetail?.value?.id) {
+        // List를 Set으로 변환하여 ViewModel에 설정
+        categorySelectionViewModel.initializeCategories(selectedCategoriesBefore.value.toSet())
+    }
+
+    // selectedCategories의 현재 값을 가져옴
+    val selectedCategories = categorySelectionViewModel.selectedCategories.value
 
     // mongo Model에서 데이터를 가져온다. todo: 이거 상세보기에서 받은 데이터로 바꿔서 세팅해줘야함
     val selectedIngredients by mongoSearchViewModel.selectedIngredients.collectAsState()
@@ -168,14 +176,15 @@ fun UpdateRecipeScreen(
                     modifier = Modifier.background(Color.White),
                     title = {
                         Text(
-                            text = "레시피 작성",
+                            text = "레시피 수정",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = {
                             categorySelectionViewModel.selectedCategories.value = emptySet() // 카테고리 선택 초기화
-                            mongoSearchViewModel.changeInitialized() // 초기상태값 초기화
+                            mongoSearchViewModel.changeInitialized() // 몽고db 검색 초기값 세팅 후 initial값 변경
+                            categorySelectionViewModel.changeInitialized() // 카테고리 초기값 세팅 후 initial값 변경
                             navController.popBackStack()
                         }) {
                             Icon(Icons.Default.Close, contentDescription = "닫기")
@@ -197,6 +206,7 @@ fun UpdateRecipeScreen(
                         // 유효성 검증 실시
                         if (isRecipeNameValid.value && isRecipeDescValid.value && isCategorySelected.value) {
 
+                            // 서브 카테고리를 가져오는 로직
                             val subCategoryDtoList =
                                 categorySelectionViewModel.createSubCategoryDtoList(
                                     categorySelectionViewModel.selectedCategories.value
@@ -496,13 +506,10 @@ fun UpdateRecipeScreen(
 
                 // 카테고리 정보 표시
                 item {
-                    // selectedCategories 상태 변수에서 카테고리 목록을 가져옴
-                    val categories = selectedCategories.value
-
                     // 선택한 카테고리를 가로로 나열하기 위해 Row 사용
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         // 각 AssistChip과 Spacer를 추가
-                        categories.forEachIndexed { index, category ->
+                        selectedCategories.forEachIndexed { index, category ->
                             ElevatedAssistChip(
                                 onClick = { /* 각 AssistChip 클릭 시 동작 */ },
                                 label = {
@@ -521,7 +528,7 @@ fun UpdateRecipeScreen(
                             )
 
                             // Spacer를 추가하여 간격 설정
-                            if (index < categories.size - 1) {
+                            if (index < selectedCategories.size - 1) {
                                 Spacer(modifier = Modifier.width(4.dp)) // 원하는 간격 설정
                             }
                         }
