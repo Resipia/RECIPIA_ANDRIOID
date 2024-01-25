@@ -27,8 +27,10 @@ import com.recipia.aos.ui.components.signup.SignUpSuccessScreen
 import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
 import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
+import com.recipia.aos.ui.model.comment.CommentViewModel
 import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
+import com.recipia.aos.ui.model.factory.CommentViewModelFactory
 import com.recipia.aos.ui.model.factory.FollowViewModelFactory
 import com.recipia.aos.ui.model.factory.MongoSearchViewModelFactory
 import com.recipia.aos.ui.model.factory.MyPageViewModelFactory
@@ -85,6 +87,9 @@ fun AppNavigation(
     )
     val mongoSearchViewModel: MongoSearchViewModel = viewModel(
         factory = MongoSearchViewModelFactory(tokenManager)
+    )
+    val commentViewModel: CommentViewModel = viewModel(
+        factory = CommentViewModelFactory(tokenManager)
     )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
@@ -154,6 +159,7 @@ fun AppNavigation(
             RecipeDetailScreen(
                 recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L,
                 recipeDetailViewModel,
+                commentViewModel,
                 navController
             )
         }

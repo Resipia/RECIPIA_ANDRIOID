@@ -34,10 +34,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,13 +52,17 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
+import com.recipia.aos.ui.components.recipe.detail.comment.CommentsSection
+import com.recipia.aos.ui.model.comment.CommentViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailScreen(
     recipeId: Long,
     recipeDetailViewModel: RecipeDetailViewModel,
+    commentViewModel: CommentViewModel,
     navController: NavController
 ) {
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
@@ -67,7 +73,10 @@ fun RecipeDetailScreen(
             TopAppBar(
                 title = { Text(text = "레시피 상세보기", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                        commentViewModel.clearComments() // 댓글 목록 초기화
+                    }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로 가기")
                     }
                 },
@@ -107,6 +116,7 @@ fun RecipeDetailScreen(
         RecipeDetailContent(
             recipeId = recipeId,
             recipeDetailViewModel = recipeDetailViewModel,
+            commentViewModel = commentViewModel,
             navController = navController,
             paddingValues = innerPadding
         )
@@ -119,13 +129,21 @@ fun RecipeDetailScreen(
 fun RecipeDetailContent(
     recipeId: Long,
     recipeDetailViewModel: RecipeDetailViewModel,
+    commentViewModel: CommentViewModel,
     navController: NavController,
     paddingValues: PaddingValues
 ) {
+
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
         recipeDetailViewModel.loadRecipeDetail(recipeId)
+        commentViewModel.loadInitialComments(recipeId) // 수정된 함수 호출
     }
+
+    val coroutineScope = rememberCoroutineScope() // 코루틴 스코프 생성
+
+    // 댓글 상태 관찰
+    val comments by commentViewModel.comments.collectAsState()
 
     // LiveData를 Compose에서 관찰하기 위해 observeAsState() 사용
     val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
@@ -187,7 +205,10 @@ fun RecipeDetailContent(
                 ) {
                     // 프로필 이미지
                     Image(
-                        painter = rememberAsyncImagePainter(model = recipeDetail.recipeFileUrlList ?: "https://example.com/default_profile.jpg"),
+                        painter = rememberAsyncImagePainter(
+                            model = recipeDetail.recipeFileUrlList
+                                ?: "https://example.com/default_profile.jpg"
+                        ),
                         contentDescription = "작성자 프로필",
                         modifier = Modifier
                             .size(60.dp) // 이미지 크기
@@ -289,6 +310,26 @@ fun RecipeDetailContent(
                     color = Color.Gray // 구분선의 색상 설정
                 )
 //                Divider(Modifier.padding(vertical = 8.dp))
+
+                // 댓글 섹션
+                if (comments == null || comments!!.content.isEmpty()) {
+                    // 댓글 데이터가 없거나 댓글 목록이 비어있는 경우
+                    Text(
+                        text = "아직 작성된 댓글이 없습니다.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    // 댓글 데이터가 있는 경우
+                    CommentsSection(
+                        comments = comments!!.content,
+                        loadMoreComments = {
+                            coroutineScope.launch {
+                                commentViewModel.loadMoreComments(recipeId)
+                            }
+                        }
+                    )
+                }
             }
         }
     }
