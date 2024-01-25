@@ -152,13 +152,28 @@ fun MongoIngredientAndHashTagSearchScreen(
             Column {
                 TextField(
                     value = searchText,
-                    onValueChange = viewModel::onSearchTextChange,
+                    onValueChange = {
+                        val filteredText = it.filter { char -> char.isLetterOrDigit() }
+                        viewModel.onSearchTextChange(filteredText)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp)
                         .focusRequester(focusRequester),
                     textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
-                    placeholder = { Text("검색어를 입력하세요") },
+                    placeholder = {
+                        if (type == SearchType.INGREDIENT) {
+                            Text(
+                                "재료를 입력하세요 (한/영, 숫자만 입력 가능)",
+                                fontSize = 14.sp
+                            )
+                        } else if (type == SearchType.HASHTAG) {
+                            Text(
+                                "해시태그를 입력하세요 (한/영, 숫자만 입력 가능)",
+                                fontSize = 14.sp
+                            )
+                        }
+                    },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Search,
@@ -211,10 +226,11 @@ fun MongoIngredientAndHashTagSearchScreen(
                         AssistChip(
                             onClick = {},
                             label = {
-                                Text(
-                                    result,
-                                    fontSize = 12.sp, // 글씨 크기 조절
-                                )
+                                if (type == SearchType.INGREDIENT) {
+                                    Text(result, fontSize = 12.sp)
+                                } else if (type == SearchType.HASHTAG) {
+                                    Text("#${result}", fontSize = 12.sp)
+                                }
                             },
                             colors = AssistChipDefaults.assistChipColors(
                                 containerColor = Color(238, 238, 238),

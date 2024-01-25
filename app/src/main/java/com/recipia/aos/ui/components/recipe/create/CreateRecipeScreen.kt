@@ -411,7 +411,7 @@ fun CreateRecipeScreen(
                         selectedHashtags.forEach { hashtag ->
                             ElevatedAssistChip(
                                 onClick = {},
-                                label = { Text(hashtag) },
+                                label = { Text("#${hashtag}") },
                                 colors = AssistChipDefaults.assistChipColors(
                                     containerColor = Color(200,230,201),
                                     labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
