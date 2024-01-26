@@ -2,8 +2,7 @@ package com.recipia.aos.ui.model.comment
 
 import TokenManager
 import androidx.lifecycle.ViewModel
-import coil.compose.rememberAsyncImagePainter
-import com.recipia.aos.ui.api.CommentService
+import com.recipia.aos.ui.api.recipe.CommentService
 import com.recipia.aos.ui.dto.PagingResponseDto
 import com.recipia.aos.ui.dto.comment.CommentListResponseDto
 import kotlinx.coroutines.flow.MutableStateFlow

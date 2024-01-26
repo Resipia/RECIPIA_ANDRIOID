@@ -4,7 +4,7 @@ import TokenManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.recipia.aos.ui.api.MyPageService
+import com.recipia.aos.ui.api.recipe.mypage.MyPageService
 import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
 import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
 import kotlinx.coroutines.launch

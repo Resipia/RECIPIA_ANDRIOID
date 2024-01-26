@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.api
+package com.recipia.aos.ui.api.recipe.mypage
 
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto

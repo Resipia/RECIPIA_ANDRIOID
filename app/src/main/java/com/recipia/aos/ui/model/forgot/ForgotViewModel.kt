@@ -1,10 +1,9 @@
 package com.recipia.aos.ui.model.forgot
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.recipia.aos.ui.api.MemberManagementService
+import com.recipia.aos.ui.api.signup.SignUpAndForgotService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.forgot.FindEmailRequestDto
 import com.recipia.aos.ui.dto.forgot.TempPasswordRequestDto
@@ -34,7 +33,7 @@ class ForgotViewModel : ViewModel() {
     val foundEmail: StateFlow<String?> = _foundEmail
 
     // RecipeApiService를 초기화
-    val memberManagementService: MemberManagementService by lazy {
+    val signUpAndForgotService: SignUpAndForgotService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -48,7 +47,7 @@ class ForgotViewModel : ViewModel() {
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(MemberManagementService::class.java)
+            .create(SignUpAndForgotService::class.java)
     }
 
     // 이메일 찾기
@@ -107,7 +106,7 @@ class ForgotViewModel : ViewModel() {
         phoneNumber: String
     ): Response<ResponseDto<String>> {
         // Retrofit을 사용하여 API 호출
-        return memberManagementService.findEmail(FindEmailRequestDto(name, phoneNumber))
+        return signUpAndForgotService.findEmail(FindEmailRequestDto(name, phoneNumber))
     }
 
     // 임시 비밀번호 재발급 호출(코루틴)
@@ -115,7 +114,7 @@ class ForgotViewModel : ViewModel() {
         email: String
     ): Response<ResponseDto<Void>> {
         // Retrofit을 사용하여 API 호출
-        return memberManagementService.sendTempPassword(TempPasswordRequestDto(email))
+        return signUpAndForgotService.sendTempPassword(TempPasswordRequestDto(email))
     }
 
     // 찾은 이메일 저장

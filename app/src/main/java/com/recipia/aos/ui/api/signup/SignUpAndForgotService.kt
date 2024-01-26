@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.api
+package com.recipia.aos.ui.api.signup
 
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.forgot.FindEmailRequestDto
@@ -7,7 +7,6 @@ import com.recipia.aos.ui.dto.singup.EmailAvailableRequestDto
 import com.recipia.aos.ui.dto.singup.NicknameAvailableRequestDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Multipart
@@ -18,7 +17,7 @@ import retrofit2.http.Part
  * 코루틴 비동기 요청
  * 이메일 중복 체크와 같은 네트워크 요청은 비동기 작업이므로 suspend fun으로 처리하는 것이 좋다.
  */
-interface MemberManagementService {
+interface SignUpAndForgotService {
 
     // 이메일 중복 체크 요청
     @POST("/member/management/checkDupEmail")

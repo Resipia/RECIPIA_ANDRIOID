@@ -1,21 +1,16 @@
 package com.recipia.aos.ui.model.signup
 
-import android.content.ContentUris
 import android.content.Context
-import android.database.Cursor
 import android.net.Uri
-import android.os.Build
-import android.provider.DocumentsContract
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.recipia.aos.ui.api.MemberManagementService
+import com.recipia.aos.ui.api.signup.SignUpAndForgotService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.singup.EmailAvailableRequestDto
 import com.recipia.aos.ui.dto.singup.NicknameAvailableRequestDto
-import com.recipia.aos.ui.dto.singup.SignUpRequestDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -82,7 +77,7 @@ class SignUpViewModel : ViewModel() {
     val isPasswordMatching: LiveData<Boolean> = _isPasswordMatching
 
     // RecipeApiService를 초기화
-    val memberManagementService: MemberManagementService by lazy {
+    val signUpAndForgotService: SignUpAndForgotService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -97,7 +92,7 @@ class SignUpViewModel : ViewModel() {
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(MemberManagementService::class.java)
+            .create(SignUpAndForgotService::class.java)
     }
 
     // 여기에 데이터 업데이트 함수들 추가
@@ -202,7 +197,7 @@ class SignUpViewModel : ViewModel() {
         email: String
     ): Response<ResponseDto<Boolean>> {
         // Retrofit을 사용하여 API 호출
-        return memberManagementService.checkDuplicateEmail(EmailAvailableRequestDto(email))
+        return signUpAndForgotService.checkDuplicateEmail(EmailAvailableRequestDto(email))
     }
 
     // 닉네임 중복 체크
@@ -210,7 +205,7 @@ class SignUpViewModel : ViewModel() {
         nickname: String
     ): Response<ResponseDto<Boolean>> {
         // Retrofit을 사용하여 API 호출
-        return memberManagementService.checkDuplicateNickname(NicknameAvailableRequestDto(nickname))
+        return signUpAndForgotService.checkDuplicateNickname(NicknameAvailableRequestDto(nickname))
     }
 
     // 비밀번호 일치여부 변경 함수
@@ -290,7 +285,7 @@ class SignUpViewModel : ViewModel() {
                 }
 
                 // Retrofit 서비스 호출
-                val response = memberManagementService.signUp(
+                val response = signUpAndForgotService.signUp(
                     email = emailBody,
                     password = passwordBody,
                     fullName = nameBody,

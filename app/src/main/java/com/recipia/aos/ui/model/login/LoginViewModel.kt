@@ -3,16 +3,11 @@ package com.recipia.aos.ui.model.login
 import TokenManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.recipia.aos.ui.api.LoginService
-import com.recipia.aos.ui.dto.login.LoginResponseDto
-import com.recipia.aos.ui.dto.ResponseDto
+import com.recipia.aos.ui.api.login.LoginService
 import com.recipia.aos.ui.dto.login.TokenMemberInfoDto
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
