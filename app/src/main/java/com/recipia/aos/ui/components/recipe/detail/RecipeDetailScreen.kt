@@ -6,22 +6,25 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -55,11 +58,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
+import com.recipia.aos.ui.components.recipe.detail.comment.CommentItem
 import com.recipia.aos.ui.components.recipe.detail.comment.CommentsSection
 import com.recipia.aos.ui.model.comment.CommentViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
@@ -454,49 +459,54 @@ fun RecipeDetailContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheet(
-    onDismiss: () -> Unit,  // 이 부분을 수정함
+    onDismiss: () -> Unit,
     commentViewModel: CommentViewModel,
     recipeId: Long
 ) {
     val modalBottomSheetState = rememberModalBottomSheetState()
 
     ModalBottomSheet(
-        onDismissRequest = {
-            onDismiss()  // 여기서 onDismiss 함수를 호출함
-        },
+        onDismissRequest = { onDismiss() },
         sheetState = modalBottomSheetState,
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-    ) {
-        CountryList(commentViewModel, recipeId)
-    }
+        content = {
+            BoxWithConstraints {
+                // 'maxHeight'를 여기에서 계산합니다.
+                val maxHeight = this.maxHeight * 0.48f  // 화면 높이의 80%
+
+                CommentsList(
+                    commentViewModel = commentViewModel,
+                    recipeId = recipeId,
+                    maxHeight = maxHeight
+                )
+            }
+        }
+    )
 }
 
-
 @Composable
-fun CountryList(
+fun CommentsList(
     commentViewModel: CommentViewModel,
-    recipeId: Long
+    recipeId: Long,
+    maxHeight: Dp
 ) {
-
+    val commentsResponse by commentViewModel.comments.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-    val comments by commentViewModel.comments.collectAsState()
 
-    if (comments == null || comments!!.content.isEmpty()) {
-        // 댓글 데이터가 없는 경우
-        Text(
-            text = "아직 작성된 댓글이 없습니다.",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(16.dp)
-        )
-    } else {
-        // 댓글 데이터가 있는 경우
-        CommentsSection(
-            comments = comments!!.content,
-            loadMoreComments = {
+    LazyColumn(
+        modifier = Modifier.height(maxHeight)  // 여기에서 최대 높이를 적용합니다.
+    ) {
+        itemsIndexed(commentsResponse?.content ?: emptyList()) { index, comment ->
+            CommentItem(comment)
+        }
+
+        item {
+            Button(onClick = {
                 coroutineScope.launch {
                     commentViewModel.loadMoreComments(recipeId)
                 }
+            }) {
+                Text("더 많은 댓글 불러오기")
             }
-        )
+        }
     }
 }
