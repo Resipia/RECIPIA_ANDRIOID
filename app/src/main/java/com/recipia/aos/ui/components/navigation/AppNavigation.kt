@@ -17,7 +17,7 @@ import com.recipia.aos.ui.components.home.CategorySelectRecipeScreen
 import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
-import com.recipia.aos.ui.components.mypage.SelectRecipeScreen
+import com.recipia.aos.ui.components.mypage.MyPageRecipeListScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
@@ -170,7 +170,7 @@ fun AppNavigation(
         // 마이페이지에서 북마크/좋아요한 레시피 보기
         composable("select-recipe-screen/{memberId}") { backStackEntry ->
             val memberId = backStackEntry.arguments?.getString("memberId")?.toLongOrNull()
-            SelectRecipeScreen(
+            MyPageRecipeListScreen(
                 navController = navController,
                 bookmarkViewModel = bookmarkViewModel,
                 myPageViewModel = myPageViewModel,

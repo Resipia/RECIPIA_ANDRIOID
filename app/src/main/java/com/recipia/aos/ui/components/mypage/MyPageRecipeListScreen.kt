@@ -9,13 +9,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,11 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,16 +56,14 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.recipia.aos.R
-import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
-import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectRecipeScreen(
+fun MyPageRecipeListScreen(
     navController: NavController,
 //    recipeAllListViewModel: RecipeAllListViewModel,
     bookmarkViewModel: BookMarkViewModel,
