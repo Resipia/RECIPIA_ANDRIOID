@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
@@ -33,6 +34,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -148,34 +150,6 @@ fun RecipeDetailScreen(
             }
         )
     }
-
-//    ModalBottomSheet(
-//        sheetState = sheetState,
-//        onDismissRequest = {
-//            coroutineScope.launch {
-//                sheetState.hide()
-//            }
-//        }
-//    ) {
-//        if (comments == null || comments!!.content.isEmpty()) {
-//            // 댓글 데이터가 없는 경우
-//            Text(
-//                text = "아직 작성된 댓글이 없습니다.",
-//                style = MaterialTheme.typography.bodyMedium,
-//                modifier = Modifier.padding(16.dp)
-//            )
-//        } else {
-//            // 댓글 데이터가 있는 경우
-//            CommentsSection(
-//                comments = comments!!.content,
-//                loadMoreComments = {
-//                    coroutineScope.launch {
-//                        commentViewModel.loadMoreComments(recipeId)
-//                    }
-//                }
-//            )
-//        }
-//    }
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
@@ -447,11 +421,23 @@ fun RecipeDetailContent(
                 // '댓글' 버튼을 눌렀을 때 showSheet 상태를 true로 설정
                 Button(
                     onClick = { setShowSheet(true) },
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth() // 전체 너비를 채우도록 설정
+                        .height(60.dp) // 버튼의 높이를 더 크게 설정
+                        .padding(horizontal = 12.dp, vertical = 8.dp), // 주변 여백 설정
+                    shape = RoundedCornerShape(12.dp), // 모서리를 둥글게 설정
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(241,243,245), // 버튼 배경색
+                        contentColor = MaterialTheme.colorScheme.onPrimary // 텍스트 및 아이콘 색상
+                    )
                 ) {
-                    Text("댓글")
+                    Text(
+                        text = "댓글보기",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
                 }
-
             }
         }
     }
