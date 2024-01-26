@@ -110,7 +110,11 @@ fun MyPageScreen(
             TopAppBar(
                 title = { Text(text = "", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack()
+                        }
+                    ) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로 가기")
                     }
                 },
@@ -193,7 +197,7 @@ fun MyPageScreen(
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Black,
-                                    text = "${myPageData?.nickname} 님의 레시피 Top 5",
+                                    text = "${myPageData?.nickname} 님의 레시피 조회수 TOP 5",
                                     modifier = Modifier.weight(1f)
                                 )
                             }

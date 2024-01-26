@@ -30,6 +30,10 @@ fun FollowStatsSection(
     val textColor = Color.Black
     val myPageData = myPageViewModel.myPageData.value
 
+    if (myPageData != null) {
+        myPageViewModel.getRecipeTotalCount(myPageData.memberId)
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -95,8 +99,16 @@ fun FollowStatsSection(
         ) {
             Text(text = "레시피", color = textColor)
             Spacer(modifier = Modifier.height(5.dp)) // 간격 추가
-            Text(text = "10", color = textColor) // todo: 레시피 개수가 없음
-            Spacer(modifier = Modifier.height(4.dp)) // 간격 추가
+
+            // 레시피 카운트 표시
+            val recipeCount = myPageViewModel.recipeCount.value
+            if (recipeCount != null) {
+                Text(text = "$recipeCount", color = textColor)
+            } else {
+                // 데이터가 로드되기 전에는 "로딩 중" 또는 공백 표시
+                Text(text = "0", color = textColor)
+                // 또는 Text를 아예 표시하지 않음
+            }
         }
 
         // 위글위글 영역
