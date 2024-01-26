@@ -18,5 +18,5 @@ data class RecipeDetailViewResponseDto(
     val recipeFileUrlList: List<RecipeFileResponseDto>,
     val bookmarkId: Long?,
     val recipeLikeId: Long?,
-    val createDate: LocalDateTime?,        // 레시피 생성시간 (년/월/일)
+    val createDate:  String?,        // 레시피 생성시간 (년/월/일)
 )
