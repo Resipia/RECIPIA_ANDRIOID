@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
@@ -47,6 +48,7 @@ import com.recipia.aos.ui.components.mypage.detail.PersonalInfoSection
 import com.recipia.aos.ui.components.mypage.detail.ProfileSection
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
+import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 
 /**
  *
@@ -56,6 +58,7 @@ import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 fun MyPageScreen(
     navController: NavController,
     myPageViewModel: MyPageViewModel,
+    recipeAllListViewModel: RecipeAllListViewModel,
     followViewModel: FollowViewModel,
     tokenManager: TokenManager,
     targetMemberId: Long? = null
@@ -66,6 +69,7 @@ fun MyPageScreen(
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
     val targetId = targetMemberId ?: tokenManager.loadMemberId() // memberId 결정
+    val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
 
     // 화면이 렌더링될 때 데이터 로딩 시작
     LaunchedEffect(key1 = targetId) { // memberId를 기반으로 데이터 로딩
@@ -119,7 +123,14 @@ fun MyPageScreen(
                 )
             )
         },
-        bottomBar = { BottomNavigationBar(navController, snackbarHostState) }
+        bottomBar = {
+            BottomNavigationBar(
+                navController,
+                snackbarHostState,
+                recipeAllListViewModel,
+                lazyListState
+            )
+        }
     ) { innerPadding ->
 
         myPageData?.let { data ->

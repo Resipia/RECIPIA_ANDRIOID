@@ -133,22 +133,36 @@ fun AppNavigation(
         composable(
             route = "search-Screen/{type}",
             arguments = listOf(
-                navArgument("type") {type = NavType.StringType}
+                navArgument("type") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val typeString = backStackEntry.arguments?.getString("type") ?: SearchType.HASHTAG.toString()
+            val typeString =
+                backStackEntry.arguments?.getString("type") ?: SearchType.HASHTAG.toString()
             val type = SearchType.valueOf(typeString)
             MongoIngredientAndHashTagSearchScreen(navController, mongoSearchViewModel, type)
 
         }
         // 내가보는 마이페이지
         composable("my-page") {
-            MyPageScreen(navController, myPageViewModel, followViewModel, tokenManager)
+            MyPageScreen(
+                navController,
+                myPageViewModel,
+                recipeAllListViewModel,
+                followViewModel,
+                tokenManager
+            )
         }
         // 남의 마이페이지 (RecipeDetailViewModel에서 memberId 사용)
         composable("other-user-page/{memberId}") { backStackEntry ->
             val memberId = backStackEntry.arguments?.getString("memberId")?.toLongOrNull()
-            MyPageScreen(navController, myPageViewModel, followViewModel, tokenManager, memberId)
+            MyPageScreen(
+                navController,
+                myPageViewModel,
+                recipeAllListViewModel,
+                followViewModel,
+                tokenManager,
+                memberId
+            )
         }
         // 팔로잉/팔로워 페이지
         composable(
@@ -161,7 +175,13 @@ fun AppNavigation(
             val type = backStackEntry.arguments?.getString("type") ?: "following"
             val memberId = backStackEntry.arguments?.getLong("memberId") ?: 0L
 
-            FollowPageScreen(navController, followViewModel, memberId, type)
+            FollowPageScreen(
+                navController,
+                followViewModel,
+                recipeAllListViewModel,
+                memberId,
+                type
+            )
         }
         // 레시피 상세보기 화면
         composable(

@@ -38,7 +38,6 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -63,7 +62,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -103,7 +101,7 @@ fun HomeScreen(
     val snackBarMessage by bookmarkViewModel.toastMessage.observeAsState()
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-    val lazyListState = rememberLazyListState()
+    val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
     val isScrolled = derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }.value
     val bookmarkUpdateState by bookmarkViewModel.bookmarkUpdateState.observeAsState()
     var menuExpanded by remember { mutableStateOf(false) }// 드롭다운 메뉴 상태
@@ -136,14 +134,14 @@ fun HomeScreen(
         }
     )
 
-    // 홈 화면이 로딩될때마다 페이지 reload하여 데이터를 받아온다.
-    LaunchedEffect(key1 = true) {
-        recipeAllListViewModel.loadItemsWithSelectedSubCategories()
-    }
-
     // 데이터 로딩 완료 감지
     LaunchedEffect(recipeAllListViewModel.items) {
         isRefreshing = false // 데이터 로딩이 완료되면 isRefreshing을 false로 설정
+    }
+
+    // 홈 화면이 로딩될때마다 페이지 reload하여 데이터를 받아온다.
+    LaunchedEffect(key1 = true) {
+        recipeAllListViewModel.loadItemsWithSelectedSubCategories()
     }
 
     /**
@@ -303,7 +301,14 @@ fun HomeScreen(
         },
         floatingActionButtonPosition = FabPosition.End,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        bottomBar = { BottomNavigationBar(navController, snackbarHostState) }
+        bottomBar = {
+            BottomNavigationBar(
+                navController = navController,
+                snackbarHostState = snackbarHostState,
+                recipeAllListViewModel = recipeAllListViewModel,
+                lazyListState = lazyListState
+            )
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier

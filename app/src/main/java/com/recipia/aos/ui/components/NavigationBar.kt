@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddReaction
@@ -43,6 +44,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.ai.client.generativeai.Chat
 import com.recipia.aos.ui.components.home.ElevatedDivider
+import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -70,10 +72,12 @@ fun NavigationBar(
 @Composable
 fun BottomNavigationBar(
     navController: NavController,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    recipeAllListViewModel: RecipeAllListViewModel,
+    lazyListState: LazyListState // LazyListState를 인자로 받음
 ) {
     val selectedItem = remember { mutableStateOf(0) }
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope() // 코루틴 스코프 생성
 
     // 아이콘 색상 정의
     val selectedIconColor = Color.Black // 선택된 아이템의 아이콘 색상
@@ -119,24 +123,28 @@ fun BottomNavigationBar(
                     selected = selectedItem.value == index,
                     onClick = {
                         when (label) {
-                            "채팅", "위글위글" -> {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = "준비중인 서비스입니다.",
-//                                        actionLabel = "확인"
-                                    )
+                            "홈" -> {
+                                if (navController.currentDestination?.route == "home") {
+                                    recipeAllListViewModel.makeEmptyListSubCategoryData()
+                                    recipeAllListViewModel.refreshItems(recipeAllListViewModel.selectedSubCategories.value)
+
+                                    scope.launch {
+                                        lazyListState.scrollToItem(0) // 스크롤을 맨 위로 이동 (코루틴 내에서 호출)
+                                    }
+                                } else {
+                                    navController.navigate("home") {
+                                        launchSingleTop = true
+                                    }
                                 }
                             }
-
-                            else -> {
-                                navController.navigate(
-                                    when (label) {
-                                        "홈" -> "home"
-                                        "마이페이지" -> "my-page"
-                                        else -> "home"
-                                    }
-                                ) {
+                            "마이페이지" -> {
+                                navController.navigate("my-page") {
                                     launchSingleTop = true
+                                }
+                            }
+                            "채팅", "위글위글" -> {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("준비중인 서비스입니다.")
                                 }
                             }
                         }
