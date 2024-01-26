@@ -85,8 +85,11 @@ fun FollowStatsSection(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .clickable { /* 레시피 페이지 이동 로직 */ },
-            horizontalAlignment = Alignment.CenterHorizontally
+                .clickable {
+                    myPageViewModel.currentPageType.value = MyPageViewModel.PageType.TARGET_MEMBER
+                    navController.navigate("select-recipe-screen")
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(text = "레시피", color = textColor)
             Spacer(modifier = Modifier.height(5.dp)) // 간격 추가

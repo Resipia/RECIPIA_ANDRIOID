@@ -50,7 +50,7 @@ interface MyPageService {
     ): Response<PagingResponseDto<RecipeListResponseDto>>
 
     // targetMember가 작성한 레시피 조회
-    @GET("/mypage/targetMemberRecipeList")
+    @GET("/recipe/mypage/targetMemberRecipeList")
     suspend fun getAllTargetMemberRecipeList(
         @Query("page") page: Int,
         @Query("size") size: Int,

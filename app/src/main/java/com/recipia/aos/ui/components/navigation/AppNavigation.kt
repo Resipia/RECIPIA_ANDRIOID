@@ -169,7 +169,6 @@ fun AppNavigation(
         composable("select-recipe-screen") {
             SelectRecipeScreen(
                 navController = navController,
-                recipeAllListViewModel = recipeAllListViewModel,
                 bookmarkViewModel = bookmarkViewModel,
                 myPageViewModel = myPageViewModel,
                 tokenManager = tokenManager

@@ -72,7 +72,7 @@ import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 @Composable
 fun SelectRecipeScreen(
     navController: NavController,
-    recipeAllListViewModel: RecipeAllListViewModel,
+//    recipeAllListViewModel: RecipeAllListViewModel,
     bookmarkViewModel: BookMarkViewModel,
     myPageViewModel: MyPageViewModel,
     targetMemberId: Long? = null,

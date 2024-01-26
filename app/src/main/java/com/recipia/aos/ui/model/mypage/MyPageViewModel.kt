@@ -179,10 +179,9 @@ class MyPageViewModel(
 
     // targetMemberId가 작성한 레시피를 더 불러오는 함수
     fun loadMoreTargetMemberRecipes(targetMemberId: Long) {
-        if (_isLoading.value == true || isLastPage) return
 
-        _isLoading.value = true
         viewModelScope.launch {
+            currentRequestPage = 0
             val response = recipeMyPageService.getAllTargetMemberRecipeList(currentRequestPage, currentRequestSize, currentRequestSortType, targetMemberId)
 
             if (response.isSuccessful) {
