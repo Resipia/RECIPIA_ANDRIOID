@@ -150,6 +150,7 @@ fun AppNavigation(
                 myPageViewModel,
                 recipeAllListViewModel,
                 followViewModel,
+                bookmarkViewModel,
                 tokenManager
             )
         }
@@ -161,6 +162,7 @@ fun AppNavigation(
                 myPageViewModel,
                 recipeAllListViewModel,
                 followViewModel,
+                bookmarkViewModel,
                 tokenManager,
                 memberId
             )
