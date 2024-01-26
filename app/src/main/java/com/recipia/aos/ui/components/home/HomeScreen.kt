@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TopAppBar
@@ -64,7 +63,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -441,84 +441,122 @@ fun ListItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(vertical = 3.dp)
             .clickable { navController.navigate("recipeDetail/${item.id}") } // 상세보기 화면으로 이동
     ) {
         Row(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // 이미지 썸네일 설정
             Image(
                 painter = imagePainter,
                 contentDescription = "Recipe Image",
                 modifier = Modifier
                     .padding(start = 6.dp)
-                    .size(130.dp) // 이 부분을 수정
+                    .size(110.dp) // 이 부분을 수정
                     .clip(RoundedCornerShape(8.dp))
                     .border(0.5.dp, Color.LightGray, RoundedCornerShape(8.dp)), // 연한 테두리 추가
                 contentScale = ContentScale.Crop
             )
 
-            Column(
+            Box(
                 modifier = Modifier
-                    .padding(start = 16.dp)
-                    .weight(1f)  // 칼럼이 차지하는 공간을 유동적으로 조정
+                    .weight(1f)
+                    .fillMaxWidth()
             ) {
-                Text(
-                    text = item.recipeName,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 2.dp)
-                )
-                Text(
-                    text = item.nickname,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 2.dp)
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp)
+                ) {
 
-                // 서브 카테고리 Assist Chips
-                if (item.subCategoryList.isNotEmpty()) {
-                    Row(modifier = Modifier.padding(top = 8.dp)) {
-                        item.subCategoryList.take(3).forEach { subCategory ->
-                            AssistChip(
-                                onClick = { /* 서브 카테고리 선택 또는 해제 로직 */ },
-                                label = { Text(subCategory, fontSize = 10.sp) },
-                                modifier = Modifier.padding(horizontal = 1.dp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically // 여기에 추가
+                    ) {
+                        // 닉네임
+                        Text(
+                            text = item.nickname,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Bold,
+//                            modifier = Modifier.padding(bottom = 20.dp),
+                            fontSize = 12.sp,
+                        )
+
+                        // 날짜 표시
+                        item.createDate?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 10.sp,
+                                modifier = Modifier.weight(1f), // 여기 weight(1f)를 적용
+                                textAlign = TextAlign.End // 날짜를 왼쪽으로 정렬
+                            )
+                        }
+
+                        // 북마크 아이콘
+                        IconButton(
+                            onClick = {
+                                if (isBookmarked) {
+                                    bookmarkViewModel.removeBookmark(item.bookmarkId!!)
+                                } else {
+                                    item.id?.let { bookmarkViewModel.addBookmark(it) }
+                                }
+                                isBookmarked = !isBookmarked
+                            },
+                            // 아이콘 크기 조절
+                            modifier = Modifier
+                                .size(28.dp)
+                                .padding(start = 2.dp)
+                        ) {
+                            val (icon, tint) = if (isBookmarked) {
+                                Pair(Icons.Filled.Bookmark, MaterialTheme.colorScheme.primary)
+                            } else {
+                                Pair(Icons.Outlined.BookmarkBorder, Color.Gray)
+                            }
+
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = "즐겨찾기",
+                                tint = Color(56, 142, 60)
                             )
                         }
                     }
-                }
-            }
 
-            /**
-             * 사용자가 아이콘을 클릭하면, isBookmarked 상태가 토글되고, BookMarkViewModel의 addBookmark 또는 removeBookmark 함수가 호출됩니다.
-             * 이 로직은 사용자 인터랙션에 직접 반응하여 UI 상의 북마크 상태를 변경하고, 백엔드(데이터베이스 또는 서버)에 북마크의 추가 또는 제거를 요청합니다.
-             */
-            IconButton(
-                onClick = {
-                    if (isBookmarked) {
-                        // 북마크 제거 로직
-                        bookmarkViewModel.removeBookmark(item.bookmarkId!!)
-                    } else {
-                        // 북마크 추가 로직
-                        item.id?.let { bookmarkViewModel.addBookmark(it) }
+                    // 레시피명(제목)
+                    Text(
+                        text = item.recipeName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 13.sp, // 글씨 크기를 줄임 (기존 값보다 작게 설정)
+                        modifier = Modifier.padding(end = 16.dp) // 오른쪽에 패딩 추가
+                    )
+
+                    // 서브 카테고리 Assist Chips
+                    if (item.subCategoryList.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier.padding(top = 2.dp)
+                        ) {
+                            item.subCategoryList.take(3).forEach { subCategory ->
+                                AssistChip(
+                                    onClick = { /* 서브 카테고리 선택 또는 해제 로직 */ },
+                                    label = { Text(subCategory, fontSize = 10.sp) }
+                                )
+                            }
+                        }
                     }
-                    isBookmarked = !isBookmarked
-                },
-                modifier = Modifier.align(Alignment.CenterVertically)
-            ) {
-                val (icon, tint) = if (isBookmarked) {
-                    Pair(Icons.Filled.Bookmark, MaterialTheme.colorScheme.primary)
-                } else {
-                    Pair(Icons.Outlined.BookmarkBorder, Color.Gray)
-                }
 
-                Icon(
-                    imageVector = icon,
-                    contentDescription = "즐겨찾기",
-                    tint = tint
-                )
+                }
             }
+
+
         }
         // 항목 사이에 구분선 추가
         HorizontalDivider(
@@ -526,7 +564,7 @@ fun ListItem(
                 .fillMaxWidth() // 전체 너비를 채우도록 설정
                 .padding(horizontal = 16.dp), // 양쪽에 패딩 적용
             thickness = 0.5.dp, // 구분선의 두께 설정
-            color = Color(222,226,230) // 구분선의 색상 설정
+            color = Color(222, 226, 230) // 구분선의 색상 설정
         )
     }
 }
