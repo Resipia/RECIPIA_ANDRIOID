@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TopAppBar
@@ -66,6 +68,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -75,7 +78,7 @@ import com.recipia.aos.R
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
-import com.recipia.aos.ui.dto.RecipeMainListResponseDto
+import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookmarkUpdateState
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
@@ -391,15 +394,6 @@ fun HomeScreen(
                                     )
                                 }
                             }
-
-//                            // 항목 사이에 구분선 추가
-//                            HorizontalDivider(
-//                                modifier = Modifier
-//                                    .fillMaxWidth() // 전체 너비를 채우도록 설정
-//                                    .padding(horizontal = 16.dp), // 양쪽에 패딩 적용
-//                                thickness = 0.5.dp, // 구분선의 두께 설정
-//                                color = Color.Gray // 구분선의 색상 설정
-//                            )
                         }
                         itemsIndexed(
                             recipeAllListViewModel.items.value
@@ -408,7 +402,8 @@ fun HomeScreen(
                             ListItem(
                                 item,
                                 bookmarkViewModel,
-                                navController
+                                navController,
+                                recipeAllListViewModel
                             )
 
                             // 마지막 아이템에 도달했을 때 추가 데이터 로드
@@ -433,11 +428,15 @@ fun HomeScreen(
 
 @Composable
 fun ListItem(
-    item: RecipeMainListResponseDto,
+    item: RecipeListResponseDto,
     bookmarkViewModel: BookMarkViewModel,
-    navController: NavController
+    navController: NavController,
+    recipeAllListViewModel: RecipeAllListViewModel
 ) {
     var isBookmarked by remember { mutableStateOf(item.bookmarkId != null) }
+    val imagePainter = rememberAsyncImagePainter(
+        model = item.thumbnailPreUrl ?: R.drawable.ic_launcher_foreground // 기본 이미지 리소스
+    )
 
     Column(
         modifier = Modifier
@@ -448,20 +447,20 @@ fun ListItem(
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 이미지 크기를 1.5배로 늘림
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground), // Replace with your image resource
+                painter = imagePainter,
                 contentDescription = "Recipe Image",
                 modifier = Modifier
+                    .padding(start = 6.dp)
                     .size(130.dp) // 이 부분을 수정
-                    .clip(RoundedCornerShape(8.dp)),
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(0.5.dp, Color.LightGray, RoundedCornerShape(8.dp)), // 연한 테두리 추가
                 contentScale = ContentScale.Crop
             )
 
             Column(
                 modifier = Modifier
                     .padding(start = 16.dp)
-//                    .align(Alignment.CenterVertically)
                     .weight(1f)  // 칼럼이 차지하는 공간을 유동적으로 조정
             ) {
                 Text(
@@ -527,7 +526,7 @@ fun ListItem(
                 .fillMaxWidth() // 전체 너비를 채우도록 설정
                 .padding(horizontal = 16.dp), // 양쪽에 패딩 적용
             thickness = 0.5.dp, // 구분선의 두께 설정
-            color = Color.Gray // 구분선의 색상 설정
+            color = Color(222,226,230) // 구분선의 색상 설정
         )
     }
 }

@@ -4,7 +4,7 @@ import TokenManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.recipia.aos.ui.api.BookmarkService
-import com.recipia.aos.ui.dto.RecipeMainListResponseDto
+import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.recipe.BookmarkRequestDto
 import okhttp3.OkHttpClient
@@ -105,7 +105,7 @@ class BookMarkViewModel(
     }
 
     // 북마크 상태 토글 함수
-    fun toggleBookmark(item: RecipeMainListResponseDto) {
+    fun toggleBookmark(item: RecipeListResponseDto) {
         item.bookmarkId?.let {
             // bookmarkId가 있으면 북마크 제거
             removeBookmark(it)

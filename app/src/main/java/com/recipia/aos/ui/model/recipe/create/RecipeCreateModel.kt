@@ -10,7 +10,7 @@ import android.provider.DocumentsContract
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.recipia.aos.ui.api.CreateRecipeService
+import com.recipia.aos.ui.api.recipe.RecipeCreateAndUpdateService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
 import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
@@ -44,7 +44,7 @@ class RecipeCreateModel(
     var selectedImageUris = mutableStateListOf<Uri?>()
 
 
-    private val recipeService: CreateRecipeService by lazy {
+    private val recipeService: RecipeCreateAndUpdateService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -62,7 +62,7 @@ class RecipeCreateModel(
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
-            .create(CreateRecipeService::class.java)
+            .create(RecipeCreateAndUpdateService::class.java)
     }
 
     // 레시피 생성하는 요청을 서버로 보낸다.

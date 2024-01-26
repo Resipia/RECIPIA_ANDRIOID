@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.api
+package com.recipia.aos.ui.api.recipe
 
 import com.recipia.aos.ui.dto.ResponseDto
 import okhttp3.MultipartBody
@@ -11,10 +11,11 @@ import retrofit2.http.Part
 
 
 /**
- * 레시피 생성
+ * 레시피 생성, 수정
  */
-interface CreateRecipeService {
+interface RecipeCreateAndUpdateService {
 
+    // 레시피 생성하기
     @Multipart
     @POST("/recipe/createRecipe")
     fun createRecipe(
@@ -32,6 +33,7 @@ interface CreateRecipeService {
         @Part fileList: List<MultipartBody.Part>
     ): Call<ResponseDto<Long>>
 
+    // 레시피 수정하기
     @Multipart
     @PUT("/recipe/updateRecipe")
     fun updateRecipe(

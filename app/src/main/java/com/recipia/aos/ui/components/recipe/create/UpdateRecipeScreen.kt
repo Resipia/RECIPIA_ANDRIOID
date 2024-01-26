@@ -224,7 +224,7 @@ fun UpdateRecipeScreen(
                             val hashtagsString = selectedHashtags.joinToString(separator = ", ")
 
                             val requestDto = RecipeCreateUpdateRequestDto(
-                                id = recipeDetailViewModel?.recipeDetail?.value?.id, // 수정할 레시피의 ID
+                                id = recipeDetailViewModel?.recipeDetail?.value?.id, // 수정할 레시피의 ID todo: 여기서 1이 들어옴
                                 recipeName = recipeName.value, // .value를 사용하여 실제 문자열 값 추출
                                 recipeDesc = recipeDesc.value, // .value를 사용하여 실제 문자열 값 추출
                                 timeTaken = timeTaken.value.toIntOrNull() ?: 0,
