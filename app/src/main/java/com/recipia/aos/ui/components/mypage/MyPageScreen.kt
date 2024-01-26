@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
@@ -160,16 +161,24 @@ fun MyPageScreen(
                     MyPageFeatureItem(
                         title = "내가 북마크한 레시피",
                         icon = Icons.Default.Bookmark,
-                        onClick = { /* 페이지 이동 로직 */ }
+                        onClick = {
+                            myPageViewModel.currentPageType.value = MyPageViewModel.PageType.BOOKMARK
+                            navController.navigate("select-recipe-screen")
+                        }
                     )
                 }
+
                 item {
                     MyPageFeatureItem(
                         title = "내가 좋아요한 레시피",
                         icon = Icons.Default.Favorite,
-                        onClick = { /* 페이지 이동 로직 */ }
+                        onClick = {
+                            myPageViewModel.currentPageType.value = MyPageViewModel.PageType.LIKE
+                            navController.navigate("select-recipe-screen")
+                        }
                     )
                 }
+
                 item {
                     MyPageFeatureItem(
                         title = "작성한 댓글/대댓글 보기",
@@ -177,6 +186,7 @@ fun MyPageScreen(
                         onClick = { /* 페이지 이동 로직 */ }
                     )
                 }
+
                 item {
                     MyPageFeatureItem(
                         title = "문의하기",
@@ -186,6 +196,7 @@ fun MyPageScreen(
                         }
                     )
                 }
+
                 item {
                     MyPageFeatureItem(
                         title = "계정 정보 수정",
@@ -193,6 +204,7 @@ fun MyPageScreen(
                         onClick = { /* 페이지 이동 로직 */ }
                     )
                 }
+
                 item {
                     MyPageFeatureItem(
                         title = "로그아웃",
@@ -213,6 +225,7 @@ fun MyPageScreen(
                         }
                     )
                 }
+
                 item {
                     MyPageFeatureItem(
                         title = "탈퇴",
