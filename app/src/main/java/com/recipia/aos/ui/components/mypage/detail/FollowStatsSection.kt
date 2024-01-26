@@ -87,7 +87,9 @@ fun FollowStatsSection(
                 .weight(1f)
                 .clickable {
                     myPageViewModel.currentPageType.value = MyPageViewModel.PageType.TARGET_MEMBER
-                    navController.navigate("select-recipe-screen")
+                    if (myPageData != null) {
+                        navController.navigate("select-recipe-screen/${myPageData.memberId}")
+                    }
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

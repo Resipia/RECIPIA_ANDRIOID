@@ -166,11 +166,13 @@ fun AppNavigation(
             )
         }
         // 마이페이지에서 북마크/좋아요한 레시피 보기
-        composable("select-recipe-screen") {
+        composable("select-recipe-screen/{memberId}") { backStackEntry ->
+            val memberId = backStackEntry.arguments?.getString("memberId")?.toLongOrNull()
             SelectRecipeScreen(
                 navController = navController,
                 bookmarkViewModel = bookmarkViewModel,
                 myPageViewModel = myPageViewModel,
+                targetMemberId = memberId, // 여기서 전달된 데이터를 사용
                 tokenManager = tokenManager
             )
         }
