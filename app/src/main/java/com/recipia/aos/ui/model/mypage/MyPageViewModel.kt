@@ -30,6 +30,7 @@ class MyPageViewModel(
     }
 
     var currentPageType: MutableLiveData<PageType> = MutableLiveData(PageType.TARGET_MEMBER)
+    var isFollowing = MutableLiveData<Boolean>()
 
     // 여기에서 북마크한 레시피, 좋아요한 레시피를 모두 저장하고 뒤로가면 데이터 초기화 시키도록 한다.
     var items = mutableStateOf<List<RecipeListResponseDto>>(listOf())
@@ -53,6 +54,13 @@ class MyPageViewModel(
 
     private val _myPageData = MutableLiveData<MyPageViewResponseDto?>()
     val myPageData: MutableLiveData<MyPageViewResponseDto?> = _myPageData
+
+    // _myPageData를 초기화하는 함수
+    fun resetMyPageData() {
+        _myPageData.value?.followId = 0L
+        // 또는
+        // _myPageData.value = MyPageViewResponseDto() // 기본 상태의 객체로 초기화 (구조에 따라 달라짐)
+    }
 
     // items와 highCountRecipe를 초기화하는 함수
     fun resetItemsAndHighCountRecipe() {
@@ -249,10 +257,12 @@ class MyPageViewModel(
                 if (response.isSuccessful) {
                     _myPageData.value = response.body()?.result
                 } else {
-                    // 에러 처리
+                    // 실패한 응답 처리
+                    Log.e("MyPageViewModel", "Failed to load my page data: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
                 // 네트워크 오류 등의 예외 처리
+                Log.e("MyPageViewModel", "Exception when loading my page data", e)
             }
         }
     }
@@ -302,6 +312,11 @@ class MyPageViewModel(
         tokenManager.saveAccessToken("")
         tokenManager.saveRefreshToken("")
         tokenManager.saveMemberId(0)
+    }
+
+    // 남의 마이페이지 팔로우 관리
+    fun updateFollowingStatus(newStatus: Boolean) {
+        isFollowing.value = newStatus
     }
 
 }
