@@ -65,6 +65,29 @@ class RecipeAllListViewModel(
             .create(GetAllRecipeListService::class.java)
     }
 
+    // 선택된 서브 카테고리를 저장하는 변수
+    var selectedSubCategories = mutableStateOf<List<Long>>(emptyList())
+
+    // 선택된 서브 카테고리에 따라 데이터를 요청하는 메서드
+    fun loadItemsWithSelectedSubCategories() {
+        currentRequestPage = 0
+        isLastPage = false
+        items.value = emptyList() // 기존 데이터를 초기화
+        loadMoreItems(selectedSubCategories.value)
+    }
+
+    // 검색할때 이 함수를 호출해서 서브 카테고리값을 저장한다.
+    fun setSubCategories(
+        subCategoryList: List<Long>
+    ) {
+        selectedSubCategories.value = subCategoryList
+    }
+
+    // 서브 카테고리 초기화
+    fun makeEmptyListSubCategoryData() {
+        selectedSubCategories.value = emptyList()
+    }
+
     fun resetLoadFailed() {
         _loadFailed.value = false
     }
@@ -74,25 +97,34 @@ class RecipeAllListViewModel(
     }
 
     // 데이터를 새로고침하는 메서드
-    fun refreshItems() {
+    fun refreshItems(
+        subCategoryList: List<Long>
+    ) {
         currentRequestPage = 0 // 페이지를 초기화
         isLastPage = false
         items.value = emptyList() // 기존 데이터를 초기화
-        loadMoreItems() // 첫 페이지부터 다시 로딩
+        loadMoreItems(subCategoryList) // 첫 페이지부터 다시 로딩
     }
 
     // 더 많은 아이템을 요청하는 메서드
-    fun loadMoreItems() {
+    fun loadMoreItems(
+        subCategoryList: List<Long>
+    ) {
         Log.d("RecipeAllListViewModel", "Loading more items")
         if (_isLoading.value == true || isLastPage) return
 
         _isLoading.value = true
-        loadItemsFromServer(currentRequestPage, currentRequestSize, currentRequestSortType)
+        loadItemsFromServer(currentRequestPage, currentRequestSize, currentRequestSortType, subCategoryList)
         Log.d("RecipeAllListViewModel", "Loading finished")
     }
 
     // 서버로부터 데이터를 가져오는 함수 예시
-    private fun loadItemsFromServer(page: Int, size: Int, sortType: String) {
+    private fun loadItemsFromServer(
+        page: Int,
+        size: Int,
+        sortType: String,
+        subCategoryList: List<Long>
+    ) {
         Log.d("RecipeAllListViewModel", "Loading items from server - Page: $page")
 
         // 현재 요청 정보 저장
@@ -104,7 +136,8 @@ class RecipeAllListViewModel(
         getAllRecipeListService.getAllRecipeList(
             currentRequestPage,
             currentRequestSize,
-            currentRequestSortType
+            currentRequestSortType,
+            subCategoryList
         )
             .enqueue(object : Callback<PagingResponseDto<RecipeMainListResponseDto>> {
 
@@ -125,7 +158,7 @@ class RecipeAllListViewModel(
                     } else {
                         if (response.code() == 401) {
                             // 401 Unauthorized 오류 처리
-                            handleUnauthorizedError(call)
+                            handleUnauthorizedError(call, subCategoryList)
                         } else {
                             // 오류 응답 처리
                             val errorBodyStr = response.errorBody()?.string()
@@ -152,13 +185,14 @@ class RecipeAllListViewModel(
 
     // failedCall은 getAllRecipeListService.getAllRecipeList에 의해 생성된 Call 객체입니다.
     private fun handleUnauthorizedError(
-        failedCall: Call<PagingResponseDto<RecipeMainListResponseDto>>
+        failedCall: Call<PagingResponseDto<RecipeMainListResponseDto>>,
+        subCategoryList: List<Long>
     ) {
         val tokenRepublishManager = TokenRepublishManager(tokenManager)
         // 토큰을 새롭게 발급받고 새로운 요청을 보낸다.
         tokenRepublishManager.renewTokenIfNeeded(
             onTokenRenewed = { newToken ->
-                retryRequestWithNewToken(failedCall, newToken)
+                retryRequestWithNewToken(failedCall, newToken, subCategoryList)
             },
             onRenewalFailed = { navigateToLogin ->
                 if (navigateToLogin) {
@@ -171,13 +205,15 @@ class RecipeAllListViewModel(
     // 새로운 토큰을 담아서 다시 요청을 보냄
     private fun retryRequestWithNewToken(
         failedCall: Call<PagingResponseDto<RecipeMainListResponseDto>>,
-        newAccessToken: String
+        newAccessToken: String,
+        subCategoryList: List<Long>
     ) {
         // 새 토큰을 사용하여 요청 재시도
         getAllRecipeListService.getAllRecipeList(
             currentRequestPage,
             currentRequestSize,
-            currentRequestSortType
+            currentRequestSortType,
+            subCategoryList
         )
             .enqueue(object : Callback<PagingResponseDto<RecipeMainListResponseDto>> {
                 override fun onResponse(

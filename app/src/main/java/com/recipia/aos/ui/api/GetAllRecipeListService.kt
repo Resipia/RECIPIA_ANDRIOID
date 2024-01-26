@@ -11,6 +11,7 @@ interface GetAllRecipeListService {
     fun getAllRecipeList(
         @Query("page") page: Int,
         @Query("size") size: Int,
-        @Query("sortType") sortType: String
+        @Query("sortType") sortType: String,
+        @Query("subCategoryList") subCategoryList: List<Long>
     ): Call<PagingResponseDto<RecipeMainListResponseDto>>
 }

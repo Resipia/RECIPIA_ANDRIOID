@@ -13,12 +13,14 @@ import androidx.navigation.navArgument
 import com.recipia.aos.ui.components.forgot.email.EmailVerificationForgotIdScreen
 import com.recipia.aos.ui.components.forgot.email.FindEmailScreen
 import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
+import com.recipia.aos.ui.components.home.CategorySelectRecipeScreen
 import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
+import com.recipia.aos.ui.components.recipe.create.UpdateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.search.MongoIngredientAndHashTagSearchScreen
 import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
@@ -27,8 +29,10 @@ import com.recipia.aos.ui.components.signup.SignUpSuccessScreen
 import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
 import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
+import com.recipia.aos.ui.model.comment.CommentViewModel
 import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
+import com.recipia.aos.ui.model.factory.CommentViewModelFactory
 import com.recipia.aos.ui.model.factory.FollowViewModelFactory
 import com.recipia.aos.ui.model.factory.MongoSearchViewModelFactory
 import com.recipia.aos.ui.model.factory.MyPageViewModelFactory
@@ -86,6 +90,9 @@ fun AppNavigation(
     val mongoSearchViewModel: MongoSearchViewModel = viewModel(
         factory = MongoSearchViewModelFactory(tokenManager)
     )
+    val commentViewModel: CommentViewModel = viewModel(
+        factory = CommentViewModelFactory(tokenManager)
+    )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
     val forgotViewModel: ForgotViewModel = viewModel()
@@ -106,32 +113,56 @@ fun AppNavigation(
         }
         // 홈 화면(메인 레시피 목록들)
         composable("home") {
+            // 홈 화면 호출할때는 카테고리 정보 초기화하기
+//            recipeAllListViewModel.makeEmptyListSubCategoryData()
             HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel)
         }
-        // 검색화면
-//        composable("searchScreen") {
-//            SearchScreen(navController)
-//        }
+        // 카테고리 조건 조회
+        composable("category-recipe-search") {
+            CategorySelectRecipeScreen(
+                navController,
+                categorySelectionViewModel,
+                onSelectedCategories = { selectedIds ->
+                    println("선택된 서브 카테고리 ID: $selectedIds")
+                    // 여기에서 선택된 ID들을 처리하는 로직을 추가할 수 있음
+                },
+                recipeAllListViewModel = recipeAllListViewModel
+            )
+        }
         // 검색화면
         composable(
             route = "search-Screen/{type}",
             arguments = listOf(
-                navArgument("type") {type = NavType.StringType}
+                navArgument("type") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val typeString = backStackEntry.arguments?.getString("type") ?: SearchType.HASHTAG.toString()
+            val typeString =
+                backStackEntry.arguments?.getString("type") ?: SearchType.HASHTAG.toString()
             val type = SearchType.valueOf(typeString)
             MongoIngredientAndHashTagSearchScreen(navController, mongoSearchViewModel, type)
 
         }
         // 내가보는 마이페이지
         composable("my-page") {
-            MyPageScreen(navController, myPageViewModel, followViewModel, tokenManager)
+            MyPageScreen(
+                navController,
+                myPageViewModel,
+                recipeAllListViewModel,
+                followViewModel,
+                tokenManager
+            )
         }
         // 남의 마이페이지 (RecipeDetailViewModel에서 memberId 사용)
         composable("other-user-page/{memberId}") { backStackEntry ->
             val memberId = backStackEntry.arguments?.getString("memberId")?.toLongOrNull()
-            MyPageScreen(navController, myPageViewModel, followViewModel, tokenManager, memberId)
+            MyPageScreen(
+                navController,
+                myPageViewModel,
+                recipeAllListViewModel,
+                followViewModel,
+                tokenManager,
+                memberId
+            )
         }
         // 팔로잉/팔로워 페이지
         composable(
@@ -144,17 +175,26 @@ fun AppNavigation(
             val type = backStackEntry.arguments?.getString("type") ?: "following"
             val memberId = backStackEntry.arguments?.getLong("memberId") ?: 0L
 
-            FollowPageScreen(navController, followViewModel, memberId, type)
+            FollowPageScreen(
+                navController,
+                followViewModel,
+                recipeAllListViewModel,
+                memberId,
+                type
+            )
         }
         // 레시피 상세보기 화면
         composable(
             route = "recipeDetail/{recipeId}",
             arguments = listOf(navArgument("recipeId") { type = NavType.LongType })
         ) { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L
             RecipeDetailScreen(
-                recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L,
-                recipeDetailViewModel,
-                navController
+                recipeId = recipeId,
+                recipeDetailViewModel = recipeDetailViewModel,
+                commentViewModel = commentViewModel,
+                navController = navController,
+                tokenManager = tokenManager
             )
         }
         // 레시피 생성하기
@@ -164,6 +204,16 @@ fun AppNavigation(
                 categorySelectionViewModel,
                 mongoSearchViewModel,
                 recipeCreateModel
+            )
+        }
+        // 레시피 수정하기
+        composable("update-recipe") {
+            UpdateRecipeScreen(
+                navController = navController,
+                recipeDetailViewModel = recipeDetailViewModel,
+                categorySelectionViewModel = categorySelectionViewModel,
+                mongoSearchViewModel = mongoSearchViewModel,
+                recipeCreateModel = recipeCreateModel
             )
         }
         // ID찾기 화면

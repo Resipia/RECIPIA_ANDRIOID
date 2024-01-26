@@ -78,4 +78,25 @@ class RecipeDetailViewModel(
         // Retrofit을 사용하여 서버 요청을 구현합니다.
          return recipeApiService.getRecipeDetailView(recipeId)
     }
+
+    // 레시피 삭제 API 호출 함수
+    fun deleteRecipe(
+        recipeId: Long,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = recipeApiService.deleteRecipe(recipeId)
+                if (response.isSuccessful) {
+                    onSuccess() // 삭제 성공 시 수행할 액션
+                } else {
+                    onError("삭제 중 오류가 발생했습니다.") // 오류 처리
+                }
+            } catch (e: Exception) {
+                onError(e.message ?: "알 수 없는 오류 발생") // 예외 처리
+            }
+        }
+    }
+
 }

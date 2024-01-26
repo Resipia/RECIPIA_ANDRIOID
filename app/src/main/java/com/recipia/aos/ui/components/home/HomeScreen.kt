@@ -1,7 +1,6 @@
 package com.recipia.aos.ui.components.home
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -24,11 +23,12 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
@@ -37,17 +37,17 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -62,7 +62,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -84,12 +83,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
     recipeAllListViewModel: RecipeAllListViewModel,
-    bookmarkViewModel: BookMarkViewModel,
+    bookmarkViewModel: BookMarkViewModel
 ) {
     /**
      * LiveData에 주로 observeAsState를 사용한다.
@@ -99,14 +98,15 @@ fun HomeScreen(
     val isLoading by recipeAllListViewModel.isLoading.observeAsState(initial = false)
     val loadFailed by recipeAllListViewModel.loadFailed.observeAsState(initial = false)
     val navigateToLogin by recipeAllListViewModel.navigateToLogin.observeAsState(initial = false)
-    val toastMessage by bookmarkViewModel.toastMessage.observeAsState()
-    val context = LocalContext.current
-
+    val snackBarMessage by bookmarkViewModel.toastMessage.observeAsState()
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-
-    val lazyListState = rememberLazyListState()
+    val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
     val isScrolled = derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }.value
+    val bookmarkUpdateState by bookmarkViewModel.bookmarkUpdateState.observeAsState()
+    var menuExpanded by remember { mutableStateOf(false) }// 드롭다운 메뉴 상태
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    var showFab by remember { mutableStateOf(true) }
 
     // `animateDpAsState` 사용하여 부드러운 애니메이션 적용
     val fabWidth by animateDpAsState(
@@ -118,12 +118,14 @@ fun HomeScreen(
         label = ""
     )
 
+    // 화면에서 데이터 새로고침할때 사용
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
         onRefresh = {
             coroutineScope.launch {
                 isRefreshing = true
-                recipeAllListViewModel.refreshItems() // 여기서 refreshItems 메서드 호출
+                // 여기서 refreshItems 메서드 호출
+                recipeAllListViewModel.refreshItems(recipeAllListViewModel.selectedSubCategories.value)
                 while (recipeAllListViewModel.isLoading.value == true) {
                     delay(1000)
                 }
@@ -137,11 +139,15 @@ fun HomeScreen(
         isRefreshing = false // 데이터 로딩이 완료되면 isRefreshing을 false로 설정
     }
 
+    // 홈 화면이 로딩될때마다 페이지 reload하여 데이터를 받아온다.
+    LaunchedEffect(key1 = true) {
+        recipeAllListViewModel.loadItemsWithSelectedSubCategories()
+    }
+
     /**
      * 상태가 변경될 때마다, 즉 북마크가 추가되거나 제거될 때마다 recipeAllListViewModel의 updateItemBookmarkId 함수를 호출하여 전체 목록의 상태를 업데이트합니다.
      * 이 로직은 북마크 상태의 변경이 백엔드에서 성공적으로 처리되었을 때, 앱의 전체 상태(여기서는 레시피 목록)를 업데이트하는 데 사용됩니다.
      */
-    val bookmarkUpdateState by bookmarkViewModel.bookmarkUpdateState.observeAsState()
     LaunchedEffect(bookmarkUpdateState) {
         bookmarkUpdateState?.let { state ->
             when (state) {
@@ -157,22 +163,6 @@ fun HomeScreen(
         }
     }
 
-    // 토스트 메시지를 찾아서 띄우고 초기화 진행
-    toastMessage?.let {
-        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-        bookmarkViewModel.toastMessage.value = null
-    }
-
-    if (loadFailed) {
-        Toast.makeText(context, "데이터 로딩 실패", Toast.LENGTH_SHORT).show()
-        recipeAllListViewModel.resetLoadFailed() // 경고창을 한 번만 표시하도록 상태를 리셋
-    }
-
-    // 화면이 렌더링될 때 데이터 로딩 시작
-    LaunchedEffect(key1 = true) {
-        recipeAllListViewModel.loadMoreItems()
-    }
-
     // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
     if (navigateToLogin) {
         LaunchedEffect(key1 = Unit) {
@@ -180,23 +170,74 @@ fun HomeScreen(
         }
     }
 
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-    var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
+    // 스낵바가 생기면 작성버튼이 사라지도록 하는 코루틴
+    LaunchedEffect(snackbarHostState.currentSnackbarData) {
+        if (snackbarHostState.currentSnackbarData != null) {
+            // 스낵바가 표시되면 FAB 숨기기
+            showFab = false
+        } else {
+            // 스낵바가 사라지면 0.3초 후에 FAB 표시
+            coroutineScope.launch {
+                delay(100) // 0.3초 지연
+                showFab = true
+            }
+        }
+    }
+
+    // 스낵바 2초후에 숨기기
+    LaunchedEffect(snackbarHostState.currentSnackbarData) {
+        snackbarHostState.currentSnackbarData?.let {
+            delay(2000) // 2초 동안 기다림
+            it.dismiss() // 스낵바 숨기기
+        }
+    }
+
+    // loadFailed 상태가 true일 때 스낵바를 표시하는 로직
+    LaunchedEffect(loadFailed) {
+        if (loadFailed) {
+            // 스낵바 표시
+            snackbarHostState.showSnackbar(
+                message = "데이터 로딩 실패", // 스낵바에 표시할 메시지
+                duration = SnackbarDuration.Short // 스낵바가 표시되는 시간
+            )
+            recipeAllListViewModel.resetLoadFailed() // 상태 리셋
+        }
+    }
+
+    // snackBarMessage가 변경될 때 스낵바를 표시하는 로직
+    LaunchedEffect(snackBarMessage) {
+        snackBarMessage?.let {
+            // 스낵바 표시
+            snackbarHostState.showSnackbar(
+                message = it, // 스낵바에 표시할 메시지
+                duration = SnackbarDuration.Short // 스낵바가 표시되는 시간
+            )
+            bookmarkViewModel.toastMessage.value = null // 메시지 초기화
+        }
+    }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
+                elevation = 0.dp,
                 modifier = Modifier.background(Color.White), // 여기에 배경색을 하얀색으로 설정,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigate("categories") }) {
+                backgroundColor = Color.White,
+                title = {
+                    // 여기서 로고와 텍스트를 Row로 배치합니다.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // 요리 아이콘
                         Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "메뉴"
+                            imageVector = Icons.Filled.Cookie, // 요리 관련 아이콘으로 변경하세요
+                            contentDescription = "로고 아이콘",
+                            modifier = Modifier.size(24.dp) // 아이콘 크기 조절
+                        )
+                        // 로고 텍스트
+                        Text(
+                            text = "Recipia",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(start = 8.dp)
                         )
                     }
                 },
@@ -223,47 +264,51 @@ fun HomeScreen(
                             onClick = { /* 수정 처리 */ }
                         )
                         DropdownMenuItem(
-                            text = { Text("로그아웃") },
-                            onClick = { /* 설정 처리 */ }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("로그아웃") },
-                            onClick = { /* 설정 처리 */ }
-                        )
-                        DropdownMenuItem(
                             text = { Text("피드백 보내기") },
                             onClick = { /* 피드백 처리 */ }
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior
+//                scrollBehavior = scrollBehavior
             )
         },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         modifier = Modifier.background(Color.White),
+        // 하단의 레시피 작성 버튼 설정
         floatingActionButton = {
-            FloatingActionButton(
-                containerColor = Color(56, 142, 60),
-                onClick = { navController.navigate("create-recipe") },
-                modifier = Modifier
-                    .height(44.dp) // 높이 설정
-                    .width(fabWidth) // 애니메이션화된 너비 사용
-                    .background(Color.White),
-                shape = RoundedCornerShape(16.dp) // 모서리 둥글게
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            if (showFab) {
+                FloatingActionButton(
+                    containerColor = Color(56, 142, 60),
+                    onClick = { navController.navigate("create-recipe") },
+                    modifier = Modifier
+                        .height(44.dp) // 높이 설정
+                        .width(fabWidth) // 애니메이션화된 너비 사용
+                        .background(Color.White),
+                    shape = RoundedCornerShape(16.dp) // 모서리 둥글게
                 ) {
-                    Icon(Icons.Filled.Add, "글쓰기", tint = Color.White)
-                    if (!isScrolled) { // 스크롤 되지 않았을 때만 "작성" 텍스트 표시
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text("작성", fontSize = 16.sp, color = Color.White)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Icon(Icons.Filled.Add, "글쓰기", tint = Color.White)
+                        if (!isScrolled) { // 스크롤 되지 않았을 때만 "작성" 텍스트 표시
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Text("작성", fontSize = 16.sp, color = Color.White)
+                        }
                     }
                 }
             }
         },
-        bottomBar = { BottomNavigationBar(navController) }
+        floatingActionButtonPosition = FabPosition.End,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        bottomBar = {
+            BottomNavigationBar(
+                navController = navController,
+                snackbarHostState = snackbarHostState,
+                recipeAllListViewModel = recipeAllListViewModel,
+                lazyListState = lazyListState
+            )
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -296,15 +341,15 @@ fun HomeScreen(
                             Column(modifier = Modifier.padding(start = 16.dp)) {
                                 Row(
                                     modifier = Modifier
-                                        .fillMaxWidth() // fillMaxSize 대신 fillMaxWidth 사용
+                                        .fillMaxWidth()
+                                        .padding(top = 8.dp)
                                 ) {
                                     AssistChip(
-                                        onClick = { /* 첫 번째 AssistChip 클릭 시 동작 */ },
+                                        onClick = {
+                                            navController.navigate("category-recipe-search")
+                                        },
                                         label = {
-                                            Text(
-                                                "카테고리",
-                                                fontSize = 12.sp, // 글씨 크기 조절
-                                            )
+                                            Text("카테고리", fontSize = 12.sp)
                                         },
                                         leadingIcon = {
                                             Icon(
@@ -316,7 +361,7 @@ fun HomeScreen(
                                             )
                                         },
                                         colors = AssistChipDefaults.assistChipColors(
-                                            containerColor = Color(238,238,238),
+                                            containerColor = Color(238, 238, 238),
                                             labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
                                         ),
 //                                        elevation = null, // 그림자 제거
@@ -326,10 +371,7 @@ fun HomeScreen(
                                     AssistChip(
                                         onClick = { /* 두 번째 AssistChip 클릭 시 동작 */ },
                                         label = {
-                                            Text(
-                                                "정렬",
-                                                fontSize = 12.sp, // 글씨 크기 조절
-                                            )
+                                            Text("정렬", fontSize = 12.sp)
                                         },
                                         leadingIcon = {
                                             Icon(
@@ -341,7 +383,7 @@ fun HomeScreen(
                                             )
                                         },
                                         colors = AssistChipDefaults.assistChipColors(
-                                            containerColor = Color(238,238,238),
+                                            containerColor = Color(238, 238, 238),
                                             labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
                                         ),
                                         elevation = null, // 그림자 제거
@@ -371,7 +413,7 @@ fun HomeScreen(
 
                             // 마지막 아이템에 도달했을 때 추가 데이터 로드
                             if (index == recipeAllListViewModel.items.value.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
-                                recipeAllListViewModel.loadMoreItems()
+                                recipeAllListViewModel.loadMoreItems(recipeAllListViewModel.selectedSubCategories.value) // 서브 카테고리 리스트로 추가 데이터 요청
                             }
                         }
                     }
@@ -505,8 +547,11 @@ fun AnimatedPreloader(modifier: Modifier = Modifier) {
     )
 
     // Lottie 애니메이션을 화면에 표시합니다.
+    // `modifier` 매개변수를 사용하여 사이즈 조절
     LottieAnimation(
         composition = preloaderLottieComposition,
         progress = preloaderProgress,
+        modifier = modifier.size(100.dp) // 여기에서 원하는 크기로 조절합니다.
     )
 }
+

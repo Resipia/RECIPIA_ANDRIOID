@@ -1,5 +1,7 @@
 package com.recipia.aos.ui.components.recipe.detail
 
+import TokenManager
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -16,13 +18,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,32 +36,80 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
+import com.recipia.aos.ui.components.recipe.detail.comment.CommentsSection
+import com.recipia.aos.ui.model.comment.CommentViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailScreen(
     recipeId: Long,
     recipeDetailViewModel: RecipeDetailViewModel,
-    navController: NavController
+    commentViewModel: CommentViewModel,
+    navController: NavController,
+    tokenManager: TokenManager
 ) {
-    var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
+    val context = LocalContext.current
+    var menuExpanded by remember { mutableStateOf(false) }
+    val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
+
+    // 레시피 상세 정보의 상태를 관찰
+    val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
+
+    // AlertDialog를 표시할지 여부를 관리하는 상태
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("레시피 삭제") },
+            text = { Text("정말 작성한 레시피를 삭제하시겠습니까?") },
+            confirmButton = {
+                Button(onClick = {
+                    recipeDetailViewModel.deleteRecipe(
+                        recipeId = recipeId,
+                        onSuccess = {
+                            // 삭제 성공 시 처리, 예를 들어 홈 화면으로 이동
+                            Toast.makeText(context, "레시피가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                            // 현재 화면을 스택에서 제거하고 홈 화면으로 이동
+                            navController.popBackStack()
+                            navController.navigate("home")
+                        },
+                        onError = { errorMessage ->
+                            // 오류 발생 시 처리
+                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                    showDialog = false
+                }) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
+    }
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
@@ -67,7 +117,13 @@ fun RecipeDetailScreen(
             TopAppBar(
                 title = { Text(text = "레시피 상세보기", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        // 댓글 목록 초기화
+                        commentViewModel.clearComments()
+                        // 현재 화면을 스택에서 제거하고 홈 화면으로 이동
+                        navController.popBackStack()
+                        navController.navigate("home")
+                    }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로 가기")
                     }
                 },
@@ -82,11 +138,23 @@ fun RecipeDetailScreen(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false }
                     ) {
-                        // 드롭다운 메뉴 아이템들
-                        DropdownMenuItem(
-                            text = { Text("수정") },
-                            onClick = { /* 수정 처리 */ }
-                        )
+                        // 레시피 작성자가 현재 로그인한 사용자와 같은 경우에만 수정 및 삭제 옵션을 보여줌
+                        if (recipeDetailState.value?.memberId == currentUserMemberId) {
+                            // 레시피 수정하기
+                            DropdownMenuItem(
+                                text = { Text("레시피 수정") },
+                                onClick = {
+                                    navController.navigate("update-recipe")
+                                }
+                            )
+                            // 레시피 삭제 버튼
+                            DropdownMenuItem(
+                                text = { Text("레시피 삭제") },
+                                onClick = {
+                                    showDialog = true
+                                }
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text("설정") },
                             onClick = { /* 설정 처리 */ }
@@ -107,6 +175,7 @@ fun RecipeDetailScreen(
         RecipeDetailContent(
             recipeId = recipeId,
             recipeDetailViewModel = recipeDetailViewModel,
+            commentViewModel = commentViewModel,
             navController = navController,
             paddingValues = innerPadding
         )
@@ -119,13 +188,21 @@ fun RecipeDetailScreen(
 fun RecipeDetailContent(
     recipeId: Long,
     recipeDetailViewModel: RecipeDetailViewModel,
+    commentViewModel: CommentViewModel,
     navController: NavController,
     paddingValues: PaddingValues
 ) {
+
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
         recipeDetailViewModel.loadRecipeDetail(recipeId)
+        commentViewModel.loadInitialComments(recipeId) // 수정된 함수 호출
     }
+
+    val coroutineScope = rememberCoroutineScope() // 코루틴 스코프 생성
+
+    // 댓글 상태 관찰
+    val comments by commentViewModel.comments.collectAsState()
 
     // LiveData를 Compose에서 관찰하기 위해 observeAsState() 사용
     val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
@@ -187,7 +264,10 @@ fun RecipeDetailContent(
                 ) {
                     // 프로필 이미지
                     Image(
-                        painter = rememberAsyncImagePainter(model = recipeDetail.recipeFileUrlList ?: "https://example.com/default_profile.jpg"),
+                        painter = rememberAsyncImagePainter(
+                            model = recipeDetail.recipeFileUrlList
+                                ?: "https://example.com/default_profile.jpg"
+                        ),
                         contentDescription = "작성자 프로필",
                         modifier = Modifier
                             .size(60.dp) // 이미지 크기
@@ -260,7 +340,11 @@ fun RecipeDetailContent(
                 // 영양 정보
                 recipeDetail.nutritionalInfoDto?.let { info ->
                     Text(
-                        text = "영양 정보: 탄수화물 ${info.carbohydrates}, 단백질 ${info.protein}, 지방 ${info.fat}",
+                        text = "영양 정보: 탄수화물 ${info.carbohydrates}," +
+                                " 단백질 ${info.protein}," +
+                                " 지방 ${info.fat}," +
+                                " 비타민 ${info.vitamins}," +
+                                " 미네랄 ${info.minerals}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -289,6 +373,26 @@ fun RecipeDetailContent(
                     color = Color.Gray // 구분선의 색상 설정
                 )
 //                Divider(Modifier.padding(vertical = 8.dp))
+
+                // 댓글 섹션
+                if (comments == null || comments!!.content.isEmpty()) {
+                    // 댓글 데이터가 없거나 댓글 목록이 비어있는 경우
+                    Text(
+                        text = "아직 작성된 댓글이 없습니다.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    // 댓글 데이터가 있는 경우
+                    CommentsSection(
+                        comments = comments!!.content,
+                        loadMoreComments = {
+                            coroutineScope.launch {
+                                commentViewModel.loadMoreComments(recipeId)
+                            }
+                        }
+                    )
+                }
             }
         }
     }

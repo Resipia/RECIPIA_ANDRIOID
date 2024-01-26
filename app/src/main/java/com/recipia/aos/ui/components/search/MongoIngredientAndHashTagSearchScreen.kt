@@ -5,6 +5,7 @@
 
 package com.recipia.aos.ui.components.search
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +51,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -68,16 +70,15 @@ import com.recipia.aos.ui.model.search.MongoSearchViewModel
 @Composable
 fun MongoIngredientAndHashTagSearchScreen(
     navController: NavController,
-    viewModel: MongoSearchViewModel,
+    mongoViewModel: MongoSearchViewModel,
     type: SearchType
 ) {
 
-    // 내부 상태로 선택된 검색 결과들을 관리
-    val selectedSearchResultsState = remember { mutableStateListOf<String>() }
+    val context = LocalContext.current
 
-    val searchText by viewModel.searchText.collectAsState()
-    val mongoSearchResults by viewModel.mongoSearchResults.collectAsState()
-    val showSearchResults by viewModel.showSearchResults.collectAsState()
+    val searchText by mongoViewModel.searchText.collectAsState()
+    val mongoSearchResults by mongoViewModel.mongoSearchResults.collectAsState()
+    val showSearchResults by mongoViewModel.showSearchResults.collectAsState()
 
     // 화면 터치로 키보드 없애기 위한 상태
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -88,8 +89,14 @@ fun MongoIngredientAndHashTagSearchScreen(
     val selectedIngredients = remember { mutableStateListOf<String>() }
     val selectedHashtags = remember { mutableStateListOf<String>() }
 
+    // 화면이 로드될 때 ViewModel에서 현재 선택된 항목들을 로컬 상태 변수로 복사
+    LaunchedEffect(key1 = Unit) {
+        selectedIngredients.addAll(mongoViewModel.selectedIngredients.value)
+        selectedHashtags.addAll(mongoViewModel.selectedHashtags.value)
+    }
+
     LaunchedEffect(type) {
-        viewModel.init(type) // type에 따라 검색 초기화
+        mongoViewModel.init(type) // type에 따라 검색 초기화
     }
 
     Scaffold(
@@ -107,11 +114,11 @@ fun MongoIngredientAndHashTagSearchScreen(
                     IconButton(onClick = {
                         // 현재 검색 유형에 따라 상태 초기화
                         if (type == SearchType.INGREDIENT) {
-                            viewModel.resetSelectedIngredients()
+                            mongoViewModel.resetSelectedIngredients()
                         } else if (type == SearchType.HASHTAG) {
-                            viewModel.resetSelectedHashtags()
+                            mongoViewModel.resetSelectedHashtags()
                         }
-                        viewModel.resetTextChange() // 입력 텍스트 초기화
+                        mongoViewModel.resetTextChange() // 입력 텍스트 초기화
                         navController.popBackStack()
                     }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -122,11 +129,11 @@ fun MongoIngredientAndHashTagSearchScreen(
         bottomBar = {
             Button(
                 onClick = {
-                    // 현재 검색 유형에 따라 저장
+                    // 사용자가 선택한 항목들을 ViewModel로 업데이트
                     if (type == SearchType.INGREDIENT) {
-                        viewModel.setSelectedIngredients(selectedIngredients)
+                        mongoViewModel.setSelectedIngredients(selectedIngredients)
                     } else if (type == SearchType.HASHTAG) {
-                        viewModel.setSelectedHashtags(selectedHashtags)
+                        mongoViewModel.setSelectedHashtags(selectedHashtags)
                     }
                     navController.popBackStack()
                 },
@@ -154,7 +161,7 @@ fun MongoIngredientAndHashTagSearchScreen(
                     value = searchText,
                     onValueChange = {
                         val filteredText = it.filter { char -> char.isLetterOrDigit() }
-                        viewModel.onSearchTextChange(filteredText)
+                        mongoViewModel.onSearchTextChange(filteredText)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -191,14 +198,22 @@ fun MongoIngredientAndHashTagSearchScreen(
                     keyboardActions = KeyboardActions(
                         onDone = {
                             if (searchText.isNotBlank()) {
-                                if (type == SearchType.INGREDIENT && !selectedIngredients.contains(searchText)) {
-                                    selectedIngredients.add(searchText) // 재료 리스트에 추가
-                                } else if (type == SearchType.HASHTAG && !selectedHashtags.contains(searchText)) {
-                                    selectedHashtags.add(searchText) // 해시태그 리스트에 추가
+                                // 정규 표현식으로 완전한 한글, 영문, 숫자만 허용
+                                if (!searchText.matches(Regex("^[가-힣a-zA-Z0-9\\s]+$"))) {
+                                    keyboardController?.hide() // 키보드를 먼저 숨깁니다.
+                                    Toast.makeText(context, "유효하지 않은 입력입니다. (자음, 모음 단독 사용 불가)", Toast.LENGTH_SHORT).show()
+                                    mongoViewModel.onSearchTextChange("") // 입력 필드 초기화
+                                } else {
+                                    // 기존 로직
+                                    if (type == SearchType.INGREDIENT && !selectedIngredients.contains(searchText)) {
+                                        selectedIngredients.add(searchText) // 재료 리스트에 추가
+                                    } else if (type == SearchType.HASHTAG && !selectedHashtags.contains(searchText)) {
+                                        selectedHashtags.add(searchText) // 해시태그 리스트에 추가
+                                    }
+                                    mongoViewModel.onSearchTextChange("") // 입력 필드 초기화
+                                    keyboardController?.hide() // 키보드 숨기기
+                                    focusManager.clearFocus() // 포커스 해제
                                 }
-                                viewModel.onSearchTextChange("") // 입력 필드 초기화
-                                keyboardController?.hide() // 키보드 숨기기
-                                focusManager.clearFocus() // 포커스 해제
                             }
                         }
                     ),
@@ -210,6 +225,8 @@ fun MongoIngredientAndHashTagSearchScreen(
                 val selectedResults = when (type) {
                     SearchType.INGREDIENT -> selectedIngredients
                     SearchType.HASHTAG -> selectedHashtags
+//                    SearchType.INGREDIENT -> mongoViewModel.selectedIngredients.value
+//                    SearchType.HASHTAG -> mongoViewModel.selectedHashtags.value
                     else -> listOf() // 기본적으로 빈 리스트
                 }
 
@@ -263,8 +280,8 @@ fun MongoIngredientAndHashTagSearchScreen(
                                                 selectedHashtags.add(result) // 해시태그 리스트에 추가
                                             }
                                         }
-                                        viewModel.clearMongoSearchResults() // 연관 검색어 목록 초기화
-                                        viewModel.resetTextChange() // 입력 텍스트 초기화
+                                        mongoViewModel.clearMongoSearchResults() // 연관 검색어 목록 초기화
+                                        mongoViewModel.resetTextChange() // 입력 텍스트 초기화
                                         keyboardController?.hide() // 키보드 숨기기
                                     }
                             )
