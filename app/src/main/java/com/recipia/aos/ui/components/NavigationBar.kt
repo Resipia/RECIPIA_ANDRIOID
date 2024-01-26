@@ -35,8 +35,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.ai.client.generativeai.Chat
@@ -72,7 +74,6 @@ fun BottomNavigationBar(
 ) {
     val selectedItem = remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     // 아이콘 색상 정의
     val selectedIconColor = Color.Black // 선택된 아이템의 아이콘 색상
@@ -99,14 +100,13 @@ fun BottomNavigationBar(
 
         // 상단 경계선 추가
         ElevatedDivider(
-            color = Color(238, 238, 238),
-            thickness = 1.5.dp,
-            elevation = 20.dp
+            color = Color(206,212,218),
+            thickness = 0.5.dp
         )
 
         // NavigationBar 스타일을 수정 (높이 추가)
         NavigationBar(
-            modifier = Modifier.height(80.dp), // 여기서 높이를 조정합니다.
+            modifier = Modifier.height(78.dp), // 여기서 높이를 조정합니다.
             containerColor = Color.White,
             contentColor = unselectedIconColor,
             tonalElevation = 1.dp
@@ -115,7 +115,7 @@ fun BottomNavigationBar(
                 val (label, icon) = pair
                 NavigationBarItem(
                     icon = { Icon(icon, contentDescription = label) },
-                    label = { Text(label) },
+                    label = { Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.Black) },
                     selected = selectedItem.value == index,
                     onClick = {
                         when (label) {

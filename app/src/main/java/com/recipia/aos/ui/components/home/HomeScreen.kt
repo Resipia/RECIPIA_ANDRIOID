@@ -1,7 +1,6 @@
 package com.recipia.aos.ui.components.home
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,7 +29,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Cookie
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
@@ -40,7 +37,6 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -53,8 +49,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -97,6 +91,7 @@ fun HomeScreen(
     navController: NavController,
     recipeAllListViewModel: RecipeAllListViewModel,
     bookmarkViewModel: BookMarkViewModel,
+    subCategoryList: List<Long> = emptyList() // CategorySelectScreen에서 전달받은 서브 카테고리 리스트
 ) {
     /**
      * LiveData에 주로 observeAsState를 사용한다.
@@ -106,7 +101,7 @@ fun HomeScreen(
     val isLoading by recipeAllListViewModel.isLoading.observeAsState(initial = false)
     val loadFailed by recipeAllListViewModel.loadFailed.observeAsState(initial = false)
     val navigateToLogin by recipeAllListViewModel.navigateToLogin.observeAsState(initial = false)
-    val toastMessage by bookmarkViewModel.toastMessage.observeAsState()
+    val snackBarMessage by bookmarkViewModel.toastMessage.observeAsState()
     val context = LocalContext.current
 
     var isRefreshing by remember { mutableStateOf(false) }
@@ -115,9 +110,9 @@ fun HomeScreen(
     val lazyListState = rememberLazyListState()
     val isScrolled = derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }.value
 
-    // 홈 화면이 로딩될때마다 페이지 reload
+    // 홈 화면이 로딩될때마다 페이지 reload하여 데이터를 받아온다.
     LaunchedEffect(key1 = true) {
-        recipeAllListViewModel.refreshItems()
+        recipeAllListViewModel.loadItemsWithSelectedSubCategories()
     }
 
     // `animateDpAsState` 사용하여 부드러운 애니메이션 적용
@@ -169,22 +164,6 @@ fun HomeScreen(
         }
     }
 
-    // 토스트 메시지를 찾아서 띄우고 초기화 진행
-    toastMessage?.let {
-        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-        bookmarkViewModel.toastMessage.value = null
-    }
-
-    if (loadFailed) {
-        Toast.makeText(context, "데이터 로딩 실패", Toast.LENGTH_SHORT).show()
-        recipeAllListViewModel.resetLoadFailed() // 경고창을 한 번만 표시하도록 상태를 리셋
-    }
-
-//    // 화면이 렌더링될 때 데이터 로딩 시작
-//    LaunchedEffect(key1 = true) {
-//        recipeAllListViewModel.loadMoreItems()
-//    }
-
     // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
     if (navigateToLogin) {
         LaunchedEffect(key1 = Unit) {
@@ -192,8 +171,8 @@ fun HomeScreen(
         }
     }
 
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-    var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
+    // 드롭다운 메뉴 상태
+    var menuExpanded by remember { mutableStateOf(false) }
 
     // 스낵바 설정
     val snackbarHostState = remember { SnackbarHostState() }
@@ -221,9 +200,34 @@ fun HomeScreen(
         }
     }
 
+    // loadFailed 상태가 true일 때 스낵바를 표시하는 로직
+    LaunchedEffect(loadFailed) {
+        if (loadFailed) {
+            // 스낵바 표시
+            snackbarHostState.showSnackbar(
+                message = "데이터 로딩 실패", // 스낵바에 표시할 메시지
+                duration = SnackbarDuration.Short // 스낵바가 표시되는 시간
+            )
+            recipeAllListViewModel.resetLoadFailed() // 상태 리셋
+        }
+    }
+
+    // snackBarMessage가 변경될 때 스낵바를 표시하는 로직
+    LaunchedEffect(snackBarMessage) {
+        snackBarMessage?.let {
+            // 스낵바 표시
+            snackbarHostState.showSnackbar(
+                message = it, // 스낵바에 표시할 메시지
+                duration = SnackbarDuration.Short // 스낵바가 표시되는 시간
+            )
+            bookmarkViewModel.toastMessage.value = null // 메시지 초기화
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
+                elevation = 0.dp,
                 modifier = Modifier.background(Color.White), // 여기에 배경색을 하얀색으로 설정,
                 backgroundColor = Color.White,
                 title = {
@@ -266,14 +270,6 @@ fun HomeScreen(
                         DropdownMenuItem(
                             text = { Text("신고하기") },
                             onClick = { /* 수정 처리 */ }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("로그아웃") },
-                            onClick = { /* 설정 처리 */ }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("로그아웃") },
-                            onClick = { /* 설정 처리 */ }
                         )
                         DropdownMenuItem(
                             text = { Text("피드백 보내기") },
@@ -418,7 +414,7 @@ fun HomeScreen(
 
                             // 마지막 아이템에 도달했을 때 추가 데이터 로드
                             if (index == recipeAllListViewModel.items.value.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
-                                recipeAllListViewModel.loadMoreItems()
+                                recipeAllListViewModel.loadMoreItems(subCategoryList) // 서브 카테고리 리스트로 추가 데이터 요청
                             }
                         }
                     }

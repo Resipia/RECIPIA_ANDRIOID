@@ -113,6 +113,8 @@ fun AppNavigation(
         }
         // 홈 화면(메인 레시피 목록들)
         composable("home") {
+            // 홈 화면 호출할때는 카테고리 정보 초기화하기
+//            recipeAllListViewModel.makeEmptyListSubCategoryData()
             HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel)
         }
         // 카테고리 조건 조회
@@ -123,7 +125,8 @@ fun AppNavigation(
                 onSelectedCategories = { selectedIds ->
                     println("선택된 서브 카테고리 ID: $selectedIds")
                     // 여기에서 선택된 ID들을 처리하는 로직을 추가할 수 있음
-                }
+                },
+                recipeAllListViewModel = recipeAllListViewModel
             )
         }
         // 검색화면

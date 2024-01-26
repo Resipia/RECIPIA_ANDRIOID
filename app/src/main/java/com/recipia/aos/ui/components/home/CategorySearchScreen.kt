@@ -40,6 +40,7 @@ import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.dto.SubCategoryDto
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
+import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 
 /**
  * 카테고리 조회 화면
@@ -49,6 +50,7 @@ import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 fun CategorySelectRecipeScreen(
     navController: NavController,
     viewModel: CategorySelectionViewModel,
+    recipeAllListViewModel: RecipeAllListViewModel,
     onSelectedCategories: (Set<Int>) -> Unit
 ) {
     val subCategories = listOf(
@@ -163,9 +165,12 @@ fun CategorySelectRecipeScreen(
         bottomBar = {
             Button(
                 onClick = {
-                    // 선택 완료 버튼 클릭 로직
-                    viewModel.setSelectedCategories(selectedSubCategories)
+                    // 사용자가 선택한 서브 카테고리 ID 리스트를 추출
+                    val selectedIds = selectedSubCategories.map { it.id }
+                    recipeAllListViewModel.setSubCategories(selectedIds)
+                    // 현재 화면을 스택에서 제거하고 홈 화면으로 이동
                     navController.popBackStack()
+                    navController.navigate("home") //todo: 여기서 전달해야하나?
                 },
                 modifier = Modifier
                     .fillMaxWidth()
