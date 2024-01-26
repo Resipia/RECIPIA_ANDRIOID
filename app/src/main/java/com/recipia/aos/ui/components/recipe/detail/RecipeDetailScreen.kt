@@ -1,6 +1,7 @@
 package com.recipia.aos.ui.components.recipe.detail
 
 import TokenManager
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -58,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -468,6 +470,7 @@ fun BottomSheet(
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = modalBottomSheetState,
+        containerColor = Color.White, // 하단 시트의 배경색을 하얗게 설정
         content = {
             BoxWithConstraints {
                 // 'maxHeight'를 여기에서 계산합니다.
@@ -483,6 +486,7 @@ fun BottomSheet(
     )
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun CommentsList(
     commentViewModel: CommentViewModel,
@@ -491,21 +495,42 @@ fun CommentsList(
 ) {
     val commentsResponse by commentViewModel.comments.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val comments = commentsResponse?.content ?: emptyList()
 
-    LazyColumn(
-        modifier = Modifier.height(maxHeight)  // 여기에서 최대 높이를 적용합니다.
-    ) {
-        itemsIndexed(commentsResponse?.content ?: emptyList()) { index, comment ->
-            CommentItem(comment)
-        }
+    Column {
+        // 고정된 헤더 부분
+        Text(
+            text = "댓글",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .fillMaxWidth() // 전체 너비를 채우도록 설정
+                .padding(start = 16.dp, bottom = 16.dp), // 양쪽에 패딩 적용
+        )
 
-        item {
-            Button(onClick = {
-                coroutineScope.launch {
-                    commentViewModel.loadMoreComments(recipeId)
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(), // 전체 너비를 채우도록 설정
+//                .padding(horizontal = 16.dp), // 양쪽에 패딩 적용
+            thickness = 0.5.dp, // 구분선의 두께 설정
+            color = Color(222, 226, 230) // 구분선의 색상 설정
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 스크롤 가능한 댓글 리스트 부분
+        LazyColumn(
+            modifier = Modifier.height(maxHeight)  // 여기에서 최대 높이를 적용합니다.
+        ) {
+            itemsIndexed(comments) { index, comment ->
+                CommentItem(comment)
+
+                // 마지막 항목이 렌더링되면 추가 데이터 로드
+                if (index == comments.size - 1) {
+                    coroutineScope.launch {
+                        commentViewModel.loadMoreComments(recipeId)
+                    }
                 }
-            }) {
-                Text("더 많은 댓글 불러오기")
             }
         }
     }
