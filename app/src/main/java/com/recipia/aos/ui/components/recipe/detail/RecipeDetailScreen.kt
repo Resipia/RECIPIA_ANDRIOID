@@ -221,8 +221,7 @@ fun RecipeDetailScreen(
             commentViewModel = commentViewModel,
             navController = navController,
             paddingValues = innerPadding,
-            showSheet = showSheet,
-            setShowSheet = setShowSheet  // 상태 변경 함수 전달
+            setShowSheet = setShowSheet
         )
     }
 }
@@ -236,7 +235,6 @@ fun RecipeDetailContent(
     commentViewModel: CommentViewModel,
     navController: NavController,
     paddingValues: PaddingValues,
-    showSheet: Boolean,
     setShowSheet: (Boolean) -> Unit  // 상태 변경 함수 받기
 ) {
 
@@ -255,68 +253,104 @@ fun RecipeDetailContent(
         CircularProgressIndicator()
     } else {
         recipeDetailState.value?.let { recipeDetail ->
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .padding(paddingValues)
             ) {
 
-                // 이미지 슬라이더 구현
-                val pagerState = rememberPagerState(
-                    initialPage = 0,
-                    initialPageOffsetFraction = 0f
-                ) {
-                    recipeDetail.recipeFileUrlList.size
-                }
+                item {
+                    // 이미지 슬라이더 구현
+                    val pagerState = rememberPagerState(
+                        initialPage = 0,
+                        initialPageOffsetFraction = 0f
+                    ) {
+                        recipeDetail.recipeFileUrlList.size
+                    }
 
-                Spacer(modifier = Modifier.height(28.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
 
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxWidth() // 전체 너비를 채우도록 설정
-                        .height(300.dp) // 높이 설정
-                ) { page ->
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            model = recipeDetail.recipeFileUrlList[page].preUrl
-                        ),
-                        contentDescription = null,
+                    HorizontalPager(
+                        state = pagerState,
                         modifier = Modifier
                             .fillMaxWidth() // 전체 너비를 채우도록 설정
-                            .aspectRatio(1.0f / 2.0f) // 이미지의 세로 길이를 가로 길이의 절반으로 설정
-                    )
+                            .height(300.dp) // 높이 설정
+                    ) { page ->
+                        Image(
+                            painter = rememberAsyncImagePainter(
+                                model = recipeDetail.recipeFileUrlList[page].preUrl
+                            ),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth() // 전체 너비를 채우도록 설정
+                                .aspectRatio(1.0f / 2.0f) // 이미지의 세로 길이를 가로 길이의 절반으로 설정
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(50.dp))
                 }
 
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // 작성자 정보
-                Row(
-                    modifier = Modifier
-                        .clickable {
-                            // 여기서 navController를 사용하여 MyPageScreen으로 이동
-                            navController.navigate("other-user-page/${recipeDetail.memberId}")
+                item {
+                    // 날짜, 좋아요, 북마크 정보
+                    Row(
+//                        modifier = Modifier
+//                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // 날짜
+                        val dateOnly = recipeDetail.createDate?.substringBefore("T") ?: ""
+                        recipeDetail.createDate?.let {
+                            Text(
+                                text = dateOnly,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                            )
                         }
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // 프로필 이미지
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            model = recipeDetail.recipeFileUrlList
-                                ?: "https://example.com/default_profile.jpg"
-                        ),
-                        contentDescription = "작성자 프로필",
+                        // todo: 좋아요
+
+                        // todo: 북마크
+                    }
+
+                    HorizontalDivider(
                         modifier = Modifier
-                            .size(60.dp) // 이미지 크기
-                            .clip(CircleShape) // 원형 클리핑
-                            .border(0.5.dp, Color.Gray, CircleShape) // 회색 테두리 추가
-                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+                        thickness = 0.5.dp, // 구분선의 두께 설정
+                        color = Color(222, 226, 230) // 구분선의 색상 설정
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-                    // 작성자 이름과 카테고리
-                    Column {
+                item {
+                    // 작성자 정보
+                    Row(
+                        modifier = Modifier
+                            .clickable {
+                                // 여기서 navController를 사용하여 MyPageScreen으로 이동
+                                navController.navigate("other-user-page/${recipeDetail.memberId}")
+                            }
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // 프로필 이미지
+                        Image(
+                            painter = rememberAsyncImagePainter(
+                                model = recipeDetail.recipeFileUrlList
+                                    ?: "https://example.com/default_profile.jpg"
+                            ),
+                            contentDescription = "작성자 프로필",
+                            modifier = Modifier
+                                .size(60.dp) // 이미지 크기
+                                .clip(CircleShape) // 원형 클리핑
+                                .border(0.5.dp, Color.Gray, CircleShape) // 회색 테두리 추가
+                                .padding(horizontal = 16.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // 닉네임
                         Text(
                             text = recipeDetail.nickname,
                             style = MaterialTheme.typography.titleSmall,
@@ -324,119 +358,145 @@ fun RecipeDetailContent(
                                 .padding(start = 4.dp)
                                 .padding(horizontal = 16.dp)
                         )
-
-                        // todo: 여기서 회원 닉네임 누르면 이동시킬때 memberId를 onClick콜백에 담아서 마이페이지 api 요청하도록 하면됨
-//                        recipeDetail.memberId
-
-                        // 카테고리 정보
-                        Row(
-                            modifier = Modifier
-                                .padding(top = 4.dp)
-                                .padding(horizontal = 16.dp)
-                        ) {
-                            recipeDetail.subCategoryDtoList.forEach { subCategory ->
-                                AssistChip(
-                                    onClick = { },
-                                    label = { Text(subCategory.subCategoryNm.orEmpty()) }
-                                )
-                            }
-                        }
                     }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+                        thickness = 0.5.dp, // 구분선의 두께 설정
+                        color = Color(222, 226, 230) // 구분선의 색상 설정
+                    )
                 }
 
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth() // 전체 너비를 채우도록 설정
-                        .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
-                    thickness = 0.5.dp, // 구분선의 두께 설정
-                    color = Color(222, 226, 230) // 구분선의 색상 설정
-                )
-//                Divider(Modifier.padding(vertical = 8.dp))
-
-                // 제목
-                Text(
-                    text = "제목: ${recipeDetail.recipeName}",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(top = 8.dp)
-                        .padding(horizontal = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth() // 전체 너비를 채우도록 설정
-                        .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
-                    thickness = 0.5.dp, // 구분선의 두께 설정
-                    color = Color(222, 226, 230) // 구분선의 색상 설정
-                )
-
-                // 재료 목록
-                Text(
-                    text = "재료: ${recipeDetail.ingredient}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 영양 정보
-                recipeDetail.nutritionalInfoDto?.let { info ->
+                item {
+                    // 레시피명
                     Text(
-                        text = "영양 정보: 탄수화물 ${info.carbohydrates}," +
-                                " 단백질 ${info.protein}," +
-                                " 지방 ${info.fat}," +
-                                " 비타민 ${info.vitamins}," +
-                                " 미네랄 ${info.minerals}",
+                        text = "레시피명: ${recipeDetail.recipeName}",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+                        thickness = 0.5.dp, // 구분선의 두께 설정
+                        color = Color(222, 226, 230) // 구분선의 색상 설정
+                    )
+                }
+
+                item {
+                    // 카테고리 정보
+                    Row(
+                        modifier = Modifier
+//                            .padding(top = 4.dp)
+                            .padding(horizontal = 12.dp)
+                    ) {
+                        recipeDetail.subCategoryDtoList.forEach { subCategory ->
+                            AssistChip(
+                                onClick = { },
+                                label = { Text(subCategory.subCategoryNm.orEmpty()) }
+                            )
+                        }
+                    }
+
+//                    Spacer(modifier = Modifier.height(4.dp))
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+                        thickness = 0.5.dp, // 구분선의 두께 설정
+                        color = Color(222, 226, 230) // 구분선의 색상 설정
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // 레시피 내용
+                    Text(
+                        text = recipeDetail.recipeDesc,
+                        color = MaterialTheme.colorScheme.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+                        thickness = 0.5.dp, // 구분선의 두께 설정
+                        color = Color(222, 226, 230) // 구분선의 색상 설정
+                    )
+                }
+
+                item {
+                    // todo: 소요 시간
+
+                    // todo: 재료 목록
+                    Text(
+                        text = "재료: ${recipeDetail.ingredient}",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // todo: 해시태그 정보
+
+                    // todo: 영양 정보
+                    recipeDetail.nutritionalInfoDto?.let { info ->
+                        Text(
+                            text = "영양 정보: 탄수화물 ${info.carbohydrates}," +
+                                    " 단백질 ${info.protein}," +
+                                    " 지방 ${info.fat}," +
+                                    " 비타민 ${info.vitamins}," +
+                                    " 미네랄 ${info.minerals}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+                        thickness = 0.5.dp, // 구분선의 두께 설정
+                        color = Color(222, 226, 230) // 구분선의 색상 설정
+                    )
                 }
 
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth() // 전체 너비를 채우도록 설정
-                        .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
-                    thickness = 0.5.dp, // 구분선의 두께 설정
-                    color = Color(222, 226, 230) // 구분선의 색상 설정
-                )
-
-                // 레시피 설명
-                Text(
-                    text = recipeDetail.recipeDesc,
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth() // 전체 너비를 채우도록 설정
-                        .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
-                    thickness = 0.5.dp, // 구분선의 두께 설정
-                    color = Color(222, 226, 230) // 구분선의 색상 설정
-                )
-
-                // '댓글' 버튼을 눌렀을 때 showSheet 상태를 true로 설정
-                Button(
-                    onClick = { setShowSheet(true) },
-                    modifier = Modifier
-                        .fillMaxWidth() // 전체 너비를 채우도록 설정
-                        .height(60.dp) // 버튼의 높이를 더 크게 설정
-                        .padding(horizontal = 12.dp, vertical = 8.dp), // 주변 여백 설정
-                    shape = RoundedCornerShape(12.dp), // 모서리를 둥글게 설정
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(241,243,245), // 버튼 배경색
-                        contentColor = MaterialTheme.colorScheme.onPrimary // 텍스트 및 아이콘 색상
-                    )
-                ) {
-                    Text(
-                        text = "댓글보기",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
+                item {
+                    // 댓글보기
+                    Button(
+                        onClick = { setShowSheet(true) },
+                        modifier = Modifier
+                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+                            .height(60.dp) // 버튼의 높이를 더 크게 설정
+                            .padding(horizontal = 12.dp, vertical = 8.dp), // 주변 여백 설정
+                        shape = RoundedCornerShape(12.dp), // 모서리를 둥글게 설정
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(241,243,245), // 버튼 배경색
+                            contentColor = MaterialTheme.colorScheme.onPrimary // 텍스트 및 아이콘 색상
+                        )
+                    ) {
+                        Text(
+                            text = "댓글보기",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
                 }
             }
         }
