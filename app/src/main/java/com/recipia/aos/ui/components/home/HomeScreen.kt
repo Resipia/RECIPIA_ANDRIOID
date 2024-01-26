@@ -85,13 +85,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
     recipeAllListViewModel: RecipeAllListViewModel,
-    bookmarkViewModel: BookMarkViewModel,
-    subCategoryList: List<Long> = emptyList() // CategorySelectScreen에서 전달받은 서브 카테고리 리스트
+    bookmarkViewModel: BookMarkViewModel
 ) {
     /**
      * LiveData에 주로 observeAsState를 사용한다.
@@ -102,18 +101,14 @@ fun HomeScreen(
     val loadFailed by recipeAllListViewModel.loadFailed.observeAsState(initial = false)
     val navigateToLogin by recipeAllListViewModel.navigateToLogin.observeAsState(initial = false)
     val snackBarMessage by bookmarkViewModel.toastMessage.observeAsState()
-    val context = LocalContext.current
-
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-
     val lazyListState = rememberLazyListState()
     val isScrolled = derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }.value
-
-    // 홈 화면이 로딩될때마다 페이지 reload하여 데이터를 받아온다.
-    LaunchedEffect(key1 = true) {
-        recipeAllListViewModel.loadItemsWithSelectedSubCategories()
-    }
+    val bookmarkUpdateState by bookmarkViewModel.bookmarkUpdateState.observeAsState()
+    var menuExpanded by remember { mutableStateOf(false) }// 드롭다운 메뉴 상태
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    var showFab by remember { mutableStateOf(true) }
 
     // `animateDpAsState` 사용하여 부드러운 애니메이션 적용
     val fabWidth by animateDpAsState(
@@ -125,12 +120,14 @@ fun HomeScreen(
         label = ""
     )
 
+    // 화면에서 데이터 새로고침할때 사용
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
         onRefresh = {
             coroutineScope.launch {
                 isRefreshing = true
-                recipeAllListViewModel.refreshItems() // 여기서 refreshItems 메서드 호출
+                // 여기서 refreshItems 메서드 호출
+                recipeAllListViewModel.refreshItems(recipeAllListViewModel.selectedSubCategories.value)
                 while (recipeAllListViewModel.isLoading.value == true) {
                     delay(1000)
                 }
@@ -138,6 +135,11 @@ fun HomeScreen(
             }
         }
     )
+
+    // 홈 화면이 로딩될때마다 페이지 reload하여 데이터를 받아온다.
+    LaunchedEffect(key1 = true) {
+        recipeAllListViewModel.loadItemsWithSelectedSubCategories()
+    }
 
     // 데이터 로딩 완료 감지
     LaunchedEffect(recipeAllListViewModel.items) {
@@ -148,7 +150,6 @@ fun HomeScreen(
      * 상태가 변경될 때마다, 즉 북마크가 추가되거나 제거될 때마다 recipeAllListViewModel의 updateItemBookmarkId 함수를 호출하여 전체 목록의 상태를 업데이트합니다.
      * 이 로직은 북마크 상태의 변경이 백엔드에서 성공적으로 처리되었을 때, 앱의 전체 상태(여기서는 레시피 목록)를 업데이트하는 데 사용됩니다.
      */
-    val bookmarkUpdateState by bookmarkViewModel.bookmarkUpdateState.observeAsState()
     LaunchedEffect(bookmarkUpdateState) {
         bookmarkUpdateState?.let { state ->
             when (state) {
@@ -170,13 +171,6 @@ fun HomeScreen(
             navController.navigate("login")
         }
     }
-
-    // 드롭다운 메뉴 상태
-    var menuExpanded by remember { mutableStateOf(false) }
-
-    // 스낵바 설정
-    val snackbarHostState = remember { SnackbarHostState() }
-    var showFab by remember { mutableStateOf(true) }
 
     // 스낵바가 생기면 작성버튼이 사라지도록 하는 코루틴
     LaunchedEffect(snackbarHostState.currentSnackbarData) {
@@ -414,7 +408,7 @@ fun HomeScreen(
 
                             // 마지막 아이템에 도달했을 때 추가 데이터 로드
                             if (index == recipeAllListViewModel.items.value.lastIndex && !recipeAllListViewModel.isLastPage && !isLoading) {
-                                recipeAllListViewModel.loadMoreItems(subCategoryList) // 서브 카테고리 리스트로 추가 데이터 요청
+                                recipeAllListViewModel.loadMoreItems(recipeAllListViewModel.selectedSubCategories.value) // 서브 카테고리 리스트로 추가 데이터 요청
                             }
                         }
                     }

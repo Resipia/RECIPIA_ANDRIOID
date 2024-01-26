@@ -70,6 +70,9 @@ class RecipeAllListViewModel(
 
     // 선택된 서브 카테고리에 따라 데이터를 요청하는 메서드
     fun loadItemsWithSelectedSubCategories() {
+        currentRequestPage = 0
+        isLastPage = false
+        items.value = emptyList() // 기존 데이터를 초기화
         loadMoreItems(selectedSubCategories.value)
     }
 
@@ -94,16 +97,18 @@ class RecipeAllListViewModel(
     }
 
     // 데이터를 새로고침하는 메서드
-    fun refreshItems() {
+    fun refreshItems(
+        subCategoryList: List<Long>
+    ) {
         currentRequestPage = 0 // 페이지를 초기화
         isLastPage = false
         items.value = emptyList() // 기존 데이터를 초기화
-        loadMoreItems(emptyList()) // 첫 페이지부터 다시 로딩
+        loadMoreItems(subCategoryList) // 첫 페이지부터 다시 로딩
     }
 
     // 더 많은 아이템을 요청하는 메서드
     fun loadMoreItems(
-        subCategoryList: List<Long> = emptyList()
+        subCategoryList: List<Long>
     ) {
         Log.d("RecipeAllListViewModel", "Loading more items")
         if (_isLoading.value == true || isLastPage) return
@@ -118,7 +123,7 @@ class RecipeAllListViewModel(
         page: Int,
         size: Int,
         sortType: String,
-        subCategoryList: List<Long> = emptyList()
+        subCategoryList: List<Long>
     ) {
         Log.d("RecipeAllListViewModel", "Loading items from server - Page: $page")
 
