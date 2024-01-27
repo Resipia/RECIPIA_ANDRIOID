@@ -58,11 +58,11 @@ fun SplashScreen(
 
         LottieAnimation(
             composition = composition,
-            modifier = Modifier.size(400.dp),
+            modifier = Modifier.size(300.dp),
             isPlaying = true, // 애니메이션 재생
             iterations = LottieConstants.IterateForever, // 무한 반복
             // 애니메이션 상태 추적
-            speed = 1f,
+            speed = 1.6f,
             restartOnPlay = false
         )
 

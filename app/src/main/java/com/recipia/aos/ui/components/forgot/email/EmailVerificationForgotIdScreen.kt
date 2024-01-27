@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.recipia.aos.ui.components.common.AnimatedPreloader
 import com.recipia.aos.ui.model.forgot.ForgotViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -168,7 +170,7 @@ fun EmailVerificationForgotIdScreen(
                         .padding(vertical = 16.dp)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator() // 로딩 표시
+                        AnimatedPreloader(modifier = Modifier.size(100.dp))
                     } else {
                         Text(text = "이메일 찾기")
                     }

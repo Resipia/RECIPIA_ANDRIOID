@@ -24,15 +24,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -65,13 +62,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.ui.components.HorizontalDivider
+import com.recipia.aos.ui.components.common.AnimatedPreloader
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.components.recipe.detail.comment.CommentItem
 import com.recipia.aos.ui.model.comment.CommentViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailScreen(
     recipeId: Long,
@@ -83,22 +81,13 @@ fun RecipeDetailScreen(
     val context = LocalContext.current
     var menuExpanded by remember { mutableStateOf(false) }
     val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
-
-    // 레시피 상세 정보의 상태를 관찰
     val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
-
-    // AlertDialog를 표시할지 여부를 관리하는 상태
     var showDialog by remember { mutableStateOf(false) }
-
-    // ModalBottomSheet 상태 관리
-    val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
-
-    // showSheet 상태를 변경하는 함수
     val setShowSheet = { value: Boolean -> showSheet = value }
 
-    // 이것은 BottomSheet를 호출하는 부분이야.
+    // BottomSheet(댓글창) 호출
     if (showSheet) {
         BottomSheet(
             onDismiss = {  // 여기서 상태를 변경하는 람다 함수를 전달함
@@ -111,9 +100,7 @@ fun RecipeDetailScreen(
         )
     }
 
-    // 댓글 상태 관찰
-    val comments by commentViewModel.comments.collectAsState()
-
+    // dialog(알림창) 호출
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
@@ -232,8 +219,11 @@ fun RecipeDetailContent(
     commentViewModel: CommentViewModel,
     navController: NavController,
     paddingValues: PaddingValues,
-    setShowSheet: (Boolean) -> Unit  // 상태 변경 함수 받기
+    setShowSheet: (Boolean) -> Unit
 ) {
+
+    val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
+    val isLoading = recipeDetailViewModel.isLoading.observeAsState()
 
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
@@ -241,13 +231,9 @@ fun RecipeDetailContent(
         commentViewModel.loadInitialComments(recipeId) // 수정된 함수 호출
     }
 
-    // LiveData를 Compose에서 관찰하기 위해 observeAsState() 사용
-    val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
-    val isLoading = recipeDetailViewModel.isLoading.observeAsState()
-
+    // 로딩중이면 인디케이터 표시
     if (isLoading.value == true) {
-        // 로딩 인디케이터 표시
-        CircularProgressIndicator()
+        AnimatedPreloader(modifier = Modifier.size(100.dp)) // 로딩 바의 크기 조절 가능
     } else {
         recipeDetailState.value?.let { recipeDetail ->
             LazyColumn(
