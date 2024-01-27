@@ -350,7 +350,8 @@ fun RecipeDetailContent(
                         // 닉네임
                         Text(
                             text = recipeDetail.nickname,
-                            style = MaterialTheme.typography.titleSmall,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier
                         )
                     }
@@ -385,6 +386,12 @@ fun RecipeDetailContent(
                             .padding(start = 4.dp)
                             .padding(horizontal = 12.dp)
                     ) {
+                        Text(
+                            text = "카테고리: ",
+                            fontSize = 12.sp,
+                            color = Color.DarkGray
+                        )
+
                         recipeDetail.subCategoryDtoList.forEach { subCategory ->
                             Text(
                                 subCategory.subCategoryNm.orEmpty(),
@@ -427,6 +434,13 @@ fun RecipeDetailContent(
 
                 item {
                     // todo: 소요 시간
+                    Text(
+                        text = "소요 시간: ${recipeDetail.timeTaken}분",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // todo: 재료 목록
                     Text(
@@ -438,15 +452,22 @@ fun RecipeDetailContent(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // todo: 해시태그 정보
+                    Text(
+                        text = "해시태그: ${recipeDetail.hashtag}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // todo: 영양 정보
                     recipeDetail.nutritionalInfoDto?.let { info ->
                         Text(
-                            text = "영양 정보: 탄수화물 ${info.carbohydrates}," +
-                                    " 단백질 ${info.protein}," +
-                                    " 지방 ${info.fat}," +
-                                    " 비타민 ${info.vitamins}," +
-                                    " 미네랄 ${info.minerals}",
+                            text = "영양 정보: 탄수화물 ${info.carbohydrates}(g)," +
+                                    " 단백질 ${info.protein}(g)," +
+                                    " 지방 ${info.fat}(g)," +
+                                    " 비타민 ${info.vitamins}(g)," +
+                                    " 미네랄 ${info.minerals}(g)",
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
@@ -464,7 +485,7 @@ fun RecipeDetailContent(
 
                 item {
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     // 댓글보기
                     Button(
@@ -486,6 +507,8 @@ fun RecipeDetailContent(
                             color = Color.Black
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
