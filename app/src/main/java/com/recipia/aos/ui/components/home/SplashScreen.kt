@@ -36,7 +36,7 @@ fun SplashScreen(
 ) {
 
     var isAnimationFinished by remember { mutableStateOf(false) }
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.signup_success))
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.splash_anime))
 
     // jwt 존재 여부를 검증한다.
     val isUserLoggedIn = remember {
@@ -52,13 +52,13 @@ fun SplashScreen(
     ) {
 
         // 성공 메시지 표시
-        Text("레시피 유토피아 Recipia.")
-
-        Spacer(modifier = Modifier.height(24.dp))
+//        Text("레시피 유토피아 Recipia.")
+//
+//        Spacer(modifier = Modifier.height(4.dp))
 
         LottieAnimation(
             composition = composition,
-            modifier = Modifier.size(200.dp),
+            modifier = Modifier.size(400.dp),
             isPlaying = true, // 애니메이션 재생
             iterations = LottieConstants.IterateForever, // 무한 반복
             // 애니메이션 상태 추적
@@ -70,7 +70,7 @@ fun SplashScreen(
         LaunchedEffect(composition) {
             if (composition != null) {
                 isAnimationFinished = true
-                delay(1000) // 2초 대기
+                delay(1500) // 1초
                 if (isUserLoggedIn.value) {
                     navController.navigate("home") { // 메인 화면으로 이동
                         popUpTo("splash-screen") { inclusive = true } // 스플래시 화면 제거
