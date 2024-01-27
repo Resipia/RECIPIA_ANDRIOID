@@ -41,11 +41,11 @@ fun CommentsList(
         // 고정된 헤더 부분
         Text(
             text = "댓글",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .fillMaxWidth() // 전체 너비를 채우도록 설정
-                .padding(start = 16.dp, bottom = 16.dp), // 양쪽에 패딩 적용
+                .padding(start = 16.dp, bottom = 8.dp), // 양쪽에 패딩 적용
         )
 
         HorizontalDivider(
@@ -56,7 +56,7 @@ fun CommentsList(
             color = Color(222, 226, 230) // 구분선의 색상 설정
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // 스크롤 가능한 댓글 리스트 부분
         LazyColumn(

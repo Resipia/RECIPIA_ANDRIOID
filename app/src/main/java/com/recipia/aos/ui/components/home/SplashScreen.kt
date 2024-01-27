@@ -62,7 +62,7 @@ fun SplashScreen(
             isPlaying = true, // 애니메이션 재생
             iterations = LottieConstants.IterateForever, // 무한 반복
             // 애니메이션 상태 추적
-            speed = 1.6f,
+            speed = 2f,
             restartOnPlay = false
         )
 
@@ -70,7 +70,7 @@ fun SplashScreen(
         LaunchedEffect(composition) {
             if (composition != null) {
                 isAnimationFinished = true
-                delay(1500) // 1초
+                delay(1000) // 1초
                 if (isUserLoggedIn.value) {
                     navController.navigate("home") { // 메인 화면으로 이동
                         popUpTo("splash-screen") { inclusive = true } // 스플래시 화면 제거

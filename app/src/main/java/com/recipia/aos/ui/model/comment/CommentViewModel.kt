@@ -63,7 +63,7 @@ class CommentViewModel(
     suspend fun getAllComments(
         recipeId: Long,
         currentPage: Int,
-        size: Int = 10,
+        size: Int = 5,
         sortType: String = "new"
     ): PagingResponseDto<CommentListResponseDto>? {
         val response = commentService.getAllCommentList(recipeId, currentPage, size, sortType)

@@ -26,20 +26,20 @@ fun CommentItem(
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 18.dp)
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
         ) {
             // 닉네임
             Text(
                 text = comment.nickname,
                 fontWeight = FontWeight.Bold,
-                fontSize = 12.sp
+                fontSize = 10.sp
             )
             // 생성일자
             Text(
                 text = " · ${comment.createDate}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray,
-                fontSize = 12.sp
+                fontSize = 10.sp
             )
             // 수정내역
             if (comment.updated) {
@@ -54,10 +54,11 @@ fun CommentItem(
         Text(
             text = comment.commentValue,
             style = MaterialTheme.typography.bodyLarge,
+            fontSize = 12.sp,
             modifier = Modifier.padding(horizontal = 16.dp)
 
         )
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(8.dp))
 }
