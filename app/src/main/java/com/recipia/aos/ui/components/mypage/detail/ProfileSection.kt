@@ -17,10 +17,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
+import com.recipia.aos.R
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 
@@ -35,6 +41,7 @@ fun ProfileSection(
 ) {
 
     val myPageData = myPageViewModel.myPageData.value
+    val context = LocalContext.current
 
     Row(
         modifier = Modifier
@@ -42,14 +49,24 @@ fun ProfileSection(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+
         // 프로필 이미지
+        val painter = rememberAsyncImagePainter(
+            ImageRequest.Builder(context).data(myPageData?.profileImageUrl ?: R.drawable.ic_launcher_foreground)
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .error(R.drawable.ic_launcher_foreground)
+                .transformations(CircleCropTransformation())
+                .build()
+        )
+
         Image(
-            painter = rememberAsyncImagePainter(model = myPageData?.profileImageUrl),
+            painter = painter,
             contentDescription = "프로필 이미지",
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .border(0.5.dp, Color.Gray, CircleShape)
+                .border(0.5.dp, Color.Gray, CircleShape),
+            contentScale = ContentScale.Crop
         )
 
         Spacer(modifier = Modifier.width(16.dp))

@@ -29,11 +29,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
+import com.recipia.aos.R
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.common.AnimatedPreloader
 import com.recipia.aos.ui.model.comment.CommentViewModel
@@ -50,7 +54,6 @@ fun RecipeDetailContent(
     commentViewModel: CommentViewModel,
     navController: NavController,
     paddingValues: PaddingValues,
-    setShowSheet: (Boolean) -> Unit
 ) {
 
     val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
@@ -143,8 +146,15 @@ fun RecipeDetailContent(
                         // 프로필 이미지
                         Image(
                             painter = rememberAsyncImagePainter(
-                                model = recipeDetail.recipeFileUrlList
-                                    ?: "https://example.com/default_profile.jpg"
+                                ImageRequest.Builder(LocalContext.current).data(
+                                    data = recipeDetail.recipeFileUrlList?.firstOrNull() ?: "https://example.com/default_profile.jpg"
+                                ).apply {
+                                    // 이미지 로드 중 및 에러 발생 시 대체 이미지 지정
+                                    placeholder(R.drawable.ic_launcher_foreground)
+                                    error(R.drawable.ic_launcher_foreground)
+                                    // 이미지를 원형으로 자르기
+                                    transformations(CircleCropTransformation())
+                                }.build()
                             ),
                             contentDescription = "작성자 프로필",
                             modifier = Modifier

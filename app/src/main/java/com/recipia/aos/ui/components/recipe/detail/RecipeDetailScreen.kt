@@ -172,8 +172,7 @@ fun RecipeDetailScreen(
             recipeDetailViewModel = recipeDetailViewModel,
             commentViewModel = commentViewModel,
             navController = navController,
-            paddingValues = innerPadding,
-            setShowSheet = setShowSheet
+            paddingValues = innerPadding
         )
     }
 }
