@@ -2,10 +2,14 @@ package com.recipia.aos.ui.components.mypage
 
 import TokenManager
 import android.widget.Toast
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -17,6 +21,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.QuestionAnswer
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,10 +40,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
@@ -48,6 +56,7 @@ import com.recipia.aos.ui.components.mypage.detail.PersonalInfoSection
 import com.recipia.aos.ui.components.mypage.detail.ProfileSection
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
+import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 
 /**
@@ -60,6 +69,7 @@ fun MyPageScreen(
     myPageViewModel: MyPageViewModel,
     recipeAllListViewModel: RecipeAllListViewModel,
     followViewModel: FollowViewModel,
+    bookMarkViewModel: BookMarkViewModel,
     tokenManager: TokenManager,
     targetMemberId: Long? = null
 ) {
@@ -70,6 +80,13 @@ fun MyPageScreen(
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
     val targetId = targetMemberId ?: tokenManager.loadMemberId() // memberId 결정
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
+
+    // targetMemberId가 존재하면 해당 멤버의 레시피를 가져오고, 그렇지 않으면 기본 마이페이지 기능을 표시
+    LaunchedEffect(key1 = targetMemberId) {
+        targetMemberId?.let {
+            myPageViewModel.getHighRecipe(it)
+        }
+    }
 
     // 화면이 렌더링될 때 데이터 로딩 시작
     LaunchedEffect(key1 = targetId) { // memberId를 기반으로 데이터 로딩
@@ -87,7 +104,11 @@ fun MyPageScreen(
             TopAppBar(
                 title = { Text(text = "", style = MaterialTheme.typography.bodyMedium) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack()
+                        }
+                    ) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로 가기")
                     }
                 },
@@ -155,83 +176,139 @@ fun MyPageScreen(
                     Spacer(modifier = Modifier.height(8.dp)) // 여기에 추가 공간
                 }
 
-                // 마이페이지 기능 리스트
-                item {
-                    MyPageFeatureItem(
-                        title = "내가 북마크한 레시피",
-                        icon = Icons.Default.Bookmark,
-                        onClick = { /* 페이지 이동 로직 */ }
-                    )
-                }
-                item {
-                    MyPageFeatureItem(
-                        title = "내가 좋아요한 레시피",
-                        icon = Icons.Default.Favorite,
-                        onClick = { /* 페이지 이동 로직 */ }
-                    )
-                }
-                item {
-                    MyPageFeatureItem(
-                        title = "작성한 댓글/대댓글 보기",
-                        icon = Icons.Default.Comment,
-                        onClick = { /* 페이지 이동 로직 */ }
-                    )
-                }
-                item {
-                    MyPageFeatureItem(
-                        title = "문의하기",
-                        icon = Icons.Default.QuestionAnswer,
-                        onClick = {
-                            Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
+                if (targetMemberId != null) {
+
+                    item {
+                        Column {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 16.dp, top = 8.dp, bottom = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                // 닉네임과 아이콘 표시
+                                Text(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black,
+                                    text = "${myPageData?.nickname} 님의 레시피 조회수 TOP 5",
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
                         }
-                    )
-                }
-                item {
-                    MyPageFeatureItem(
-                        title = "계정 정보 수정",
-                        icon = Icons.Default.ManageAccounts,
-                        onClick = { /* 페이지 이동 로직 */ }
-                    )
-                }
-                item {
-                    MyPageFeatureItem(
-                        title = "로그아웃",
-                        icon = Icons.Default.ExitToApp,
-                        onClick = {
-                            // todo: 다이얼로그 띄우기
-                            myPageViewModel.logout(
-                                onSuccess = {
-                                    // 성공시 로그인 화면으로 이동
-                                    navController.navigate("login")
-                                },
-                                onError = { errorMessage ->
-                                    // 실패시 에러 메시지 표시
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
-                                        .show()
-                                }
-                            )
-                        }
-                    )
-                }
-                item {
-                    MyPageFeatureItem(
-                        title = "탈퇴",
-                        icon = Icons.Default.Delete,
-                        onClick = {
-                            // todo: 다이얼로그 띄우기
-                            myPageViewModel.deactivateAccount(
-                                onSuccess = {
-                                    // 성공시 로그인 화면으로 이동
-                                    navController.navigate("login")
-                                },
-                                onError = { errorMessage ->
-                                    // 실패시 에러 메시지 표시
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
-                                        .show()
-                                }
-                            )
-                        }
-                    )
+
+                        // 항목 사이에 구분선 추가
+                        Divider(
+                            modifier = Modifier
+                                .fillMaxWidth() // 전체 너비를 채우도록 설정
+                                .padding(horizontal = 16.dp), // 양쪽에 패딩 적용
+                            thickness = 0.5.dp, // 구분선의 두께 설정
+                            color = Color(222, 226, 230) // 구분선의 색상 설정
+                        )
+
+                    }
+                    
+                    // targetMemberId가 있을 경우 해당 멤버의 레시피 목록 표시
+                    items(myPageViewModel.highCountRecipe.value) { recipe ->
+                        MyPageRecipeListItem(
+                            item = recipe,
+                            bookmarkViewModel = bookMarkViewModel,
+                            navController = navController
+                        )
+                    }
+                } else {
+                    // 마이페이지 기능 리스트
+                    item {
+                        MyPageFeatureItem(
+                            title = "내가 북마크한 레시피",
+                            icon = Icons.Default.Bookmark,
+                            onClick = {
+                                myPageViewModel.currentPageType.value =
+                                    MyPageViewModel.PageType.BOOKMARK
+                                navController.navigate("select-recipe-screen")
+                            }
+                        )
+                    }
+
+                    item {
+                        MyPageFeatureItem(
+                            title = "내가 좋아요한 레시피",
+                            icon = Icons.Default.Favorite,
+                            onClick = {
+                                myPageViewModel.currentPageType.value =
+                                    MyPageViewModel.PageType.LIKE
+                                navController.navigate("select-recipe-screen")
+                            }
+                        )
+                    }
+
+                    item {
+                        MyPageFeatureItem(
+                            title = "작성한 댓글/대댓글 보기",
+                            icon = Icons.Default.Comment,
+                            onClick = { /* 페이지 이동 로직 */ }
+                        )
+                    }
+
+                    item {
+                        MyPageFeatureItem(
+                            title = "문의하기",
+                            icon = Icons.Default.QuestionAnswer,
+                            onClick = {
+                                Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+
+                    item {
+                        MyPageFeatureItem(
+                            title = "계정 정보 수정",
+                            icon = Icons.Default.ManageAccounts,
+                            onClick = { /* 페이지 이동 로직 */ }
+                        )
+                    }
+
+                    item {
+                        MyPageFeatureItem(
+                            title = "로그아웃",
+                            icon = Icons.Default.ExitToApp,
+                            onClick = {
+                                // todo: 다이얼로그 띄우기
+                                myPageViewModel.logout(
+                                    onSuccess = {
+                                        // 성공시 로그인 화면으로 이동
+                                        navController.navigate("login")
+                                    },
+                                    onError = { errorMessage ->
+                                        // 실패시 에러 메시지 표시
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        MyPageFeatureItem(
+                            title = "탈퇴",
+                            icon = Icons.Default.Delete,
+                            onClick = {
+                                // todo: 다이얼로그 띄우기
+                                myPageViewModel.deactivateAccount(
+                                    onSuccess = {
+                                        // 성공시 로그인 화면으로 이동
+                                        navController.navigate("login")
+                                    },
+                                    onError = { errorMessage ->
+                                        // 실패시 에러 메시지 표시
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }

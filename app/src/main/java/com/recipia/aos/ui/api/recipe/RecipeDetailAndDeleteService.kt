@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.api
+package com.recipia.aos.ui.api.recipe
 
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.recipe.detail.RecipeDetailViewResponseDto
@@ -10,7 +10,7 @@ import retrofit2.http.Query
 /**
  * 레시피 상세정보 관련 api
  */
-interface RecipeApiService {
+interface RecipeDetailAndDeleteService {
 
     // 레시피 상세정보 조회
     @GET("/recipe/getRecipeDetail")

@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.recipia.aos.ui.api.RecipeApiService
+import com.recipia.aos.ui.api.recipe.RecipeDetailAndDeleteService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.recipe.detail.RecipeDetailViewResponseDto
 import kotlinx.coroutines.launch
@@ -28,7 +28,7 @@ class RecipeDetailViewModel(
     val isLoading: LiveData<Boolean> = _isLoading
 
     // RecipeApiService를 초기화하는 코드
-    val recipeApiService: RecipeApiService by lazy {
+    val recipeDetailAndDeleteService: RecipeDetailAndDeleteService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -48,7 +48,7 @@ class RecipeDetailViewModel(
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(RecipeApiService::class.java)
+            .create(RecipeDetailAndDeleteService::class.java)
     }
 
     fun loadRecipeDetail(recipeId: Long) {
@@ -76,7 +76,7 @@ class RecipeDetailViewModel(
     ): Response<ResponseDto<RecipeDetailViewResponseDto>> {
 
         // Retrofit을 사용하여 서버 요청을 구현합니다.
-         return recipeApiService.getRecipeDetailView(recipeId)
+         return recipeDetailAndDeleteService.getRecipeDetailView(recipeId)
     }
 
     // 레시피 삭제 API 호출 함수
@@ -87,7 +87,7 @@ class RecipeDetailViewModel(
     ) {
         viewModelScope.launch {
             try {
-                val response = recipeApiService.deleteRecipe(recipeId)
+                val response = recipeDetailAndDeleteService.deleteRecipe(recipeId)
                 if (response.isSuccessful) {
                     onSuccess() // 삭제 성공 시 수행할 액션
                 } else {

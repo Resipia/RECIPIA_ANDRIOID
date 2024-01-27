@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.api
+package com.recipia.aos.ui.api.login
 
 import com.recipia.aos.ui.dto.login.LoginResponseDto
 import com.recipia.aos.ui.dto.ResponseDto

@@ -4,7 +4,7 @@ import TokenManager
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.recipia.aos.ui.api.FollowService
+import com.recipia.aos.ui.api.recipe.mypage.FollowService
 import com.recipia.aos.ui.dto.mypage.follow.FollowListResponseDto
 import com.recipia.aos.ui.dto.mypage.follow.FollowRequestDto
 import kotlinx.coroutines.launch

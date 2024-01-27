@@ -2,8 +2,6 @@ package com.recipia.aos.ui.components.navigation
 
 import TokenManager
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -15,7 +13,9 @@ import com.recipia.aos.ui.components.forgot.email.FindEmailScreen
 import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
 import com.recipia.aos.ui.components.home.CategorySelectRecipeScreen
 import com.recipia.aos.ui.components.home.HomeScreen
+import com.recipia.aos.ui.components.home.SplashScreen
 import com.recipia.aos.ui.components.login.LoginScreen
+import com.recipia.aos.ui.components.mypage.MyPageRecipeListScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
@@ -97,16 +97,15 @@ fun AppNavigation(
     val signUpViewModel: SignUpViewModel = viewModel()
     val forgotViewModel: ForgotViewModel = viewModel()
 
-    // jwt 존재 여부를 검증한다.
-    val isUserLoggedIn = remember {
-        mutableStateOf(tokenManager.hasValidAccessToken())
-    }
-
-    // 네비게이션 컨트롤
+    // 네비게이션 컨트롤 시작
     NavHost(
         navController = navController,
-        startDestination = if (isUserLoggedIn.value) "home" else "login"
+        startDestination = "splash-screen"
     ) {
+        // 로딩화면
+        composable("splash-screen") {
+            SplashScreen(navController, tokenManager)
+        }
         // 로그인 화면
         composable("login") {
             LoginScreen(navController, loginViewModel)
@@ -149,6 +148,7 @@ fun AppNavigation(
                 myPageViewModel,
                 recipeAllListViewModel,
                 followViewModel,
+                bookmarkViewModel,
                 tokenManager
             )
         }
@@ -160,8 +160,20 @@ fun AppNavigation(
                 myPageViewModel,
                 recipeAllListViewModel,
                 followViewModel,
+                bookmarkViewModel,
                 tokenManager,
                 memberId
+            )
+        }
+        // 마이페이지에서 북마크/좋아요한 레시피 보기
+        composable("select-recipe-screen/{memberId}") { backStackEntry ->
+            val memberId = backStackEntry.arguments?.getString("memberId")?.toLongOrNull()
+            MyPageRecipeListScreen(
+                navController = navController,
+                bookmarkViewModel = bookmarkViewModel,
+                myPageViewModel = myPageViewModel,
+                targetMemberId = memberId, // 여기서 전달된 데이터를 사용
+                tokenManager = tokenManager
             )
         }
         // 팔로잉/팔로워 페이지

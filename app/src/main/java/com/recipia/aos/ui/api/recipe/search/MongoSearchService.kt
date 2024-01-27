@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.api
+package com.recipia.aos.ui.api.recipe.search
 
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.search.SearchResponseDto

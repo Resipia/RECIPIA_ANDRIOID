@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.api
+package com.recipia.aos.ui.api.recipe.jwt
 
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.login.jwt.JwtRepublishRequestDto

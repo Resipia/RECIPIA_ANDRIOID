@@ -4,7 +4,7 @@ import TokenManager
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.recipia.aos.ui.api.MongoSearchService
+import com.recipia.aos.ui.api.recipe.search.MongoSearchService
 import com.recipia.aos.ui.dto.search.SearchType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

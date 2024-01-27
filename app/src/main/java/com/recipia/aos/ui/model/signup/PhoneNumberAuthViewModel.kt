@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.recipia.aos.ui.api.AuthApiService
+import com.recipia.aos.ui.api.signup.PhoneNumberValidService
 import com.recipia.aos.ui.dto.singup.CheckVerifyCodeRequestDto
 import com.recipia.aos.ui.dto.singup.PhoneNumberRequestDto
 import kotlinx.coroutines.launch
@@ -28,7 +28,7 @@ class PhoneNumberAuthViewModel() : ViewModel() {
     var verificationSuccessMessage by mutableStateOf("") // 인증 성공 메시지
 
     // Retrofit 인스턴스 생성
-    private val authApiService: AuthApiService by lazy {
+    private val phoneNumberValidService: PhoneNumberValidService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -42,7 +42,7 @@ class PhoneNumberAuthViewModel() : ViewModel() {
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
-            .create(AuthApiService::class.java)
+            .create(PhoneNumberValidService::class.java)
     }
 
 
@@ -50,7 +50,7 @@ class PhoneNumberAuthViewModel() : ViewModel() {
     fun sendVerificationCode(phone: String) {
         viewModelScope.launch {
             try {
-                val response = authApiService.sendPhoneNumber(PhoneNumberRequestDto(phone))
+                val response = phoneNumberValidService.sendPhoneNumber(PhoneNumberRequestDto(phone))
 
                 // 성공적인 응답 처리
                 if (response.isSuccessful) {
@@ -85,7 +85,7 @@ class PhoneNumberAuthViewModel() : ViewModel() {
     // 인증코드 검증
     fun checkVerificationCode(code: String) {
         viewModelScope.launch {
-            val response = authApiService.checkVerifyCode(CheckVerifyCodeRequestDto(phone, code))
+            val response = phoneNumberValidService.checkVerifyCode(CheckVerifyCodeRequestDto(phone, code))
 
             if (response.isSuccessful && response.body()?.result == true) {
                 verificationSuccessMessage = "인증에 성공했습니다."

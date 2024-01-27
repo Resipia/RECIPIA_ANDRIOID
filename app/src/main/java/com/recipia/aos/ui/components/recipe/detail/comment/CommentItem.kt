@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.recipia.aos.ui.dto.comment.CommentListResponseDto
 
 /**
@@ -22,16 +24,24 @@ fun CommentItem(
     comment: CommentListResponseDto
 ) {
     Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 18.dp)
+        ) {
+            // 닉네임
             Text(
                 text = comment.nickname,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
             )
+            // 생성일자
             Text(
                 text = " · ${comment.createDate}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = Color.Gray,
+                fontSize = 12.sp
             )
+            // 수정내역
             if (comment.updated) {
                 Text(
                     text = " (수정됨)",
@@ -40,9 +50,12 @@ fun CommentItem(
                 )
             }
         }
+        // 댓글 내용
         Text(
             text = comment.commentValue,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(horizontal = 16.dp)
+
         )
     }
 
