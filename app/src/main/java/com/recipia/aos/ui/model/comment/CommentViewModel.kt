@@ -147,12 +147,11 @@ class CommentViewModel(
             val requestDto = CommentUpdateRequestDto(id, recipeId, commentText)
             val response = commentService.updateComment(requestDto)
             if (response.isSuccessful) {
-                // 상태를 강제로 초기화하여 변경을 감지하게 만듦
-                _comments.value = null
-                // 현재 페이지를 0으로 리셋하고 초기 댓글 목록을 다시 불러옴
-                currentPage = 0
-                initialLoadDone = false
-                loadInitialComments(recipeId) // 댓글 목록을 다시 불러오기
+                // 기존 댓글 목록에서 수정된 댓글 찾아서 업데이트
+                val updatedList = _comments.value?.content?.map { comment ->
+                    if (comment.id == id) comment.copy(commentValue = commentText) else comment
+                }
+                _comments.value = _comments.value?.copy(content = updatedList.orEmpty())
             } else {
                 _errorMessage.value = "댓글 수정에 실패했습니다."
             }

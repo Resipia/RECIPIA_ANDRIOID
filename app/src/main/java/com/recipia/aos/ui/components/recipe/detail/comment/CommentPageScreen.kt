@@ -41,6 +41,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -64,6 +66,7 @@ fun CommentPageScreen(
     val errorMessage by commentViewModel.errorMessage.collectAsState()
     val context = LocalContext.current
     val editingComment by commentViewModel.editingComment.collectAsState()
+    var textFieldValueState by remember { mutableStateOf(TextFieldValue("")) }
 
     // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -91,6 +94,14 @@ fun CommentPageScreen(
             // 포커스 요청과 함께 키보드를 올림
             focusRequester.requestFocus()
             keyboardController?.show()
+        }
+    }
+
+    // 수정하려는 댓글이 있을 때 OutlinedTextField에 값을 세팅하고 커서를 텍스트 맨 끝으로 옮김
+    LaunchedEffect(editingComment) {
+        editingComment?.let { (_, commentValue) ->
+            textFieldValueState = TextFieldValue(text = commentValue, selection = TextRange(commentValue.length))
+            focusRequester.requestFocus()  // 텍스트 필드에 포커스를 요청
         }
     }
 
@@ -144,11 +155,13 @@ fun CommentPageScreen(
 
                 // 가변적인 높이를 가진 댓글 입력창
                 OutlinedTextField(
-                    value = commentText,
-                    onValueChange = { commentText = it },
+                    value = textFieldValueState,
+                    onValueChange = { newValue ->
+                        textFieldValueState = newValue  // 사용자 입력에 따라 텍스트 필드 상태 업데이트
+                    },
                     modifier = Modifier
                         .weight(1f)
-                        .focusRequester(focusRequester), // 포커스 리퀘스터 추가
+                        .focusRequester(focusRequester),  // 포커스 리퀘스터를 이용하여 텍스트 필드에 포커스 부여
                     maxLines = 5,
                     placeholder = { Text("댓글을 입력하세요") },
                 )
@@ -160,12 +173,17 @@ fun CommentPageScreen(
                     onClick = {
                         coroutineScope.launch {
                             editingComment?.let { (id, _) ->
-                                commentViewModel.updateComment(id, recipeId, commentText)
+                                // TextFieldValue에서 text 속성을 사용하여 String 값을 전달
+                                commentViewModel.updateComment(id, recipeId, textFieldValueState.text)
                                 commentViewModel.clearEditingComment()
-                                commentText = ""
+                                textFieldValueState = TextFieldValue("")  // 텍스트 필드 상태 초기화
+                                keyboardController?.hide()  // 키보드 숨김
                             } ?: run {
+                                // 추가하는 경우에는 textFieldValueState.text 대신 commentText 사용
                                 commentViewModel.addComment(recipeId, commentText)
-                                commentText = ""
+                                textFieldValueState = TextFieldValue("")  // 텍스트 필드 상태 초기화
+                                commentText = ""  // 텍스트 필드 초기화
+                                keyboardController?.hide()  // 키보드 숨김
                             }
                         }
                     }
