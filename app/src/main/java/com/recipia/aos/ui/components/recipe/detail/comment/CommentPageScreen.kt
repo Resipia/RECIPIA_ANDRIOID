@@ -1,10 +1,12 @@
 package com.recipia.aos.ui.components.recipe.detail.comment
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,8 +29,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -38,7 +43,7 @@ import kotlinx.coroutines.launch
 /**
  * 댓글 화면을 보여주는 컴포저
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun CommentPageScreen(
     commentViewModel: CommentViewModel,
@@ -48,14 +53,30 @@ fun CommentPageScreen(
 
     val coroutineScope = rememberCoroutineScope()
     var commentText by remember { mutableStateOf("") }
+    // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                // 이벤트를 감지하여 키보드를 숨깁니다.
+                detectTapGestures(
+                    onPress = { /* 터치 감지 시 수행할 동작 */ },
+                    onTap = { keyboardController?.hide() }
+                )
+            },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {
             TopAppBar(
                 modifier = Modifier.background(Color.White), // 여기에 배경색을 하얀색으로 설정,
                 title = {
-                    Text(text = "댓글", fontSize = 16.sp, color = Color.Black, modifier = Modifier.padding(bottom = 4.dp))
+                    Text(
+                        text = "댓글",
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = {
