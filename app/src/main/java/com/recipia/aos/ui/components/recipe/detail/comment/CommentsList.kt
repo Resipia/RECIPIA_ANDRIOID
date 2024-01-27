@@ -38,16 +38,6 @@ fun CommentsList(
     val comments = commentsResponse?.content ?: emptyList()
 
     Column {
-        // 고정된 헤더 부분
-        Text(
-            text = "댓글",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth() // 전체 너비를 채우도록 설정
-                .padding(start = 16.dp, bottom = 8.dp), // 양쪽에 패딩 적용
-        )
-
         HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth(), // 전체 너비를 채우도록 설정

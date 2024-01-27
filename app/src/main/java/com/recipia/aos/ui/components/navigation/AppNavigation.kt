@@ -22,6 +22,7 @@ import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
 import com.recipia.aos.ui.components.recipe.create.UpdateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
+import com.recipia.aos.ui.components.recipe.detail.comment.CommentPageScreen
 import com.recipia.aos.ui.components.search.MongoIngredientAndHashTagSearchScreen
 import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
@@ -208,6 +209,14 @@ fun AppNavigation(
                 navController = navController,
                 tokenManager = tokenManager
             )
+        }
+        // 댓글 화면
+        composable(
+            "comment/{recipeId}",
+            arguments = listOf(navArgument("recipeId") { type = NavType.LongType })
+        ) {backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L
+            CommentPageScreen(commentViewModel, navController, recipeId)
         }
         // 레시피 생성하기
         composable("create-recipe") {

@@ -306,7 +306,9 @@ fun RecipeDetailContent(
 
                     // 댓글보기
                     Button(
-                        onClick = { setShowSheet(true) }, // true면 상세보기 화면에 BottomSheet(댓글창) 호출
+                        onClick = {
+                            navController.navigate("comment/${recipeId}")
+                        },
                         modifier = Modifier
                             .fillMaxWidth() // 전체 너비를 채우도록 설정
                             .height(60.dp) // 버튼의 높이를 더 크게 설정
