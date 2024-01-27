@@ -1,22 +1,19 @@
 package com.recipia.aos.ui.components.recipe.detail.comment
 
+import TokenManager
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.recipia.aos.ui.components.HorizontalDivider
@@ -31,7 +28,8 @@ import kotlinx.coroutines.launch
 fun CommentsList(
     commentViewModel: CommentViewModel,
     recipeId: Long,
-    maxHeight: Dp
+    maxHeight: Dp,
+    tokenManager: TokenManager
 ) {
     val commentsResponse by commentViewModel.comments.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -53,7 +51,7 @@ fun CommentsList(
             modifier = Modifier.height(maxHeight)  // 여기에서 최대 높이를 적용합니다.
         ) {
             itemsIndexed(comments) { index, comment ->
-                CommentItem(comment)
+                CommentItem(comment, commentViewModel, tokenManager, recipeId)
 
                 // 마지막 항목이 렌더링되면 추가 데이터 로드
                 if (index == comments.size - 1) {

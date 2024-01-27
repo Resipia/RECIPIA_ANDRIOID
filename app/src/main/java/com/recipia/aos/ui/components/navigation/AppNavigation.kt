@@ -216,7 +216,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("recipeId") { type = NavType.LongType })
         ) {backStackEntry ->
             val recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L
-            CommentPageScreen(commentViewModel, navController, recipeId)
+            CommentPageScreen(commentViewModel, navController, recipeId, tokenManager)
         }
         // 레시피 생성하기
         composable("create-recipe") {

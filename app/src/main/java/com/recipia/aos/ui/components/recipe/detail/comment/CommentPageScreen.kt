@@ -1,5 +1,7 @@
 package com.recipia.aos.ui.components.recipe.detail.comment
 
+import TokenManager
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -24,6 +26,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +37,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,13 +53,32 @@ import kotlinx.coroutines.launch
 fun CommentPageScreen(
     commentViewModel: CommentViewModel,
     navController: NavController,
-    recipeId: Long
+    recipeId: Long,
+    tokenManager: TokenManager
 ) {
 
     val coroutineScope = rememberCoroutineScope()
     var commentText by remember { mutableStateOf("") }
     // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
     val keyboardController = LocalSoftwareKeyboardController.current
+    val errorMessage by commentViewModel.errorMessage.collectAsState()
+    val context = LocalContext.current
+    val editingComment by commentViewModel.editingComment.collectAsState()
+
+    // 에러 메시지가 있을 경우 토스트 메시지로 표시
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            commentViewModel.clearErrorMessage() // 메시지 표시 후 초기화
+        }
+    }
+
+    // 수정하려는 댓글을 OutlinedTextField에 로드
+    LaunchedEffect(editingComment) {
+        editingComment?.let { (_, commentValue) ->
+            commentText = commentValue
+        }
+    }
 
     Scaffold(
         modifier = Modifier
@@ -115,12 +139,18 @@ fun CommentPageScreen(
 
                 Spacer(modifier = Modifier.width(4.dp))
 
+                // "전송" 버튼 클릭 로직
                 IconButton(
                     onClick = {
                         coroutineScope.launch {
-                            // 댓글 추가 로직
-                            // commentViewModel.addComment(recipeId, commentText)
-                            commentText = ""  // 입력 필드 초기화
+                            editingComment?.let { (id, _) ->
+                                commentViewModel.updateComment(id, commentText)
+                                commentViewModel.clearEditingComment()
+                                commentText = ""
+                            } ?: run {
+                                commentViewModel.addComment(recipeId, commentText)
+                                commentText = ""
+                            }
                         }
                     }
                 ) {
@@ -146,7 +176,8 @@ fun CommentPageScreen(
                 CommentsList(
                     commentViewModel = commentViewModel,
                     recipeId = recipeId,
-                    maxHeight = maxHeight
+                    maxHeight = maxHeight,
+                    tokenManager = tokenManager
                 )
             }
         }

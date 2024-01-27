@@ -63,7 +63,8 @@ fun RecipeDetailScreen(
                 }
             },
             commentViewModel = commentViewModel,
-            recipeId = recipeId
+            recipeId = recipeId,
+            tokenManager = tokenManager
         )
     }
 

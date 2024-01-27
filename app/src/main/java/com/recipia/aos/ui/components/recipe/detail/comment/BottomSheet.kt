@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.recipe.detail.comment
 
+import TokenManager
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,7 @@ import kotlinx.coroutines.launch
 fun BottomSheet(
     onDismiss: () -> Unit,
     commentViewModel: CommentViewModel,
+    tokenManager: TokenManager,
     recipeId: Long
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -70,7 +72,8 @@ fun BottomSheet(
                     CommentsList(
                         commentViewModel = commentViewModel,
                         recipeId = recipeId,
-                        maxHeight = maxHeight
+                        maxHeight = maxHeight,
+                        tokenManager = tokenManager
                     )
 
                     HorizontalDivider(
