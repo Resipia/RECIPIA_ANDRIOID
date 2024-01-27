@@ -188,7 +188,9 @@ fun LoginScreen(
                             email = email,
                             password = password,
                             onLoginSuccess = {
-                                navController.navigate("home")
+                                navController.navigate("home") {
+                                    popUpTo("login") { inclusive = true } // 로그인 화면을 백스택에서 제거
+                                }
                             },
                             onLoginFailure = { error ->
                                 loginError = if (error == "403") "존재하지 않는 계정입니다." else error
