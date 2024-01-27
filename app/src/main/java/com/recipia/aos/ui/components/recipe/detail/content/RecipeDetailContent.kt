@@ -126,14 +126,6 @@ fun RecipeDetailContent(
                         // todo: 북마크
                     }
 
-//                    HorizontalDivider(
-//                        modifier = Modifier
-//                            .fillMaxWidth() // 전체 너비를 채우도록 설정
-//                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
-//                        thickness = 0.5.dp, // 구분선의 두께 설정
-//                        color = Color(222, 226, 230) // 구분선의 색상 설정
-//                    )
-
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
@@ -145,7 +137,7 @@ fun RecipeDetailContent(
                                 // 여기서 navController를 사용하여 MyPageScreen으로 이동
                                 navController.navigate("other-user-page/${recipeDetail.memberId}")
                             }
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // 프로필 이미지
@@ -159,7 +151,7 @@ fun RecipeDetailContent(
                                 .size(40.dp) // 이미지 크기
                                 .clip(CircleShape) // 원형 클리핑
                                 .border(0.5.dp, Color.Gray, CircleShape) // 회색 테두리 추가
-                                .padding(horizontal = 16.dp)
+                                .padding(horizontal = 4.dp)
                         )
 
                         Spacer(modifier = Modifier.width(8.dp))
@@ -221,15 +213,13 @@ fun RecipeDetailContent(
                     HorizontalDivider(
                         modifier = Modifier
                             .fillMaxWidth() // 전체 너비를 채우도록 설정
-                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+                            .padding(horizontal = 16.dp, vertical = 16.dp), // 양쪽에 패딩 적용
                         thickness = 0.5.dp, // 구분선의 두께 설정
                         color = Color(222, 226, 230) // 구분선의 색상 설정
                     )
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     // 레시피 내용
                     Text(
                         text = recipeDetail.recipeDesc,
@@ -254,7 +244,8 @@ fun RecipeDetailContent(
                     Text(
                         text = "소요 시간: ${recipeDetail.timeTaken}분",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -263,7 +254,8 @@ fun RecipeDetailContent(
                     Text(
                         text = "재료: ${recipeDetail.ingredient}",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -272,7 +264,8 @@ fun RecipeDetailContent(
                     Text(
                         text = "해시태그: ${recipeDetail.hashtag}",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -286,7 +279,8 @@ fun RecipeDetailContent(
                                     " 비타민 ${info.vitamins}(g)," +
                                     " 미네랄 ${info.minerals}(g)",
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
                         )
                     }
 
@@ -312,7 +306,7 @@ fun RecipeDetailContent(
                         modifier = Modifier
                             .fillMaxWidth() // 전체 너비를 채우도록 설정
                             .height(60.dp) // 버튼의 높이를 더 크게 설정
-                            .padding(horizontal = 12.dp, vertical = 8.dp), // 주변 여백 설정
+                            .padding(horizontal = 16.dp, vertical = 8.dp), // 주변 여백 설정
                         shape = RoundedCornerShape(12.dp), // 모서리를 둥글게 설정
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(241,243,245), // 버튼 배경색
