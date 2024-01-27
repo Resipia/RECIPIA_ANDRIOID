@@ -80,28 +80,13 @@ fun CommentPageScreen(
         }
     }
 
-    // 수정하려는 댓글을 OutlinedTextField에 로드
-    LaunchedEffect(editingComment) {
-        editingComment?.let { (_, commentValue) ->
-            commentText = commentValue
-        }
-    }
-
-    // 수정하려는 댓글이 있을 때 OutlinedTextField에 값을 세팅하고 키보드를 자동으로 올림
-    LaunchedEffect(editingComment) {
-        editingComment?.let { (_, commentValue) ->
-            commentText = commentValue
-            // 포커스 요청과 함께 키보드를 올림
-            focusRequester.requestFocus()
-            keyboardController?.show()
-        }
-    }
-
     // 수정하려는 댓글이 있을 때 OutlinedTextField에 값을 세팅하고 커서를 텍스트 맨 끝으로 옮김
     LaunchedEffect(editingComment) {
         editingComment?.let { (_, commentValue) ->
             textFieldValueState = TextFieldValue(text = commentValue, selection = TextRange(commentValue.length))
-            focusRequester.requestFocus()  // 텍스트 필드에 포커스를 요청
+            // 포커스 요청과 함께 키보드를 자동으로 올림
+            focusRequester.requestFocus()
+            keyboardController?.show()
         }
     }
 
@@ -180,9 +165,8 @@ fun CommentPageScreen(
                                 keyboardController?.hide()  // 키보드 숨김
                             } ?: run {
                                 // 추가하는 경우에는 textFieldValueState.text 대신 commentText 사용
-                                commentViewModel.addComment(recipeId, commentText)
+                                commentViewModel.addComment(recipeId, textFieldValueState.text)
                                 textFieldValueState = TextFieldValue("")  // 텍스트 필드 상태 초기화
-                                commentText = ""  // 텍스트 필드 초기화
                                 keyboardController?.hide()  // 키보드 숨김
                             }
                         }

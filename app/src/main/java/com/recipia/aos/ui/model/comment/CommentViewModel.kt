@@ -128,7 +128,12 @@ class CommentViewModel(
             val requestDto = CommentRegistRequestDto(recipeId, commentText)
             val response = commentService.registComment(requestDto)
             if (response.isSuccessful) {
-                loadInitialComments(recipeId)
+                // 상태를 강제로 초기화하여 변경을 감지하게 만듦
+                _comments.value = null
+                // 현재 페이지를 0으로 리셋하고 초기 댓글 목록을 다시 불러옴
+                currentPage = 0
+                initialLoadDone = false
+                loadInitialComments(recipeId) // 댓글 목록을 다시 불러오기
             } else {
                 _errorMessage.value = "댓글 등록에 실패했습니다."
             }
