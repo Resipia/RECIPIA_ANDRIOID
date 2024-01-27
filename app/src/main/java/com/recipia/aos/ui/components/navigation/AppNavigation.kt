@@ -15,6 +15,7 @@ import com.recipia.aos.ui.components.forgot.email.FindEmailScreen
 import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
 import com.recipia.aos.ui.components.home.CategorySelectRecipeScreen
 import com.recipia.aos.ui.components.home.HomeScreen
+import com.recipia.aos.ui.components.home.SplashScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.MyPageRecipeListScreen
@@ -98,16 +99,15 @@ fun AppNavigation(
     val signUpViewModel: SignUpViewModel = viewModel()
     val forgotViewModel: ForgotViewModel = viewModel()
 
-    // jwt 존재 여부를 검증한다.
-    val isUserLoggedIn = remember {
-        mutableStateOf(tokenManager.hasValidAccessToken())
-    }
-
-    // 네비게이션 컨트롤
+    // 네비게이션 컨트롤 시작
     NavHost(
         navController = navController,
-        startDestination = if (isUserLoggedIn.value) "home" else "login"
+        startDestination = "splash-screen"
     ) {
+        // 로딩화면
+        composable("splash-screen") {
+            SplashScreen(navController, tokenManager)
+        }
         // 로그인 화면
         composable("login") {
             LoginScreen(navController, loginViewModel)
