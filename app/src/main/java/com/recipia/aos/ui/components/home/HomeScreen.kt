@@ -573,7 +573,7 @@ fun ListItem(
 fun AnimatedPreloader(modifier: Modifier = Modifier) {
     val preloaderLottieComposition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(
-            R.raw.animation_preloader // 여기에 애니메이션 리소스를 지정합니다.
+            R.raw.loading // 여기에 애니메이션 리소스를 지정합니다.
         )
     )
 
