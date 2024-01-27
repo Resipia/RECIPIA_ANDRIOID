@@ -223,9 +223,8 @@ fun MyPageScreen(
                             title = "내가 북마크한 레시피",
                             icon = Icons.Default.Bookmark,
                             onClick = {
-                                myPageViewModel.currentPageType.value =
-                                    MyPageViewModel.PageType.BOOKMARK
-                                navController.navigate("select-recipe-screen")
+                                myPageViewModel.currentPageType.value = MyPageViewModel.PageType.BOOKMARK
+                                navController.navigate("select-recipe-screen/${myPageData!!.memberId}")
                             }
                         )
                     }
@@ -235,9 +234,8 @@ fun MyPageScreen(
                             title = "내가 좋아요한 레시피",
                             icon = Icons.Default.Favorite,
                             onClick = {
-                                myPageViewModel.currentPageType.value =
-                                    MyPageViewModel.PageType.LIKE
-                                navController.navigate("select-recipe-screen")
+                                myPageViewModel.currentPageType.value = MyPageViewModel.PageType.LIKE
+                                navController.navigate("select-recipe-screen/${myPageData!!.memberId}")
                             }
                         )
                     }

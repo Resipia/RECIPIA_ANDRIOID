@@ -9,10 +9,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.recipia.aos.ui.components.HorizontalDivider
-import com.recipia.aos.ui.components.recipe.detail.FeatureListItem
 
 /**
- * 마이페이지 하단 사용자 기능
+ * 내가 보는 마이페이지 하단에 표시될 사용자 편의 기능 컴포저
+ * (내가 북마크한 레시피, 내가 좋아요한 레시피, 작성한 댓글/대댓글 보기 등등)
  */
 @Composable
 fun MyPageFeatureItem(

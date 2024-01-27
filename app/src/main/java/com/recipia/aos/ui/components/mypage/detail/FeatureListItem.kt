@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.recipe.detail
+package com.recipia.aos.ui.components.mypage.detail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
