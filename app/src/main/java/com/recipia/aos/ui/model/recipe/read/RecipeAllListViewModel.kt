@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.recipia.aos.ui.api.GetAllRecipeListService
+import com.recipia.aos.ui.api.recipe.RecipeListService
 import com.recipia.aos.ui.dto.PagingResponseDto
-import com.recipia.aos.ui.dto.RecipeMainListResponseDto
+import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.model.jwt.TokenRepublishManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -22,7 +22,7 @@ class RecipeAllListViewModel(
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
-    var items = mutableStateOf<List<RecipeMainListResponseDto>>(listOf())
+    var items = mutableStateOf<List<RecipeListResponseDto>>(listOf())
         private set // 이렇게 하면 외부에서는 읽기만 가능해짐
 
     // 현재 페이지, 사이즈, 정렬 유형 저장
@@ -42,7 +42,7 @@ class RecipeAllListViewModel(
     val navigateToLogin: LiveData<Boolean> = _navigateToLogin
 
     // 모든 레시피 리스트를 호출하는 서비스 선언
-    val getAllRecipeListService: GetAllRecipeListService by lazy {
+    val recipeListService: RecipeListService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -62,7 +62,30 @@ class RecipeAllListViewModel(
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(GetAllRecipeListService::class.java)
+            .create(RecipeListService::class.java)
+    }
+
+    // 선택된 서브 카테고리를 저장하는 변수
+    var selectedSubCategories = mutableStateOf<List<Long>>(emptyList())
+
+    // 선택된 서브 카테고리에 따라 데이터를 요청하는 메서드
+    fun loadItemsWithSelectedSubCategories() {
+        currentRequestPage = 0
+        isLastPage = false
+        items.value = emptyList() // 기존 데이터를 초기화
+        loadMoreItems(selectedSubCategories.value)
+    }
+
+    // 검색할때 이 함수를 호출해서 서브 카테고리값을 저장한다.
+    fun setSubCategories(
+        subCategoryList: List<Long>
+    ) {
+        selectedSubCategories.value = subCategoryList
+    }
+
+    // 서브 카테고리 초기화
+    fun makeEmptyListSubCategoryData() {
+        selectedSubCategories.value = emptyList()
     }
 
     fun resetLoadFailed() {
@@ -74,25 +97,34 @@ class RecipeAllListViewModel(
     }
 
     // 데이터를 새로고침하는 메서드
-    fun refreshItems() {
+    fun refreshItems(
+        subCategoryList: List<Long>
+    ) {
         currentRequestPage = 0 // 페이지를 초기화
         isLastPage = false
         items.value = emptyList() // 기존 데이터를 초기화
-        loadMoreItems() // 첫 페이지부터 다시 로딩
+        loadMoreItems(subCategoryList) // 첫 페이지부터 다시 로딩
     }
 
     // 더 많은 아이템을 요청하는 메서드
-    fun loadMoreItems() {
+    fun loadMoreItems(
+        subCategoryList: List<Long>
+    ) {
         Log.d("RecipeAllListViewModel", "Loading more items")
         if (_isLoading.value == true || isLastPage) return
 
         _isLoading.value = true
-        loadItemsFromServer(currentRequestPage, currentRequestSize, currentRequestSortType)
+        loadItemsFromServer(currentRequestPage, currentRequestSize, currentRequestSortType, subCategoryList)
         Log.d("RecipeAllListViewModel", "Loading finished")
     }
 
     // 서버로부터 데이터를 가져오는 함수 예시
-    private fun loadItemsFromServer(page: Int, size: Int, sortType: String) {
+    private fun loadItemsFromServer(
+        page: Int,
+        size: Int,
+        sortType: String,
+        subCategoryList: List<Long>
+    ) {
         Log.d("RecipeAllListViewModel", "Loading items from server - Page: $page")
 
         // 현재 요청 정보 저장
@@ -101,17 +133,18 @@ class RecipeAllListViewModel(
         currentRequestSortType = sortType
 
         // 서버에 레시피 전체 리스트 데이터 요청
-        getAllRecipeListService.getAllRecipeList(
+        recipeListService.getAllRecipeList(
             currentRequestPage,
             currentRequestSize,
-            currentRequestSortType
+            currentRequestSortType,
+            subCategoryList
         )
-            .enqueue(object : Callback<PagingResponseDto<RecipeMainListResponseDto>> {
+            .enqueue(object : Callback<PagingResponseDto<RecipeListResponseDto>> {
 
                 // 응답 성공
                 override fun onResponse(
-                    call: Call<PagingResponseDto<RecipeMainListResponseDto>>,
-                    response: Response<PagingResponseDto<RecipeMainListResponseDto>>
+                    call: Call<PagingResponseDto<RecipeListResponseDto>>,
+                    response: Response<PagingResponseDto<RecipeListResponseDto>>
                 ) {
                     if (response.isSuccessful) {
                         Log.d("RecipeAllListViewModel", "Response received: ${response.body()}")
@@ -125,7 +158,7 @@ class RecipeAllListViewModel(
                     } else {
                         if (response.code() == 401) {
                             // 401 Unauthorized 오류 처리
-                            handleUnauthorizedError(call)
+                            handleUnauthorizedError(call, subCategoryList)
                         } else {
                             // 오류 응답 처리
                             val errorBodyStr = response.errorBody()?.string()
@@ -140,7 +173,7 @@ class RecipeAllListViewModel(
 
                 // 응답 실패
                 override fun onFailure(
-                    call: Call<PagingResponseDto<RecipeMainListResponseDto>>,
+                    call: Call<PagingResponseDto<RecipeListResponseDto>>,
                     t: Throwable
                 ) {
                     Log.e("RecipeAllListViewModel", "Failed to load items: ${t.message}", t)
@@ -152,13 +185,14 @@ class RecipeAllListViewModel(
 
     // failedCall은 getAllRecipeListService.getAllRecipeList에 의해 생성된 Call 객체입니다.
     private fun handleUnauthorizedError(
-        failedCall: Call<PagingResponseDto<RecipeMainListResponseDto>>
+        failedCall: Call<PagingResponseDto<RecipeListResponseDto>>,
+        subCategoryList: List<Long>
     ) {
         val tokenRepublishManager = TokenRepublishManager(tokenManager)
         // 토큰을 새롭게 발급받고 새로운 요청을 보낸다.
         tokenRepublishManager.renewTokenIfNeeded(
             onTokenRenewed = { newToken ->
-                retryRequestWithNewToken(failedCall, newToken)
+                retryRequestWithNewToken(failedCall, newToken, subCategoryList)
             },
             onRenewalFailed = { navigateToLogin ->
                 if (navigateToLogin) {
@@ -170,19 +204,21 @@ class RecipeAllListViewModel(
 
     // 새로운 토큰을 담아서 다시 요청을 보냄
     private fun retryRequestWithNewToken(
-        failedCall: Call<PagingResponseDto<RecipeMainListResponseDto>>,
-        newAccessToken: String
+        failedCall: Call<PagingResponseDto<RecipeListResponseDto>>,
+        newAccessToken: String,
+        subCategoryList: List<Long>
     ) {
         // 새 토큰을 사용하여 요청 재시도
-        getAllRecipeListService.getAllRecipeList(
+        recipeListService.getAllRecipeList(
             currentRequestPage,
             currentRequestSize,
-            currentRequestSortType
+            currentRequestSortType,
+            subCategoryList
         )
-            .enqueue(object : Callback<PagingResponseDto<RecipeMainListResponseDto>> {
+            .enqueue(object : Callback<PagingResponseDto<RecipeListResponseDto>> {
                 override fun onResponse(
-                    call: Call<PagingResponseDto<RecipeMainListResponseDto>>,
-                    response: Response<PagingResponseDto<RecipeMainListResponseDto>>
+                    call: Call<PagingResponseDto<RecipeListResponseDto>>,
+                    response: Response<PagingResponseDto<RecipeListResponseDto>>
                 ) {
                     if (response.isSuccessful) {
                         // 성공적으로 데이터를 받아왔을 때의 처리
@@ -202,7 +238,7 @@ class RecipeAllListViewModel(
                 }
 
                 override fun onFailure(
-                    call: Call<PagingResponseDto<RecipeMainListResponseDto>>,
+                    call: Call<PagingResponseDto<RecipeListResponseDto>>,
                     t: Throwable
                 ) {
                     // 네트워크 오류나 기타 문제로 요청 실패 시 처리

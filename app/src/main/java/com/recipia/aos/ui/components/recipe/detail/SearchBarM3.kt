@@ -21,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
 import com.recipia.aos.ui.theme.RecipiaaosTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

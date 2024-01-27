@@ -51,9 +51,9 @@ android {
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.10.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation("androidx.activity:activity-compose:1.7.0")
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.activity:activity-compose:1.8.2")
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -70,27 +70,31 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Coil for Compose
-    implementation("io.coil-kt:coil-compose:2.2.0")
-    implementation("androidx.compose.runtime:runtime-livedata:1.3.2")
+    implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
 
-    val nav_version = "2.5.3"
+    // navigation
+    val nav_version = "2.7.6"
     implementation("androidx.navigation:navigation-compose:$nav_version")
-    implementation("androidx.compose.foundation:foundation:1.3.1")
-    implementation("androidx.compose.material:material-icons-extended:1.0.0")
+    implementation("androidx.compose.foundation:foundation:1.5.4")
 
     // http 요청
-    implementation("com.squareup.okhttp3:okhttp:4.9.1")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.8.0")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:4.9.1")
+
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    // Gson
-    implementation("com.google.code.gson:gson:2.8.6")
 
-    implementation("androidx.compose.material:material:1.3.1")
+    // Gson
+    implementation("com.google.code.gson:gson:2.10")
+
+    // icon, lottie
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    implementation("androidx.compose.material:material:1.5.4")
     implementation("com.airbnb.android:lottie-compose:6.0.1")
 
-//    implementation("com.google.accompanist:accompanist-pager:0.32")
-
+    // image Cropper
+    implementation("com.github.CanHub:Android-Image-Cropper:4.0.0")
 }

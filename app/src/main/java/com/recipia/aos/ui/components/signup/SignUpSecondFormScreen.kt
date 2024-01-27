@@ -1,13 +1,19 @@
 package com.recipia.aos.ui.components.signup
 
+import android.widget.Toast
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -28,9 +34,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -42,13 +52,16 @@ import com.recipia.aos.ui.components.signup.function.InputField
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SignUpSecondFormScreen(
     navController: NavController,
     signUpViewModel: SignUpViewModel,
-    phoneNumberAuthViewModel: PhoneNumberAuthViewModel // ViewModel 추가
+    phoneNumberAuthViewModel: PhoneNumberAuthViewModel
 ) {
+    // Toast메시지를 위한 context 선언
+    val context = LocalContext.current
+
     // ViewModel에서 각 입력 필드의 현재 값을 가져옴
     val currentName by signUpViewModel.name.collectAsState()
     val currentNickname by signUpViewModel.nickname.collectAsState()
@@ -81,6 +94,11 @@ fun SignUpSecondFormScreen(
     val emailDuplicateCheckResult by signUpViewModel.emailDuplicateCheckResult.observeAsState()
     val isEmailVerified by signUpViewModel.isEmailVerified.observeAsState()
     val isPasswordMatching by signUpViewModel.isPasswordMatching.observeAsState()
+    val nicknameDuplicateCheckResult by signUpViewModel.nicknameDuplicateCheckResult.observeAsState()
+
+    val listState = rememberLazyListState()
+    val focusRequester = remember { FocusRequester() }
+
 
     // AlertDialog를 표시할지 여부를 관리하는 상태
     var showDialog by remember { mutableStateOf(false) }
@@ -154,219 +172,294 @@ fun SignUpSecondFormScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "회원가입", style = MaterialTheme.typography.bodyMedium) },
-                navigationIcon = {
-                    IconButton(onClick = { showDialog = true }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
-        ) {
+    // 이메일 형식을 확인하는 정규식
+    val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+".toRegex()
 
-            item { Spacer(modifier = Modifier.height(10.dp)) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-            // 각 입력 필드 및 검증 로직...
-            item {
-                InputField(
-                    label = "이름",
-                    value = name,
-                    onValueChange = { name = it },
-                    focusRequester = nameFocusRequester,
-                    errorMessage = nameError,
-                    onErrorMessageChange = { nameError = it }, // 에러 메시지 업데이트 함수 전달
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                // 이벤트를 감지하여 키보드를 숨깁니다.
+                detectTapGestures(
+                    onPress = { /* 터치 감지 시 수행할 동작 */ },
+                    onTap = { keyboardController?.hide() }
                 )
             }
-
-            // "닉네임" 입력 필드 및 중복체크 버튼
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    InputField(
-                        label = "닉네임",
-                        value = nickname,
-                        onValueChange = { nickname = it },
-                        focusRequester = nicknameFocusRequester,
-                        errorMessage = nicknameError,
-                        onErrorMessageChange = { nicknameError = it }, // 에러 메시지 업데이트 함수 전달
-                        modifier = Modifier.weight(0.7f)
-                    )
-
-                    Button(
-                        onClick = {
-                            // ViewModel의 함수를 호출하여 중복 체크
-                            signUpViewModel.checkDuplicateNickname(nickname)
-                        },
-                        modifier = Modifier
-                            .weight(0.3f)
-                            .height(70.dp)
-                            .padding(top = 18.dp)
-                    ) {
-                        Text("중복체크")
-                    }
-                }
-            }
-
-            // "이메일" 입력 필드 및 중복체크 버튼
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    InputField(
-                        label = "이메일",
-                        value = email,
-                        onValueChange = { email = it },
-                        focusRequester = emailFocusRequester,
-                        errorMessage = emailError, // 에러 메시지 문자열 전달
-                        onErrorMessageChange = { emailError = it }, // 에러 메시지 업데이트 함수 전달
-                        isEmail = true,  // 이 필드가 이메일 필드임을 표시
-                        modifier = Modifier.weight(0.7f)
-                    )
-
-                    Button(
-                        onClick = {
-                            signUpViewModel.checkDuplicateEmail(email)
-                        },
-                        modifier = Modifier
-                            .weight(0.3f)
-                            .height(70.dp)
-                            .padding(top = 18.dp)
-                    ) {
-                        Text("중복체크")
-                    }
-                }
-            }
-
-            item {
-                // 중복 확인 결과 메시지를 표시하는 Text 컴포넌트
-                if (!emailDuplicateCheckResult.isNullOrEmpty()) {
-                    Text(
-                        text = emailDuplicateCheckResult!!,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = if (emailDuplicateCheckResult == "사용가능한 이메일입니다.") Color(0xFF006633) else Color.Red,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(9.dp),
-                        textAlign = TextAlign.Start
-                    )
-                }
-            }
-
-            item {
-                InputField(
-                    label = "비밀번호",
-                    value = password,
-                    onValueChange = { password = it },
-                    focusRequester = passwordFocusRequester,
-                    errorMessage = passwordError,
-                    onErrorMessageChange = { passwordError = it },
-                    isPassword = true
-                )
-            }
-
-            item {
-                val text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("* 영문 대,소문자, 숫자, 특수문자 포함 8-20자")
-                    }
-                }
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 9.dp)
-                )
-            }
-
-            // "비밀번호 재확인" 입력 필드
-            item {
-                InputField(
-                    label = "비밀번호 재확인",
-                    value = confirmPassword,
-                    onValueChange = { newPassword ->
-                        confirmPassword = newPassword
-                        confirmPasswordError = "" // 사용자가 입력할 때마다 에러 메시지 초기화
-                        val isMatching =
-                            password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword
-                        signUpViewModel.updatePasswordMatching(isMatching) // 비밀번호 일치 여부 업데이트
-                        if (isMatching) {
-                            passwordMatchMessage = "비밀번호가 일치합니다."
-                            passwordMatchColor = Color(0xFF006633)
-                        } else {
-                            passwordMatchMessage = "비밀번호가 일치하지 않습니다."
-                            passwordMatchColor = Color.Red
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "회원가입 (2/3)",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { showDialog = true }) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                         }
                     },
-                    focusRequester = confirmPasswordFocusRequester,
-                    errorMessage = confirmPasswordError,
-                    onErrorMessageChange = { confirmPasswordError = it }, // 에러 메시지 업데이트 함수 전달
-                    isPasswordConfirm = true
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 )
+            }
+        ) { innerPadding ->
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding() // 키보드가 활성화될 때 패딩 적용
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp)
+                .fillMaxHeight(), // 화면 크기에 맞게 최대 높이로 설정
+//                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
 
-                // 비밀번호 일치 메시지 표시
-                if (passwordMatchMessage.isNotEmpty()) {
-                    Text(
-                        text = passwordMatchMessage,
-                        color = passwordMatchColor,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(9.dp),
-                        textAlign = TextAlign.Start
+                item { Spacer(modifier = Modifier.height(10.dp)) }
+
+                // 각 입력 필드 및 검증 로직...
+                item {
+                    InputField(
+                        label = "이름",
+                        value = name,
+                        onValueChange = { name = it },
+                        focusRequester = nameFocusRequester,
+                        errorMessage = nameError,
+                        onErrorMessageChange = { nameError = it }, // 에러 메시지 업데이트 함수 전달
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
 
-            // 버튼 영역
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    // 사용자가 "다음" 버튼을 클릭했을 때 데이터 업데이트
-                    Button(
-                        onClick = {
-                            validateFields()
-                            if (emailError.isBlank() && passwordError.isBlank()) {
-                                // 데이터 업데이트
-                                signUpViewModel.updateName(name)
-                                signUpViewModel.updateNickname(nickname)
-                                signUpViewModel.updateEmail(email)
-                                signUpViewModel.updatePassword(password)
-                                // 다음 화면으로 네비게이션
-                                navController.navigate("signUpThirdForm")
+                // "닉네임" 입력 필드 및 중복체크 버튼
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        InputField(
+                            label = "닉네임",
+                            value = nickname,
+                            onValueChange = {
+                                nickname = it
+                                signUpViewModel.resetNicknameDuplicateCheck() // 중복 체크 결과 초기화
+                                nicknameError = ""
+                            },
+                            focusRequester = nicknameFocusRequester,
+                            errorMessage = nicknameError,
+                            onErrorMessageChange = { nicknameError = it }, // 에러 메시지 업데이트 함수 전달
+                            modifier = Modifier.weight(0.7f)
+                        )
+
+                        Button(
+                            onClick = {
+                                signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(0.3f)
+                                .height(70.dp)
+                                .padding(top = 18.dp)
+                        ) {
+                            Text("중복체크")
+                        }
+                    }
+                }
+
+                // 닉네임 중복 확인 결과 메시지를 표시하는 Text 컴포넌트
+                item {
+                    if (!nicknameDuplicateCheckResult.isNullOrEmpty()) {
+                        Text(
+                            text = nicknameDuplicateCheckResult!!,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = if (nicknameDuplicateCheckResult == "사용가능한 닉네임입니다.") Color(
+                                0xFF006633
+                            ) else Color.Red,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 9.dp, bottom = 4.dp),
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                }
+
+                // "이메일" 입력 필드 및 중복체크 버튼
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // "이메일" 입력 필드
+                        InputField(
+                            label = "이메일",
+                            value = email,
+                            onValueChange = { newEmail ->
+                                email = newEmail
+                                signUpViewModel.resetEmailDuplicateCheck() // 중복 체크 결과 초기화
+                                if (emailPattern.matches(newEmail) || newEmail.isEmpty()) {
+                                    emailError = "" // 오류 메시지 제거
+                                } else {
+                                    emailError = "잘못된 이메일 형식입니다." // 오류 메시지 설정
+                                }
+                            },
+                            focusRequester = emailFocusRequester,
+                            errorMessage = emailError, // 현재 오류 메시지
+                            onErrorMessageChange = { emailError = it }, // 오류 메시지 업데이트 콜백
+                            isEmail = true, // 이 필드가 이메일 필드임을 표시
+                            modifier = Modifier.weight(0.7f)
+                        )
+
+                        Button(
+                            onClick = {
+                                signUpViewModel.checkDuplicateEmail(email) { errorMessage ->
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(0.3f)
+                                .height(70.dp)
+                                .padding(top = 18.dp)
+                        ) {
+                            Text("중복체크")
+                        }
+                    }
+                }
+
+                item {
+                    // 중복 확인 결과 메시지를 표시하는 Text 컴포넌트
+                    if (!emailDuplicateCheckResult.isNullOrEmpty()) {
+                        Text(
+                            text = emailDuplicateCheckResult!!,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = if (emailDuplicateCheckResult == "사용가능한 이메일입니다.") Color(
+                                0xFF006633
+                            ) else Color.Red,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 9.dp, bottom = 4.dp),
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                }
+
+                item {
+                    InputField(
+                        label = "비밀번호",
+                        value = password,
+                        onValueChange = { password = it },
+                        focusRequester = passwordFocusRequester,
+                        errorMessage = passwordError,
+                        onErrorMessageChange = { passwordError = it },
+                        isPassword = true,
+                        modifier = Modifier
+                            .imePadding() // 키보드가 활성화될 때 패딩 적용
+                            .padding(bottom = 2.dp) // 키보드와 겹치지 않도록 하기 위한 패딩 추가
+                    )
+                }
+
+                item {
+                    val text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("* 영문 대,소문자, 숫자, 특수문자 포함 8-20자")
+                        }
+                    }
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 9.dp, bottom = 2.dp)
+                    )
+                }
+
+                // "비밀번호 재확인" 입력 필드
+                item {
+                    InputField(
+                        label = "비밀번호 재확인",
+                        value = confirmPassword,
+                        onValueChange = { newPassword ->
+                            confirmPassword = newPassword
+                            confirmPasswordError = "" // 사용자가 입력할 때마다 에러 메시지 초기화
+                            val isMatching =
+                                password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword
+                            signUpViewModel.updatePasswordMatching(isMatching) // 비밀번호 일치 여부 업데이트
+                            if (isMatching) {
+                                passwordMatchMessage = "비밀번호가 일치합니다."
+                                passwordMatchColor = Color(0xFF006633)
+                            } else {
+                                passwordMatchMessage = "비밀번호가 일치하지 않습니다."
+                                passwordMatchColor = Color.Red
                             }
                         },
-                        enabled = (isEmailVerified == true) && (isPasswordMatching == true), // 이메일 인증 및 비밀번호 일치 여부에 따라 버튼 활성화
+                        focusRequester = confirmPasswordFocusRequester,
+                        errorMessage = confirmPasswordError,
+                        onErrorMessageChange = { confirmPasswordError = it }, // 에러 메시지 업데이트 함수 전달
+                        isPasswordConfirm = true,
                         modifier = Modifier
-                            .weight(1f)
+                            .imePadding() // 키보드가 활성화될 때 패딩 적용
+                            .padding(bottom = 4.dp) // 키보드와 겹치지 않도록 하기 위한 패딩 추가
+                    )
+
+                    // 비밀번호 일치 메시지 표시
+                    if (passwordMatchMessage.isNotEmpty()) {
+                        Text(
+                            text = passwordMatchMessage,
+                            color = passwordMatchColor,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 9.dp, top = 2.dp),
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
+
+                // 버튼 영역
+                item {
+                    Row(
+                        modifier = Modifier
                             .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Text("다음")
+                        // 사용자가 "다음" 버튼을 클릭했을 때 데이터 업데이트
+                        Button(
+                            onClick = {
+                                validateFields()
+                                if (emailError.isBlank() && passwordError.isBlank() &&
+                                    emailDuplicateCheckResult == "사용가능한 이메일입니다." &&
+                                    nicknameDuplicateCheckResult == "사용가능한 닉네임입니다." &&
+                                    isPasswordMatching == true
+                                ) {
+
+                                    // 데이터 업데이트
+                                    signUpViewModel.updateName(name)
+                                    signUpViewModel.updateNickname(nickname)
+                                    signUpViewModel.updateEmail(email)
+                                    signUpViewModel.updatePassword(password)
+
+                                    // 다음 화면으로 네비게이션
+                                    navController.navigate("signUpThirdForm")
+                                }
+                            },
+                            enabled = emailError.isBlank() && passwordError.isBlank() &&
+                                    emailDuplicateCheckResult == "사용가능한 이메일입니다." &&
+                                    nicknameDuplicateCheckResult == "사용가능한 닉네임입니다." &&
+                                    isPasswordMatching == true,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                        ) {
+                            Text("다음")
+                        }
                     }
                 }
             }
