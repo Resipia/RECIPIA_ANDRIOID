@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.recipe.create
+package com.recipia.aos.ui.components.recipe.update
 
 import android.annotation.SuppressLint
 import android.net.Uri
@@ -63,6 +63,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.recipia.aos.ui.components.recipe.create.ImageThumbnails
+import com.recipia.aos.ui.components.recipe.create.NutritionalInfoInputScreen
 import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
 import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
 import com.recipia.aos.ui.dto.search.SearchType
@@ -73,7 +75,7 @@ import com.recipia.aos.ui.model.search.MongoSearchViewModel
 
 
 /**
- * 레시피 생성 필드
+ * 레시피 업데이트 컴포저
  */
 @SuppressLint("UnrememberedMutableState")
 @OptIn(
@@ -128,11 +130,11 @@ fun UpdateRecipeScreen(
         mongoSearchViewModel.initializeSelectedIngredientsAndHashtags(initialIngredients, initialHashtags)
     }
 
-    // 초기 카테고리 값 세팅
-    LaunchedEffect(key1 = recipeDetailViewModel?.recipeDetail?.value?.id) {
-        // List를 Set으로 변환하여 ViewModel에 설정
-        categorySelectionViewModel.initializeCategories(selectedCategoriesBefore.value.toSet())
-    }
+//    // 초기 카테고리 값 세팅
+//    LaunchedEffect(key1 = recipeDetailViewModel?.recipeDetail?.value?.id) {
+//        // List를 Set으로 변환하여 ViewModel에 설정
+//        categorySelectionViewModel.initializeCategories(selectedCategoriesBefore.value.toSet())
+//    }
 
     // 초기 이미지에 기존 저장되어있던 이미지 정보 추가
     LaunchedEffect(key1 = recipeDetailViewModel?.recipeDetail) {
@@ -142,7 +144,7 @@ fun UpdateRecipeScreen(
     }
 
     // selectedCategories의 현재 값을 가져옴
-    val selectedCategories = categorySelectionViewModel.selectedCategories.value
+    var selectedCategories = categorySelectionViewModel.selectedCategories.value
 
     // mongo Model에서 데이터를 가져온다.
     val selectedIngredients by mongoSearchViewModel.selectedIngredients.collectAsState()
@@ -187,9 +189,12 @@ fun UpdateRecipeScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = {
-                            categorySelectionViewModel.selectedCategories.value = emptySet() // 카테고리 선택 초기화
+                            selectedCategories = emptySet()
                             mongoSearchViewModel.changeInitialized() // 몽고db 검색 초기값 세팅 후 initial값 변경
                             categorySelectionViewModel.changeInitialized() // 카테고리 초기값 세팅 후 initial값 변경
+                            mongoSearchViewModel.resetSelectedIngredients()
+                            mongoSearchViewModel.resetSelectedHashtags()
+                            categorySelectionViewModel.clearSelectedCategories()
                             selectedImageUris.clear() // 이미지 제거
                             navController.popBackStack()
                         }) {
@@ -515,7 +520,7 @@ fun UpdateRecipeScreen(
                     // 선택한 카테고리를 가로로 나열하기 위해 Row 사용
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         // 각 AssistChip과 Spacer를 추가
-                        selectedCategories.forEachIndexed { index, category ->
+                        selectedCategoriesBefore.value.forEachIndexed { index, category ->
                             ElevatedAssistChip(
                                 onClick = { /* 각 AssistChip 클릭 시 동작 */ },
                                 label = {
@@ -534,7 +539,7 @@ fun UpdateRecipeScreen(
                             )
 
                             // Spacer를 추가하여 간격 설정
-                            if (index < selectedCategories.size - 1) {
+                            if (index < selectedCategoriesBefore.value.size - 1) {
                                 Spacer(modifier = Modifier.width(4.dp)) // 원하는 간격 설정
                             }
                         }

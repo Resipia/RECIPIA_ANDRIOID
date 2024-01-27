@@ -32,7 +32,12 @@ class CategorySelectionViewModel : ViewModel() {
         isInitialized = false
     }
 
-    // 재료와 해시태그 초기화 메소드 (레시피 수정에서 사용)
+    // 카테고리 초기화
+    fun clearSelectedCategories() {
+        selectedCategories.value = emptySet()
+    }
+
+    // 초기 카테고리 초기화 메소드 (레시피 수정에서 사용)
     fun initializeCategories(
         initialCategories: Set<SubCategoryDto>
     ) {

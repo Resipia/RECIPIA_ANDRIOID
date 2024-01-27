@@ -20,7 +20,7 @@ import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
-import com.recipia.aos.ui.components.recipe.create.UpdateRecipeScreen
+import com.recipia.aos.ui.components.recipe.update.UpdateRecipeScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.recipe.detail.comment.CommentPageScreen
 import com.recipia.aos.ui.components.search.MongoIngredientAndHashTagSearchScreen
