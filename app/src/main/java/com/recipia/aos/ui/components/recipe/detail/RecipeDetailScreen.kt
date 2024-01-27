@@ -61,6 +61,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.ui.components.HorizontalDivider
@@ -298,7 +299,7 @@ fun RecipeDetailContent(
                             Text(
                                 text = dateOnly,
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray,
                                 modifier = Modifier
                                     .padding(horizontal = 16.dp)
                             )
@@ -308,15 +309,15 @@ fun RecipeDetailContent(
                         // todo: 북마크
                     }
 
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth() // 전체 너비를 채우도록 설정
-                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
-                        thickness = 0.5.dp, // 구분선의 두께 설정
-                        color = Color(222, 226, 230) // 구분선의 색상 설정
-                    )
+//                    HorizontalDivider(
+//                        modifier = Modifier
+//                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+//                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+//                        thickness = 0.5.dp, // 구분선의 두께 설정
+//                        color = Color(222, 226, 230) // 구분선의 색상 설정
+//                    )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 item {
@@ -338,7 +339,7 @@ fun RecipeDetailContent(
                             ),
                             contentDescription = "작성자 프로필",
                             modifier = Modifier
-                                .size(60.dp) // 이미지 크기
+                                .size(40.dp) // 이미지 크기
                                 .clip(CircleShape) // 원형 클리핑
                                 .border(0.5.dp, Color.Gray, CircleShape) // 회색 테두리 추가
                                 .padding(horizontal = 16.dp)
@@ -351,8 +352,6 @@ fun RecipeDetailContent(
                             text = recipeDetail.nickname,
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier
-                                .padding(start = 4.dp)
-                                .padding(horizontal = 16.dp)
                         )
                     }
 
@@ -370,8 +369,9 @@ fun RecipeDetailContent(
                 item {
                     // 레시피명
                     Text(
-                        text = "레시피명: ${recipeDetail.recipeName}",
+                        text = recipeDetail.recipeName,
                         style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .padding(top = 8.dp)
                             .padding(horizontal = 16.dp)
@@ -379,31 +379,20 @@ fun RecipeDetailContent(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth() // 전체 너비를 채우도록 설정
-                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
-                        thickness = 0.5.dp, // 구분선의 두께 설정
-                        color = Color(222, 226, 230) // 구분선의 색상 설정
-                    )
-                }
-
-                item {
                     // 카테고리 정보
                     Row(
                         modifier = Modifier
-//                            .padding(top = 4.dp)
+                            .padding(start = 4.dp)
                             .padding(horizontal = 12.dp)
                     ) {
                         recipeDetail.subCategoryDtoList.forEach { subCategory ->
-                            AssistChip(
-                                onClick = { },
-                                label = { Text(subCategory.subCategoryNm.orEmpty()) }
+                            Text(
+                                subCategory.subCategoryNm.orEmpty(),
+                                fontSize = 12.sp,
+                                color = Color.DarkGray
                             )
                         }
                     }
-
-//                    Spacer(modifier = Modifier.height(4.dp))
 
                     HorizontalDivider(
                         modifier = Modifier
@@ -420,7 +409,7 @@ fun RecipeDetailContent(
                     // 레시피 내용
                     Text(
                         text = recipeDetail.recipeDesc,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = Color.Black,
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
@@ -472,7 +461,11 @@ fun RecipeDetailContent(
                     )
                 }
 
+
                 item {
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     // 댓글보기
                     Button(
                         onClick = { setShowSheet(true) },
