@@ -62,7 +62,6 @@ fun CommentPageScreen(
 ) {
 
     val coroutineScope = rememberCoroutineScope()
-    var commentText by remember { mutableStateOf("") }
     val errorMessage by commentViewModel.errorMessage.collectAsState()
     val context = LocalContext.current
     val editingComment by commentViewModel.editingComment.collectAsState()

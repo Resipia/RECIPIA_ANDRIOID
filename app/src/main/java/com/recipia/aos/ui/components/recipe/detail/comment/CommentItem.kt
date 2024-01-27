@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.dto.comment.CommentListResponseDto
 import com.recipia.aos.ui.model.comment.CommentViewModel
-import kotlinx.coroutines.launch
 
 /**
  * 댓글 콘텐츠 정보
@@ -43,7 +41,6 @@ fun CommentItem(
     tokenManager: TokenManager,
     recipeId: Long
 ) {
-    val coroutineScope = rememberCoroutineScope() // 코루틴 스코프 생성
     val loadMemberId = tokenManager.loadMemberId()
     var showDialog by remember { mutableStateOf(false) }  // 다이얼로그 표시 상태
 
