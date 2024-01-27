@@ -35,6 +35,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -59,11 +61,13 @@ fun CommentPageScreen(
 
     val coroutineScope = rememberCoroutineScope()
     var commentText by remember { mutableStateOf("") }
-    // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
-    val keyboardController = LocalSoftwareKeyboardController.current
     val errorMessage by commentViewModel.errorMessage.collectAsState()
     val context = LocalContext.current
     val editingComment by commentViewModel.editingComment.collectAsState()
+
+    // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
 
     // 에러 메시지가 있을 경우 토스트 메시지로 표시
     LaunchedEffect(errorMessage) {
@@ -77,6 +81,16 @@ fun CommentPageScreen(
     LaunchedEffect(editingComment) {
         editingComment?.let { (_, commentValue) ->
             commentText = commentValue
+        }
+    }
+
+    // 수정하려는 댓글이 있을 때 OutlinedTextField에 값을 세팅하고 키보드를 자동으로 올림
+    LaunchedEffect(editingComment) {
+        editingComment?.let { (_, commentValue) ->
+            commentText = commentValue
+            // 포커스 요청과 함께 키보드를 올림
+            focusRequester.requestFocus()
+            keyboardController?.show()
         }
     }
 
@@ -132,7 +146,9 @@ fun CommentPageScreen(
                 OutlinedTextField(
                     value = commentText,
                     onValueChange = { commentText = it },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(focusRequester), // 포커스 리퀘스터 추가
                     maxLines = 5,
                     placeholder = { Text("댓글을 입력하세요") },
                 )
@@ -144,7 +160,7 @@ fun CommentPageScreen(
                     onClick = {
                         coroutineScope.launch {
                             editingComment?.let { (id, _) ->
-                                commentViewModel.updateComment(id, commentText)
+                                commentViewModel.updateComment(id, recipeId, commentText)
                                 commentViewModel.clearEditingComment()
                                 commentText = ""
                             } ?: run {

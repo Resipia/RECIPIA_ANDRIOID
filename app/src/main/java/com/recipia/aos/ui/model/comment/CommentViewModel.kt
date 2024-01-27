@@ -140,13 +140,19 @@ class CommentViewModel(
     // 댓글 수정
     suspend fun updateComment(
         id: Long, // 댓글의 id
-        commentText: String // 수정할 text
+        recipeId: Long, // 댓글이 작성된 recipe의 id
+        commentText: String // 수정할 text){}
     ) {
         try {
-            val requestDto = CommentUpdateRequestDto(id, commentText)
+            val requestDto = CommentUpdateRequestDto(id, recipeId, commentText)
             val response = commentService.updateComment(requestDto)
             if (response.isSuccessful) {
-                loadInitialComments(id) // 댓글 목록을 다시 불러오기
+                // 상태를 강제로 초기화하여 변경을 감지하게 만듦
+                _comments.value = null
+                // 현재 페이지를 0으로 리셋하고 초기 댓글 목록을 다시 불러옴
+                currentPage = 0
+                initialLoadDone = false
+                loadInitialComments(recipeId) // 댓글 목록을 다시 불러오기
             } else {
                 _errorMessage.value = "댓글 수정에 실패했습니다."
             }
