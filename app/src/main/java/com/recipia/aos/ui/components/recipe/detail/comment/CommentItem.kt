@@ -36,7 +36,7 @@ import com.recipia.aos.ui.model.comment.CommentViewModel
  */
 @Composable
 fun CommentItem(
-    comment: CommentListResponseDto,
+    commentDto: CommentListResponseDto,
     commentViewModel: CommentViewModel,
     tokenManager: TokenManager,
     recipeId: Long
@@ -51,20 +51,20 @@ fun CommentItem(
         ) {
             // 닉네임
             Text(
-                text = comment.nickname,
+                text = commentDto.nickname,
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
                 modifier = Modifier.weight(1f) // Expand the space to the right
             )
             // 생성일자
             Text(
-                text = " · ${comment.createDate}",
+                text = " · ${commentDto.createDate}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray,
                 fontSize = 12.sp
             )
             // 수정내역
-            if (comment.updated) {
+            if (commentDto.updated) {
                 Text(
                     text = " (수정됨)",
                     style = MaterialTheme.typography.bodySmall,
@@ -75,7 +75,7 @@ fun CommentItem(
         }
         // 댓글 내용
         Text(
-            text = comment.commentValue,
+            text = commentDto.commentValue,
             style = MaterialTheme.typography.bodyLarge,
             fontSize = 16.sp,
             modifier = Modifier.padding(horizontal = 16.dp)
@@ -117,12 +117,12 @@ fun CommentItem(
         }
 
         // 만약 본인 댓글이면 수정 및 삭제 버튼 추가
-        if (comment.memberId == loadMemberId) {
+        if (commentDto.memberId == loadMemberId) {
 
             // todo: 수정
             Button(
                 onClick = {
-                    commentViewModel.startEditingComment(comment.id, comment.commentValue)
+                    commentViewModel.startEditingComment(commentDto.id, commentDto.commentValue)
                 },
                 modifier = Modifier
                     .height(40.dp)
@@ -188,7 +188,7 @@ fun CommentItem(
                     text = { Text("이 댓글을 삭제하시겠습니까?") },
                     confirmButton = {
                         Button(onClick = {
-                            commentViewModel.requestDeleteComment(comment.id, recipeId)
+                            commentViewModel.requestDeleteComment(commentDto.id, recipeId)
                             showDialog = false  // 다이얼로그 닫기
                         }) {
                             Text("확인")

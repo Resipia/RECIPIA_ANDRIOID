@@ -50,8 +50,8 @@ fun CommentsList(
         LazyColumn(
             modifier = Modifier.height(maxHeight)  // 여기에서 최대 높이를 적용합니다.
         ) {
-            itemsIndexed(comments) { index, comment ->
-                CommentItem(comment, commentViewModel, tokenManager, recipeId)
+            itemsIndexed(comments) { index, commentDto ->
+                CommentItem(commentDto, commentViewModel, tokenManager, recipeId)
 
                 // 마지막 항목이 렌더링되면 추가 데이터 로드
                 if (index == comments.size - 1) {

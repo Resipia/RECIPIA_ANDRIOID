@@ -152,9 +152,9 @@ class CommentViewModel(
             val requestDto = CommentUpdateRequestDto(id, recipeId, commentText)
             val response = commentService.updateComment(requestDto)
             if (response.isSuccessful) {
-                // 기존 댓글 목록에서 수정된 댓글 찾아서 업데이트
+                // 기존 댓글 목록에서 수정된 댓글 찾아서 업데이트하고, updated 플래그를 true로 설정
                 val updatedList = _comments.value?.content?.map { comment ->
-                    if (comment.id == id) comment.copy(commentValue = commentText) else comment
+                    if (comment.id == id) comment.copy(commentValue = commentText, updated = true) else comment
                 }
                 _comments.value = _comments.value?.copy(content = updatedList.orEmpty())
             } else {
