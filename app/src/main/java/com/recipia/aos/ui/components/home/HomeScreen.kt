@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -542,7 +543,8 @@ fun ListItem(
                     // 서브 카테고리 Assist Chips
                     if (item.subCategoryList.isNotEmpty()) {
                         Row(
-                            modifier = Modifier.padding(top = 2.dp)
+                            modifier = Modifier.padding(top = 2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp) // AssistChip 사이의 간격을 조절
                         ) {
                             item.subCategoryList.take(3).forEach { subCategory ->
                                 AssistChip(
