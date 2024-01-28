@@ -35,31 +35,31 @@ fun ProfilePictureInputField(
     onImageSelected: () -> Unit,
     onImageRemoved: () -> Unit,
 ) {
-
+    // Box를 부모 컴포넌트의 중앙에 배치하기 위해 'fillMaxSize'와 'align' 사용
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(150.dp)
-            .clickable { onImageSelected() }, // 클릭 이벤트 설정
-        contentAlignment = Alignment.Center // 내용을 중앙에 정렬
+            .fillMaxSize() // 부모 컴포넌트를 꽉 채움
+            .padding(16.dp), // 내부 컨텐츠와의 간격 설정
+        contentAlignment = Alignment.Center // Box 내부의 컨텐츠를 중앙에 배치
     ) {
+        // 프로필 사진을 보여주는 내부 Box
         Box(
             modifier = Modifier
-                .size(150.dp)
-                .border(2.dp, Color.Gray, shape = CircleShape)
-                .clip(CircleShape),
+                .size(150.dp) // 내부 Box의 크기를 150dp x 150dp로 설정
+                .clip(CircleShape) // 내부 Box의 모서리를 원형으로 클리핑
+                .clickable { onImageSelected() } // 내부 Box를 클릭 가능하게 하여 이미지 선택 함수를 호출
+                .border(BorderStroke(2.dp, Color.Gray), shape = CircleShape), // 원형의 테두리 추가
             contentAlignment = Alignment.Center
         ) {
-            // 이미지를 보여준다.
+            // 이미지가 있으면 이미지를 보여주고, 그렇지 않으면 + 아이콘을 보여줌
             if (profilePictureUri != null) {
                 Image(
                     painter = rememberAsyncImagePainter(model = profilePictureUri),
                     contentDescription = null,
                     modifier = Modifier
-                        .fillMaxSize() // Image를 Box 안에서 최대로 채우도록 설정
-                        .align(Alignment.Center), // Image를 Box의 중앙에 정렬
-                    contentScale = ContentScale.Crop // 이미지가 Box를 꽉 채우도록 조정
+                        .fillMaxSize() // 이미지를 내부 Box의 최대 크기로 채우기
+                        .clip(CircleShape), // 이미지를 원형으로 클리핑
+                    contentScale = ContentScale.Crop // 이미지가 내부 Box를 꽉 채우도록 조정
                 )
             }
             // 이미지 내부에 + 아이콘

@@ -7,13 +7,17 @@ import android.os.Build
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -38,10 +42,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -60,7 +67,7 @@ import kotlinx.coroutines.launch
 /**
  * 마이페이지 내 프로필 수정하기
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ProfileEditScreen(
     navController: NavController,
@@ -120,161 +127,192 @@ fun ProfileEditScreen(
         }
     }
 
-    Scaffold(
-        containerColor = Color.White,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("프로필 수정", fontSize = 16.sp, color = Color.Black) },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navController.popBackStack()
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로 가기")
-                    }
-                },
-                actions = {
-                    TextButton(
-                        onClick = {
-                            // "s3" 문자열이 포함되어 있는지 검사
-                            val finalProfilePictureUri = if (profilePictureUri?.toString()?.contains("s3") == true) null else profilePictureUri
+    // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-                            myPageViewModel.updateProfile(
-                                context = context,
-                                nickname = nickname, // nickname을 입력받은 값으로 변경
-                                introduction = oneLineIntroduction,
-                                profileImageUri = finalProfilePictureUri, // 조건에 따라 변경된 URI 사용
-                                deleteFileOrder = 0, // TODO: 이 부분을 실제 값으로 업데이트 필요
-                                birth = selectedDate,
-                                gender = when (gender) {
-                                    "남성" -> "M"
-                                    "여성" -> "F"
-                                    else -> null
-                                }
-                            )
-                            navController.popBackStack()
-                        }) {
-                        Text("저장")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                // 이벤트를 감지하여 키보드를 숨깁니다.
+                detectTapGestures(
+                    onPress = { /* 터치 감지 시 수행할 동작 */ },
+                    onTap = { keyboardController?.hide() }
                 )
-            )
-        },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp)
-        ) {
-            item { Spacer(modifier = Modifier.height(10.dp)) }
-
-            // 사진
-            item {
-                ProfilePictureInputField(
-                    profilePictureUri = profilePictureUri,
-                    onImageSelected = {
-                        // CropImageContractOptions 객체를 생성하여 이미지 선택 및 크롭 로직 호출
-                        val cropImageOptions = CropImageContractOptions(
-                            CropImage.CancelledResult.uriContent,
-                            CropImageOptions()
-                        )
-                        imagePickerLauncher.launch(cropImageOptions)
-                    },
-                    onImageRemoved = {
-                        profilePictureUri = null
-                        bitmap = null
-                    }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
             }
-
-            // todo: 닉네임 수정 (중복된 닉네임이면 수정 못하게 해야함)
-            // "닉네임" 입력 필드 및 중복체크 버튼
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    InputField(
-                        label = "닉네임",
-                        value = nickname,
-                        onValueChange = {
-                            nickname = it
-                            signUpViewModel.resetNicknameDuplicateCheck() // 중복 체크 결과 초기화
-                            nicknameError = ""
-                        },
-                        focusRequester = nicknameFocusRequester,
-                        errorMessage = nicknameError,
-                        onErrorMessageChange = { nicknameError = it }, // 에러 메시지 업데이트 함수 전달
-                        modifier = Modifier.weight(0.7f)
-                    )
-
-                    Button(
-                        onClick = {
-                            signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
-                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+    ) {
+        Scaffold(
+            containerColor = Color.White,
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            topBar = {
+                TopAppBar(
+                    title = { Text("프로필 수정", fontSize = 16.sp, color = Color.Black) },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                navController.popBackStack()
                             }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "뒤로 가기"
+                            )
+                        }
+                    },
+                    actions = {
+                        TextButton(
+                            onClick = {
+                                // "s3" 문자열이 포함되어 있는지 검사
+                                val finalProfilePictureUri = if (profilePictureUri?.toString()
+                                        ?.contains("s3") == true
+                                ) null else profilePictureUri
+
+                                myPageViewModel.updateProfile(
+                                    context = context,
+                                    nickname = nickname, // nickname을 입력받은 값으로 변경
+                                    introduction = oneLineIntroduction,
+                                    profileImageUri = finalProfilePictureUri, // 조건에 따라 변경된 URI 사용
+                                    deleteFileOrder = 0, // TODO: 이 부분을 실제 값으로 업데이트 필요
+                                    birth = selectedDate,
+                                    gender = when (gender) {
+                                        "남성" -> "M"
+                                        "여성" -> "F"
+                                        else -> null
+                                    }
+                                )
+                                navController.popBackStack()
+                            }) {
+                            Text("저장")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                )
+            },
+        ) { innerPadding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(10.dp)) }
+
+                // 사진
+                item {
+                    ProfilePictureInputField(
+                        profilePictureUri = profilePictureUri,
+                        onImageSelected = {
+                            // CropImageContractOptions 객체를 생성하여 이미지 선택 및 크롭 로직 호출
+                            val cropImageOptions = CropImageContractOptions(
+                                CropImage.CancelledResult.uriContent,
+                                CropImageOptions()
+                            )
+                            imagePickerLauncher.launch(cropImageOptions)
                         },
-                        modifier = Modifier
-                            .weight(0.3f)
-                            .height(70.dp)
-                            .padding(top = 18.dp)
-                    ) {
-                        Text("중복체크")
-                    }
+                        onImageRemoved = {
+                            profilePictureUri = null
+                            bitmap = null
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+                // todo: 닉네임 수정 (중복된 닉네임이면 수정 못하게 해야함)
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = nickname,
+                            onValueChange = {
+                                nickname = it
+                                // 중복 체크 결과 초기화 및 에러 메시지 업데이트
+                                signUpViewModel.resetNicknameDuplicateCheck()
+                                nicknameError = ""
+                            },
+                            label = { Text("닉네임") },
+                            modifier = Modifier
+                                .weight(0.7f), // Row 내에서 차지하는 비율 조정
+                            isError = nicknameError.isNotEmpty(),
+                            singleLine = true
+                        )
 
-            // 한줄 소개
-            item {
-                OutlinedTextField(
-                    value = oneLineIntroduction,
-                    onValueChange = { oneLineIntroduction = it },
-                    label = { Text("한줄 소개") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+                        Spacer(modifier = Modifier.width(8.dp)) // 닉네임 필드와 버튼 사이의 간격 추가
 
-            // 생년월일
-            item {
-                Text("생년월일", style = MaterialTheme.typography.bodyMedium)
-                MyDatePickerDialog(onDateSelected = { selectedDate = it })
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+                        Button(
+                            onClick = {
+                                signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(0.3f) // Row 내에서 차지하는 비율 조정
+                                .padding(top = 8.dp)
+                                .height(54.dp), // 높이 지정
+                            shape = MaterialTheme.shapes.medium.copy(CornerSize(0.dp)) // 버튼 모서리를 직사각형으로 설정
+                        ) {
+                            Text("중복체크")
+                        }
+                    }
 
-            // 날짜 선택
-            if (selectedDate.isNotEmpty()) {
+                    if (nicknameError.isNotEmpty()) {
+                        Text(
+                            text = nicknameError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // 한줄 소개
                 item {
                     OutlinedTextField(
-                        value = "선택된 날짜: $selectedDate",
-                        onValueChange = {},
-                        readOnly = true,
+                        value = oneLineIntroduction,
+                        onValueChange = { oneLineIntroduction = it },
+                        label = { Text("한줄 소개") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-            }
 
-            // 성별 선택
-            item {
-                Text("성별", style = MaterialTheme.typography.bodyMedium)
-                // 성별 선택 컴포저블
-                GenderSelector(
-                    selectedGender = gender,
-                    onGenderSelect = onGenderSelect
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                // 생년월일
+                item {
+                    Text("생년월일", style = MaterialTheme.typography.bodyMedium)
+                    MyDatePickerDialog(onDateSelected = { selectedDate = it })
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // 날짜 선택
+                if (selectedDate.isNotEmpty()) {
+                    item {
+                        OutlinedTextField(
+                            value = "선택된 날짜: $selectedDate",
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+
+                // 성별 선택
+                item {
+                    Text("성별", style = MaterialTheme.typography.bodyMedium)
+                    // 성별 선택 컴포저블
+                    GenderSelector(
+                        selectedGender = gender,
+                        onGenderSelect = onGenderSelect
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
     }
