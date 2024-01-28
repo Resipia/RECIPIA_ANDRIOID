@@ -81,7 +81,6 @@ fun ProfileEditScreen(
     // Context 및 기타 상태 변수
     val context = LocalContext.current
     var profilePictureUri by remember { mutableStateOf<Uri?>(null) }
-    // 서버로부터 받은 이미지 URL을 Uri 객체로 변환
     profilePictureUri = myPageData?.profileImageUrl?.let { Uri.parse(it) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
@@ -93,6 +92,9 @@ fun ProfileEditScreen(
     var nicknameError by remember { mutableStateOf("") }
     val nicknameFocusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
+
+    // 중복 체크 결과 관찰
+    val nicknameDuplicateCheckResult by signUpViewModel.nicknameDuplicateCheckResult.observeAsState()
 
     // 초기 성별 값을 "M", "F"에서 "남성", "여성"으로 변환
     var gender by remember {
@@ -124,6 +126,17 @@ fun ProfileEditScreen(
                     duration = SnackbarDuration.Short
                 )
             }
+        }
+    }
+
+    // 입력 필드 검증
+    fun validateFields() {
+        // 닉네임 검증
+        if (nickname.isBlank()) {
+            nicknameError = "필수 입력값입니다."
+            nicknameFocusRequester.requestFocus()
+        } else {
+            nicknameError = ""
         }
     }
 
@@ -162,6 +175,9 @@ fun ProfileEditScreen(
                     actions = {
                         TextButton(
                             onClick = {
+                                // 닉네임 입력필드 검증
+                                validateFields()
+
                                 // "s3" 문자열이 포함되어 있는지 검사
                                 val finalProfilePictureUri = if (profilePictureUri?.toString()
                                         ?.contains("s3") == true
@@ -260,12 +276,12 @@ fun ProfileEditScreen(
                         }
                     }
 
-                    if (nicknameError.isNotEmpty()) {
+                    // 중복 체크 결과에 따른 메시지 표시
+                    nicknameDuplicateCheckResult?.let {
                         Text(
-                            text = nicknameError,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+                            text = it,
+                            color = if (it.contains("사용 가능")) Color(0xFF006633) else Color.Red,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                         )
                     }
 

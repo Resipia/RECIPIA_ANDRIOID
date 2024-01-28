@@ -148,7 +148,7 @@ class SignUpViewModel : ViewModel() {
                         _isNicknameAvailable.value = responseDto.result
                         // 중복 체크 결과 메시지 업데이트
                         _nicknameDuplicateCheckResult.value =
-                            if (responseDto.result) "사용가능한 닉네임입니다." else "이미 존재하는 닉네임입니다."
+                            if (responseDto.result) "사용 가능한 닉네임입니다." else "이미 존재하는 닉네임입니다."
                     } else {
                         onError("응답 데이터가 없습니다.")
                     }
