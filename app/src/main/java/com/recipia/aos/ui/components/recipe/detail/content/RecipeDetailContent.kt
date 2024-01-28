@@ -20,12 +20,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -475,43 +472,6 @@ fun RecipeDetailContent(
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
-
-//                    HorizontalDivider(
-//                        modifier = Modifier
-//                            .fillMaxWidth() // 전체 너비를 채우도록 설정
-//                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
-//                        thickness = 0.5.dp, // 구분선의 두께 설정
-//                        color = Color(222, 226, 230) // 구분선의 색상 설정
-//                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // 댓글보기
-                    Button(
-                        onClick = {
-                            navController.navigate("comment/${recipeId}")
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth() // 전체 너비를 채우도록 설정
-                            .height(60.dp) // 버튼의 높이를 더 크게 설정
-                            .padding(horizontal = 16.dp, vertical = 8.dp), // 주변 여백 설정
-                        shape = RoundedCornerShape(12.dp), // 모서리를 둥글게 설정
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(241, 243, 245), // 버튼 배경색
-                            contentColor = MaterialTheme.colorScheme.onPrimary // 텍스트 및 아이콘 색상
-                        )
-                    ) {
-                        Text(
-                            text = "댓글보기",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
