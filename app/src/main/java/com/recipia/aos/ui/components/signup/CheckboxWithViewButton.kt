@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/**
+ * 회원가입 동의 버튼
+ */
 @Composable
 fun CheckboxWithViewButton(
     label: String,
@@ -36,8 +39,8 @@ fun CheckboxWithViewButton(
             checked = isChecked,
             onCheckedChange = { onCheckedChange(it) },
             colors = CheckboxDefaults.colors(
-                checkedColor = MaterialTheme.colorScheme.primary,
-                uncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                checkedColor = Color(27, 94, 32),
+                uncheckedColor = Color(27, 94, 32).copy(alpha = 0.6f)
             ),
             modifier = Modifier.padding(end = 8.dp)
         )
@@ -57,6 +60,7 @@ fun CheckboxWithViewButton(
         ) {
             Text(
                 text = "보기",
+                color = Color(27, 94, 32),
                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
             )
         }

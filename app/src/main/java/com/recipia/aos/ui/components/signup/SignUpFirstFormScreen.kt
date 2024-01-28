@@ -291,7 +291,9 @@ fun SignUpFirstFormScreen(
                             0xFF006633
                         ),
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.Start)
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(start = 2.dp)
                     )
                 }
 
@@ -397,7 +399,8 @@ fun SignUpFirstFormScreen(
                                     ) {
                                         val minutes = timeLeft / 60
                                         val seconds = timeLeft % 60
-                                        val timerText = String.format("남은 시간: %02d:%02d", minutes, seconds)
+                                        val timerText =
+                                            String.format("남은 시간: %02d:%02d", minutes, seconds)
 
                                         Text(
                                             text = timerText,
@@ -442,7 +445,10 @@ fun SignUpFirstFormScreen(
                                     isPersonalInfoConsent = it
                                     isDataRetentionConsent = it
                                 },
-                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(27, 94, 32),
+                                    uncheckedColor = Color(27, 94, 32).copy(alpha = 0.6f)
+                                )
                             )
 
                             Text(

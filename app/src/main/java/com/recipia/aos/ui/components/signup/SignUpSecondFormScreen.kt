@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.signup.function.InputField
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
@@ -222,6 +223,19 @@ fun SignUpSecondFormScreen(
                 .fillMaxHeight(), // 화면 크기에 맞게 최대 높이로 설정
                 verticalArrangement = Arrangement.Top
             ) {
+
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+
+                // 각 입력 필드 및 검증 로직...
+                item {
+                    Text(
+                        text = "모든 입력값과 중복체크는 필수입니다.",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        modifier = Modifier.padding(start = 9.dp)
+                    )
+                }
 
                 item { Spacer(modifier = Modifier.height(10.dp)) }
 
