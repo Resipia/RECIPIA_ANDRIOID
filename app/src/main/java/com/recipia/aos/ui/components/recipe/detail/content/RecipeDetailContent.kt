@@ -1,5 +1,6 @@
 package com.recipia.aos.ui.components.recipe.detail.content
 
+import TokenManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,6 +56,7 @@ import coil.transform.CircleCropTransformation
 import com.recipia.aos.R
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.common.AnimatedPreloader
+import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.model.comment.CommentViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 
@@ -68,11 +71,14 @@ fun RecipeDetailContent(
     commentViewModel: CommentViewModel,
     navController: NavController,
     paddingValues: PaddingValues,
+    tokenManager: TokenManager
 ) {
 
     val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
     val isLoading = recipeDetailViewModel.isLoading.observeAsState()
     var menuExpanded by remember { mutableStateOf(false) }
+    val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
+    var showDialog by remember { mutableStateOf(false) }
 
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
@@ -139,14 +145,42 @@ fun RecipeDetailContent(
                                 }
                             },
                             actions = {
-                                // TopAppBar의 액션 아이템들
                                 IconButton(onClick = { menuExpanded = true }) {
                                     Icon(
                                         imageVector = Icons.Filled.MoreVert,
                                         contentDescription = "더보기"
                                     )
                                 }
-                                // DropdownMenu 로직 생략...
+                                CustomDropdownMenu(
+                                    expanded = menuExpanded,
+                                    onDismissRequest = { menuExpanded = false }
+                                ) {
+                                    // 레시피 작성자가 현재 로그인한 사용자와 같은 경우에만 수정 및 삭제 옵션을 보여줌
+                                    if (recipeDetailState.value?.memberId == currentUserMemberId) {
+                                        // 레시피 수정하기
+                                        DropdownMenuItem(
+                                            text = { Text("레시피 수정") },
+                                            onClick = {
+                                                navController.navigate("update-recipe")
+                                            }
+                                        )
+                                        // 레시피 삭제 버튼
+                                        DropdownMenuItem(
+                                            text = { Text("레시피 삭제") },
+                                            onClick = {
+                                                showDialog = true
+                                            }
+                                        )
+                                    }
+                                    DropdownMenuItem(
+                                        text = { Text("설정") },
+                                        onClick = { /* 설정 처리 */ }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("피드백 보내기") },
+                                        onClick = { /* 피드백 처리 */ }
+                                    )
+                                }
                             },
                             colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
