@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -215,9 +217,8 @@ fun SignUpSecondFormScreen(
                     .fillMaxSize()
                     .imePadding() // 키보드가 활성화될 때 패딩 적용
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 9.dp)
                 .fillMaxHeight(), // 화면 크기에 맞게 최대 높이로 설정
-//                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
 
@@ -268,10 +269,16 @@ fun SignUpSecondFormScreen(
                                     }
                                 }
                             },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(27, 94, 32),
+                                contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                            ),
+                            shape = RoundedCornerShape(4.dp),
                             modifier = Modifier
+                                .align(Alignment.CenterVertically)
                                 .weight(0.3f)
-                                .height(70.dp)
-                                .padding(top = 18.dp)
+                                .height(54.dp) // 높이 지정
+                                .padding(start = 8.dp, end = 8.dp) // 오른쪽 여백 추가
                         ) {
                             Text("중복체크")
                         }
@@ -284,12 +291,12 @@ fun SignUpSecondFormScreen(
                         Text(
                             text = nicknameDuplicateCheckResult!!,
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = if (nicknameDuplicateCheckResult == "사용가능한 닉네임입니다.") Color(
+                            color = if (nicknameDuplicateCheckResult == "사용 가능한 닉네임입니다.") Color(
                                 0xFF006633
                             ) else Color.Red,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 9.dp, bottom = 4.dp),
+                                .padding(start = 9.dp, bottom = 8.dp),
                             textAlign = TextAlign.Start
                         )
                     }
@@ -333,10 +340,16 @@ fun SignUpSecondFormScreen(
                                     }
                                 }
                             },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(27, 94, 32),
+                                contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                            ),
+                            shape = RoundedCornerShape(4.dp),
                             modifier = Modifier
+                                .align(Alignment.CenterVertically)
                                 .weight(0.3f)
-                                .height(70.dp)
-                                .padding(top = 18.dp)
+                                .height(54.dp) // 높이 지정
+                                .padding(start = 8.dp, end = 8.dp) // 오른쪽 여백 추가
                         ) {
                             Text("중복체크")
                         }
@@ -349,12 +362,12 @@ fun SignUpSecondFormScreen(
                         Text(
                             text = emailDuplicateCheckResult!!,
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = if (emailDuplicateCheckResult == "사용가능한 이메일입니다.") Color(
+                            color = if (emailDuplicateCheckResult == "사용 가능한 이메일입니다.") Color(
                                 0xFF006633
                             ) else Color.Red,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 9.dp, bottom = 4.dp),
+                                .padding(start = 9.dp, bottom = 8.dp),
                             textAlign = TextAlign.Start
                         )
                     }
@@ -415,7 +428,6 @@ fun SignUpSecondFormScreen(
                         isPasswordConfirm = true,
                         modifier = Modifier
                             .imePadding() // 키보드가 활성화될 때 패딩 적용
-                            .padding(bottom = 4.dp) // 키보드와 겹치지 않도록 하기 위한 패딩 추가
                     )
 
                     // 비밀번호 일치 메시지 표시
@@ -426,7 +438,7 @@ fun SignUpSecondFormScreen(
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 9.dp, top = 2.dp),
+                                .padding(start = 9.dp),
                             textAlign = TextAlign.Start
                         )
                     }
@@ -438,7 +450,7 @@ fun SignUpSecondFormScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 16.dp),
+                            .padding(vertical = 16.dp, horizontal = 8.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         // 사용자가 "다음" 버튼을 클릭했을 때 데이터 업데이트
@@ -446,8 +458,8 @@ fun SignUpSecondFormScreen(
                             onClick = {
                                 validateFields()
                                 if (emailError.isBlank() && passwordError.isBlank() &&
-                                    emailDuplicateCheckResult == "사용가능한 이메일입니다." &&
-                                    nicknameDuplicateCheckResult == "사용가능한 닉네임입니다." &&
+                                    emailDuplicateCheckResult == "사용 가능한 이메일입니다." &&
+                                    nicknameDuplicateCheckResult == "사용 가능한 닉네임입니다." &&
                                     isPasswordMatching == true
                                 ) {
 
@@ -461,13 +473,27 @@ fun SignUpSecondFormScreen(
                                     navController.navigate("signUpThirdForm")
                                 }
                             },
+                            shape = RoundedCornerShape(4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (emailError.isBlank() && passwordError.isBlank() &&
+                                    emailDuplicateCheckResult == "사용 가능한 이메일입니다." &&
+                                    nicknameDuplicateCheckResult == "사용 가능한 닉네임입니다." &&
+                                    isPasswordMatching == true) Color(
+                                    27,
+                                    94,
+                                    32
+                                ) else Color.LightGray, // 유효한 번호일 때와 아닐 때의 색상 설정
+                                contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                            ),
                             enabled = emailError.isBlank() && passwordError.isBlank() &&
-                                    emailDuplicateCheckResult == "사용가능한 이메일입니다." &&
-                                    nicknameDuplicateCheckResult == "사용가능한 닉네임입니다." &&
+                                    emailDuplicateCheckResult == "사용 가능한 이메일입니다." &&
+                                    nicknameDuplicateCheckResult == "사용 가능한 닉네임입니다." &&
                                     isPasswordMatching == true,
                             modifier = Modifier
-                                .weight(1f)
                                 .fillMaxWidth()
+                                .align(Alignment.CenterVertically)
+                                .height(62.dp) // 높이 지정
+                                .padding(top = 6.dp),
                         ) {
                             Text("다음")
                         }

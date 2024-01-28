@@ -498,27 +498,24 @@ fun SignUpFirstFormScreen(
                                 .padding(vertical = 16.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Button(
-                                onClick = {
-                                    // 뒤로 가기 버튼 동작
-                                    navController.popBackStack()
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(end = 8.dp)
-                                    .fillMaxWidth()
-                            ) {
-                                Text(text = "이전")
-                            }
-
                             // "다음" 버튼 영역
                             Button(
-                                onClick = onAgreeButtonClick,
-                                enabled = isAgreeButtonEnabled, // 동의 버튼 활성화 여부
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 16.dp),
-                                shape = RoundedCornerShape(8.dp)
+                                    .align(Alignment.CenterVertically)
+                                    .height(62.dp) // 높이 지정
+                                    .padding(top = 6.dp),
+                                onClick = onAgreeButtonClick,
+                                enabled = isAgreeButtonEnabled, // 동의 버튼 활성화 여부
+                                shape = RoundedCornerShape(4.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isValidPhoneNumber(phoneNumber)) Color(
+                                        27,
+                                        94,
+                                        32
+                                    ) else Color.LightGray, // 유효한 번호일 때와 아닐 때의 색상 설정
+                                    contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                                )
                             ) {
                                 Text(text = "다음")
                             }
