@@ -63,4 +63,12 @@ class CategorySelectionViewModel : ViewModel() {
         selectedCategories.value = subCategoryDtos
     }
 
+    // 카테고리 삭제 메소드 추가
+    fun removeSelectedCategory(subCategoryDto: SubCategoryDto) {
+        val updatedCategories = selectedCategories.value.toMutableSet()
+        updatedCategories.remove(subCategoryDto)
+        selectedCategories.value = updatedCategories
+    }
+
+
 }

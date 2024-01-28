@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CornerSize
@@ -473,31 +475,52 @@ fun RecipeCreateScreen(
                     }
                 }
 
-                // 카테고리 정보 표시
+                // RecipeCreateScreen 내에서 ElevatedAssistChip 수정
                 item {
-
                     // 선택한 카테고리를 가로로 나열하기 위해 Row 사용
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // 각 AssistChip과 Spacer를 추가
                         selectedCategories.forEachIndexed { index, category ->
-                            ElevatedAssistChip(
-                                onClick = { /* 각 AssistChip 클릭 시 동작 */ },
-                                label = {
-                                    Text(
-                                        category.subCategoryNm.toString(),
-                                        fontSize = 12.sp, // 글씨 크기 조절
+                            Box(contentAlignment = Alignment.TopEnd) {
+                                ElevatedAssistChip(
+                                    onClick = {
+                                        // 여기서 클릭한 카테고리 삭제
+                                        categorySelectionViewModel.removeSelectedCategory(category)
+                                    },
+                                    label = {
+                                        Text(
+                                            category.subCategoryNm.toString(),
+                                            fontSize = 12.sp, // 글씨 크기 조절
+                                        )
+                                    },
+                                    colors = AssistChipDefaults.assistChipColors(
+                                        containerColor = Color(200, 230, 201),
+                                        labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                                    ),
+                                    border = AssistChipDefaults.assistChipBorder(
+                                        borderColor = Color(189, 189, 189)
                                     )
-                                },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = Color(200, 230, 201),
-                                    labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
-                                ),
-                                border = AssistChipDefaults.assistChipBorder(
-                                    borderColor = Color(189, 189, 189)
                                 )
-                            )
+                                IconButton(
+                                    onClick = {
+                                        // 여기서 클릭한 카테고리 삭제
+                                        categorySelectionViewModel.removeSelectedCategory(category)
+                                    },
+                                    modifier = Modifier
+                                        .size(20.dp) // 아이콘 버튼의 크기 조절
+                                        .offset(x = (1).dp, y = 6.dp) // 아이콘 버튼을 우측 상단으로 조정
+                                        .padding(0.dp) // 필요한 경우 패딩 조정
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "삭제",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(16.dp) // 아이콘 크기 조절
+                                    )
+                                }
+                            }
 
                             // Spacer를 추가하여 간격 설정
                             if (index < selectedCategories.size - 1) {

@@ -346,6 +346,7 @@ fun RecipeDetailContent(
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     // 아이콘 추가
                                     Text(
@@ -353,6 +354,7 @@ fun RecipeDetailContent(
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     // 아이콘 추가
                                     Text(
@@ -360,6 +362,7 @@ fun RecipeDetailContent(
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     // 아이콘 추가
                                     Text(
@@ -367,6 +370,7 @@ fun RecipeDetailContent(
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     // 아이콘 추가
                                     Text(
