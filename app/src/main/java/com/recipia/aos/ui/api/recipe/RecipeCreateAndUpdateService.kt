@@ -8,6 +8,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.PartMap
 
 
 /**
@@ -49,7 +50,7 @@ interface RecipeCreateAndUpdateService {
         @Part("nutritionalInfo.minerals") minerals: RequestBody,
         @Part("nutritionalInfo.protein") protein: RequestBody,
         @Part("nutritionalInfo.vitamins") vitamins: RequestBody,
-        @Part("subCategoryDtoList[0].id") subCategoryId: RequestBody,
+        @PartMap subCategoryParts: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part fileList: List<MultipartBody.Part>
     ): Call<ResponseDto<Void>>
 

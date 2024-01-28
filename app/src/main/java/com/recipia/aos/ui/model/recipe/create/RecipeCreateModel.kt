@@ -17,6 +17,7 @@ import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
@@ -150,7 +151,10 @@ class RecipeCreateModel(
         val minerals = requestDto.nutritionalInfo?.minerals.toString().toRequestBody("text/plain".toMediaTypeOrNull())
         val protein = requestDto.nutritionalInfo?.protein.toString().toRequestBody("text/plain".toMediaTypeOrNull())
         val vitamins = requestDto.nutritionalInfo?.vitamins.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val subCategoryId = requestDto.subCategoryDtoList.firstOrNull()?.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val subCategoryParts = mutableMapOf<String, RequestBody>()
+        requestDto.subCategoryDtoList.forEachIndexed { index, subCategoryDto ->
+            subCategoryParts["subCategoryDtoList[$index].id"] = subCategoryDto.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        }
 
         recipeService.updateRecipe(
             recipeId,
@@ -165,7 +169,7 @@ class RecipeCreateModel(
             minerals,
             protein,
             vitamins,
-            subCategoryId,
+            subCategoryParts,
             imageParts
         ).enqueue(object : Callback<ResponseDto<Void>> {
             override fun onResponse(
