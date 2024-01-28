@@ -23,7 +23,7 @@ import com.recipia.aos.ui.components.recipe.create.RecipeCreateScreen
 import com.recipia.aos.ui.components.recipe.update.RecipeUpdateScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.recipe.detail.comment.CommentPageScreen
-import com.recipia.aos.ui.components.search.MongoIngredientAndHashTagSearchScreen
+import com.recipia.aos.ui.components.recipe.search.MongoIngredientAndHashTagSearchScreen
 import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSuccessScreen

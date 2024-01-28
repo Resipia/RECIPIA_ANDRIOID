@@ -425,20 +425,47 @@ fun RecipeUpdateScreen(
                 // 선택된 재료를 AssistChip으로 표시
                 item {
                     FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, end = 4.dp),
                         horizontalArrangement = Arrangement.Start,
                         verticalArrangement = Arrangement.Top,
                         maxItemsInEachRow = Int.MAX_VALUE
                     ) {
                         selectedIngredients.forEach { ingredient ->
-                            ElevatedAssistChip(
-                                onClick = {},
-                                label = { Text(ingredient) },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = Color(200, 230, 201),
-                                    labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                            Box(contentAlignment = Alignment.TopEnd) {
+                                ElevatedAssistChip(
+                                    onClick = {
+                                        // 클릭한 재료 삭제
+                                        mongoSearchViewModel.removeSelectedIngredient(ingredient)
+                                    },
+                                    label = { Text(ingredient) },
+                                    colors = AssistChipDefaults.assistChipColors(
+                                        containerColor = Color(200, 230, 201),
+                                        labelColor = Color.Black
+                                    ),
+                                    border = AssistChipDefaults.assistChipBorder(
+                                        borderColor = Color(189, 189, 189)
+                                    )
                                 )
-                            )
+                                IconButton(
+                                    onClick = {
+                                        // 클릭한 재료 삭제
+                                        mongoSearchViewModel.removeSelectedIngredient(ingredient)
+                                    },
+                                    modifier = Modifier
+                                        .size(20.dp) // 아이콘 버튼의 크기 조절
+                                        .offset(x = (1).dp, y = 7.dp) // 아이콘 버튼을 우측 상단으로 조정
+                                        .padding(0.dp) // 필요한 경우 패딩 조정
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "삭제",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(12.dp) // 아이콘 크기 조절
+                                    )
+                                }
+                            }
                             Spacer(modifier = Modifier.width(4.dp)) // 여백 추가
                         }
                     }
@@ -465,24 +492,52 @@ fun RecipeUpdateScreen(
                 // 선택된 해시태그를 AssistChip으로 표시
                 item {
                     FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, end = 4.dp),
                         horizontalArrangement = Arrangement.Start,
                         verticalArrangement = Arrangement.Top,
                         maxItemsInEachRow = Int.MAX_VALUE
                     ) {
                         selectedHashtags.forEach { hashtag ->
-                            ElevatedAssistChip(
-                                onClick = {},
-                                label = { Text("#$hashtag") },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = Color(200, 230, 201),
-                                    labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                            Box(contentAlignment = Alignment.TopEnd) {
+                                ElevatedAssistChip(
+                                    onClick = {
+                                        // 클릭한 해시태그 삭제
+                                        mongoSearchViewModel.removeSelectedHashtag(hashtag)
+                                    },
+                                    label = { Text("#$hashtag") },
+                                    colors = AssistChipDefaults.assistChipColors(
+                                        containerColor = Color(200, 230, 201),
+                                        labelColor = Color.Black
+                                    ),
+                                    border = AssistChipDefaults.assistChipBorder(
+                                        borderColor = Color(189, 189, 189)
+                                    )
                                 )
-                            )
+                                IconButton(
+                                    onClick = {
+                                        // 클릭한 해시태그 삭제
+                                        mongoSearchViewModel.removeSelectedHashtag(hashtag)
+                                    },
+                                    modifier = Modifier
+                                        .size(20.dp) // 아이콘 버튼의 크기 조절
+                                        .offset(x = (1).dp, y = 7.dp) // 아이콘 버튼을 우측 상단으로 조정
+                                        .padding(0.dp) // 필요한 경우 패딩 조정
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "삭제",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(12.dp) // 아이콘 크기 조절
+                                    )
+                                }
+                            }
                             Spacer(modifier = Modifier.width(4.dp)) // 여백 추가
                         }
                     }
                 }
+
 
                 // 카테고리 선택 버튼
                 item {
@@ -539,14 +594,14 @@ fun RecipeUpdateScreen(
                                     },
                                     modifier = Modifier
                                         .size(20.dp) // 아이콘 버튼의 크기 조절
-                                        .offset(x = (1).dp, y = 6.dp) // 아이콘 버튼을 우측 상단으로 조정
+                                        .offset(x = (1).dp, y = 7.dp) // 아이콘 버튼을 우측 상단으로 조정
                                         .padding(0.dp) // 필요한 경우 패딩 조정
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "삭제",
                                         tint = Color.Gray,
-                                        modifier = Modifier.size(16.dp) // 아이콘 크기 조절
+                                        modifier = Modifier.size(12.dp) // 아이콘 크기 조절
                                     )
                                 }
                             }

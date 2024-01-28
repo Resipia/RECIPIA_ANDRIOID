@@ -3,7 +3,7 @@
     ExperimentalLayoutApi::class
 )
 
-package com.recipia.aos.ui.components.search
+package com.recipia.aos.ui.components.recipe.search
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -64,6 +64,9 @@ import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.search.MongoSearchViewModel
 
 
+/**
+ * 재료, 해시태그 검색 및 추가 컴포저
+ */
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class,
     ExperimentalComposeUiApi::class
 )
@@ -112,12 +115,6 @@ fun MongoIngredientAndHashTagSearchScreen(
                 title = { Text(text = "검색") },
                 navigationIcon = {
                     IconButton(onClick = {
-                        // 현재 검색 유형에 따라 상태 초기화
-                        if (type == SearchType.INGREDIENT) {
-                            mongoViewModel.resetSelectedIngredients()
-                        } else if (type == SearchType.HASHTAG) {
-                            mongoViewModel.resetSelectedHashtags()
-                        }
                         mongoViewModel.resetTextChange() // 입력 텍스트 초기화
                         navController.popBackStack()
                     }) {
