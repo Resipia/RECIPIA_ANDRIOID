@@ -83,7 +83,7 @@ import com.recipia.aos.ui.model.search.MongoSearchViewModel
     ExperimentalLayoutApi::class
 )
 @Composable
-fun UpdateRecipeScreen(
+fun RecipeUpdateScreen(
     navController: NavController,
     recipeDetailViewModel: RecipeDetailViewModel?, // 작성했던 데이터 받기
     categorySelectionViewModel: CategorySelectionViewModel,
@@ -92,26 +92,18 @@ fun UpdateRecipeScreen(
 ) {
 
     // 상태 변수를 사용하여 각 필드에 데이터 바인딩
-    val recipeName = rememberSaveable { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.recipeName ?: "") }
-
-    val recipeDesc = rememberSaveable { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.recipeDesc ?: "") }
-
-    val timeTaken = rememberSaveable { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.timeTaken.toString()) }
+    val recipeName = rememberSaveable { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.recipeName ?: "") }
+    val recipeDesc = rememberSaveable { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.recipeDesc ?: "") }
+    val timeTaken = rememberSaveable { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.timeTaken.toString()) }
 
     // 기존 이미지 URL들을 Uri 객체로 변환하여 저장할 리스트
     val selectedImageUris = remember { mutableStateListOf<Uri?>() }
-
-    val nutritionalInfo = remember { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.nutritionalInfoDto ?: NutritionalInfoDto()) } // 영양 정보 상태 변수
-
-    val selectedCategoriesBefore = remember { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.subCategoryDtoList ?: emptyList()) }  // 선택된 카테고리 상태 변수
-
+    val nutritionalInfo = remember { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.nutritionalInfoDto ?: NutritionalInfoDto()) } // 영양 정보 상태 변수
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
     val showNutritionalInfo = mutableStateOf(false)
+    val selectedIngredients by mongoSearchViewModel.selectedIngredients.collectAsState()
+    val selectedHashtags by mongoSearchViewModel.selectedHashtags.collectAsState()
+    val recipeId = recipeDetailViewModel?.recipeDetail?.value?.id
 
     // 필수 필드에 대한 유효성 상태
     val isRecipeNameValid = remember { mutableStateOf(true) }
@@ -130,11 +122,16 @@ fun UpdateRecipeScreen(
         mongoSearchViewModel.initializeSelectedIngredientsAndHashtags(initialIngredients, initialHashtags)
     }
 
-//    // 초기 카테고리 값 세팅
-//    LaunchedEffect(key1 = recipeDetailViewModel?.recipeDetail?.value?.id) {
-//        // List를 Set으로 변환하여 ViewModel에 설정
-//        categorySelectionViewModel.initializeCategories(selectedCategoriesBefore.value.toSet())
-//    }
+    // selectedCategoriesBefore 상태를 rememberSaveable을 사용하여 유지
+    val selectedCategoriesBefore = rememberSaveable { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.subCategoryDtoList ?: emptyList()) }
+
+    // 초기 카테고리 값 세팅에 대한 LaunchedEffect
+    LaunchedEffect(key1 = true) { // key를 true로 고정하여 이 컴포저블이 처음 로드될 때만 실행되도록 함
+        if (!categorySelectionViewModel.isInitialized.value) { // ViewModel의 초기화 상태를 체크
+            categorySelectionViewModel.initializeCategories(selectedCategoriesBefore.value.toSet())
+            categorySelectionViewModel.setInitialized(true) // 초기화 완료 상태로 설정
+        }
+    }
 
     // 초기 이미지에 기존 저장되어있던 이미지 정보 추가
     LaunchedEffect(key1 = recipeDetailViewModel?.recipeDetail) {
@@ -142,13 +139,6 @@ fun UpdateRecipeScreen(
             selectedImageUris.add(Uri.parse(fileResponse.preUrl))
         }
     }
-
-    // selectedCategories의 현재 값을 가져옴
-    var selectedCategories = categorySelectionViewModel.selectedCategories.value
-
-    // mongo Model에서 데이터를 가져온다.
-    val selectedIngredients by mongoSearchViewModel.selectedIngredients.collectAsState()
-    val selectedHashtags by mongoSearchViewModel.selectedHashtags.collectAsState()
 
     // 사진 선택기 선언
     val multiplePhotosPickerLauncher = rememberLauncherForActivityResult(
@@ -189,14 +179,14 @@ fun UpdateRecipeScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = {
-                            selectedCategories = emptySet()
                             mongoSearchViewModel.changeInitialized() // 몽고db 검색 초기값 세팅 후 initial값 변경
-                            categorySelectionViewModel.changeInitialized() // 카테고리 초기값 세팅 후 initial값 변경
                             mongoSearchViewModel.resetSelectedIngredients()
                             mongoSearchViewModel.resetSelectedHashtags()
                             categorySelectionViewModel.clearSelectedCategories()
                             selectedImageUris.clear() // 이미지 제거
+
                             navController.popBackStack()
+                            navController.navigate("recipeDetail/${recipeId}")
                         }) {
                             Icon(Icons.Default.Close, contentDescription = "닫기")
                         }
@@ -254,16 +244,15 @@ fun UpdateRecipeScreen(
                                     nutritionalInfo.value = NutritionalInfoDto() // 새 NutritionalInfoDto 객체로 초기화
                                     recipeCreateModel.selectedImageUris = mutableStateListOf<Uri?>()
                                     categorySelectionViewModel.selectedCategories.value = emptySet()
-                                    // MongoSearchViewModel 내의 선택된 재료와 해시태그를 초기화
                                     mongoSearchViewModel.resetSelectedIngredients()
                                     mongoSearchViewModel.resetSelectedHashtags()
                                     mongoSearchViewModel.changeInitialized() // 몽고db 검색 초기값 세팅 후 initial값 변경
-                                    categorySelectionViewModel.changeInitialized() // 카테고리 초기값 세팅 후 initial값 변경
-
+                                    categorySelectionViewModel.clearSelectedCategories()
+                                    selectedImageUris.clear() // 이미지 제거
                                     Toast.makeText(context, "레시피 업데이트 성공", Toast.LENGTH_SHORT).show()
 
                                     // 레시피 상세보기 화면으로 네비게이션
-                                    navController.navigate("recipeDetail/${recipeDetailViewModel?.recipeDetail?.value?.id}")
+                                    navController.navigate("recipeDetail/${recipeId}")
                                 }
                             ) { errorMessage ->
                                 Toast.makeText(context, "레시피 업데이트 실패: $errorMessage", Toast.LENGTH_LONG).show()
@@ -520,7 +509,7 @@ fun UpdateRecipeScreen(
                     // 선택한 카테고리를 가로로 나열하기 위해 Row 사용
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         // 각 AssistChip과 Spacer를 추가
-                        selectedCategoriesBefore.value.forEachIndexed { index, category ->
+                        categorySelectionViewModel.selectedCategories.value.forEachIndexed { index, category ->
                             ElevatedAssistChip(
                                 onClick = { /* 각 AssistChip 클릭 시 동작 */ },
                                 label = {
@@ -539,7 +528,7 @@ fun UpdateRecipeScreen(
                             )
 
                             // Spacer를 추가하여 간격 설정
-                            if (index < selectedCategoriesBefore.value.size - 1) {
+                            if (index < categorySelectionViewModel.selectedCategories.value.size - 1) {
                                 Spacer(modifier = Modifier.width(4.dp)) // 원하는 간격 설정
                             }
                         }

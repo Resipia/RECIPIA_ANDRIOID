@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -70,7 +71,7 @@ import com.recipia.aos.ui.model.search.MongoSearchViewModel
 
 
 /**
- * 레시피 생성 필드
+ * 레시피 생성 컴포저
  */
 @SuppressLint("UnrememberedMutableState")
 @OptIn(
@@ -78,7 +79,7 @@ import com.recipia.aos.ui.model.search.MongoSearchViewModel
     ExperimentalLayoutApi::class
 )
 @Composable
-fun CreateRecipeScreen(
+fun RecipeCreateScreen(
     navController: NavController,
     categorySelectionViewModel: CategorySelectionViewModel,
     mongoSearchViewModel: MongoSearchViewModel,
@@ -91,11 +92,10 @@ fun CreateRecipeScreen(
     val nutritionalInfoList = recipeCreateModel.nutritionalInfoList
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
     val showNutritionalInfo = mutableStateOf(false)
-    // mongo Model에서 데이터를 가져온다.
     val selectedIngredients by mongoSearchViewModel.selectedIngredients.collectAsState()
     val selectedHashtags by mongoSearchViewModel.selectedHashtags.collectAsState()
-    // 선택한 이미지 URI
     var selectedImageUris = recipeCreateModel.selectedImageUris
+    val selectedCategories = categorySelectionViewModel.selectedCategories.value
 
     // 필수 필드에 대한 유효성 상태
     val isRecipeNameValid = remember { mutableStateOf(true) }
@@ -146,7 +146,7 @@ fun CreateRecipeScreen(
                             recipeCreateModel.timeTaken.value = ""
                             mongoSearchViewModel.resetSelectedIngredients()
                             mongoSearchViewModel.resetSelectedHashtags()
-                            categorySelectionViewModel.selectedCategories.value = emptySet()
+                            categorySelectionViewModel.clearCategories()
                             nutritionalInfoList.clear()
                             navController.popBackStack()
                         }) {
@@ -206,8 +206,7 @@ fun CreateRecipeScreen(
                                     recipeCreateModel.hashtag.value = ""
                                     nutritionalInfoList.clear()
                                     recipeCreateModel.selectedImageUris = mutableStateListOf<Uri?>()
-                                    categorySelectionViewModel.selectedCategories.value = emptySet()
-                                    // MongoSearchViewModel 내의 선택된 재료와 해시태그를 초기화
+                                    categorySelectionViewModel.clearCategories()
                                     mongoSearchViewModel.resetSelectedIngredients()
                                     mongoSearchViewModel.resetSelectedHashtags()
 
@@ -476,8 +475,6 @@ fun CreateRecipeScreen(
 
                 // 카테고리 정보 표시
                 item {
-                    // viewModel에서 선택한 카테고리 값을 가져옴
-                    val selectedCategories = categorySelectionViewModel.selectedCategories.value
 
                     // 선택한 카테고리를 가로로 나열하기 위해 Row 사용
                     Row(

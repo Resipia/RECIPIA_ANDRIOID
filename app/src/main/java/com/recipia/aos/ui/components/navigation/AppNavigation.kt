@@ -19,8 +19,8 @@ import com.recipia.aos.ui.components.mypage.MyPageRecipeListScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
-import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
-import com.recipia.aos.ui.components.recipe.update.UpdateRecipeScreen
+import com.recipia.aos.ui.components.recipe.create.RecipeCreateScreen
+import com.recipia.aos.ui.components.recipe.update.RecipeUpdateScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.recipe.detail.comment.CommentPageScreen
 import com.recipia.aos.ui.components.search.MongoIngredientAndHashTagSearchScreen
@@ -220,7 +220,7 @@ fun AppNavigation(
         }
         // 레시피 생성하기
         composable("create-recipe") {
-            CreateRecipeScreen(
+            RecipeCreateScreen(
                 navController,
                 categorySelectionViewModel,
                 mongoSearchViewModel,
@@ -229,7 +229,7 @@ fun AppNavigation(
         }
         // 레시피 수정하기
         composable("update-recipe") {
-            UpdateRecipeScreen(
+            RecipeUpdateScreen(
                 navController = navController,
                 recipeDetailViewModel = recipeDetailViewModel,
                 categorySelectionViewModel = categorySelectionViewModel,
@@ -269,11 +269,7 @@ fun AppNavigation(
         composable("categorySelect") {
             CategorySelectScreen(
                 navController = navController,
-                viewModel = categorySelectionViewModel,
-                onSelectedCategories = { selectedIds ->
-                    println("선택된 서브 카테고리 ID: $selectedIds")
-                    // 여기에서 선택된 ID들을 처리하는 로직을 추가할 수 있음
-                }
+                viewModel = categorySelectionViewModel
             )
         }
     }
