@@ -21,29 +21,35 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.canhub.cropper.CropImage
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
-import com.recipia.aos.ui.components.signup.ProfilePictureInputField
+import com.recipia.aos.ui.components.common.ProfilePictureInputField
 import com.recipia.aos.ui.components.signup.function.GenderSelector
 import com.recipia.aos.ui.components.signup.function.MyDatePickerDialog
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
+import kotlinx.coroutines.launch
 
 /**
  * 마이페이지 내 프로필 수정하기
@@ -61,12 +67,15 @@ fun ProfileEditScreen(
     // Context 및 기타 상태 변수
     val context = LocalContext.current
     var profilePictureUri by remember { mutableStateOf<Uri?>(null) }
+    // 서버로부터 받은 이미지 URL을 Uri 객체로 변환
+    profilePictureUri = myPageData?.profileImageUrl?.let { Uri.parse(it) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     // 초기값 설정
     var oneLineIntroduction by remember { mutableStateOf(myPageData?.introduction ?: "") }
     var selectedDate by remember { mutableStateOf(myPageData?.birth ?: "") }
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    val coroutineScope = rememberCoroutineScope()
 
     // 초기 성별 값을 "M", "F"에서 "남성", "여성"으로 변환
     var gender by remember {
@@ -91,61 +100,58 @@ fun ProfileEditScreen(
         if (result.isSuccessful) {
             profilePictureUri = result.uriContent
         } else {
-            val exception = result.error
-            Toast.makeText(
-                context,
-                "Image selection failed: ${exception?.message}",
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    // 프로필 이미지 로딩
-    if (myPageData?.profileImageUrl != null && profilePictureUri == null) {
-        profilePictureUri = Uri.parse(myPageData!!.profileImageUrl)
-    }
-
-    // Bitmap 로딩
-    if (profilePictureUri != null && bitmap == null) {
-        bitmap = if (Build.VERSION.SDK_INT < 28) {
-            MediaStore.Images.Media.getBitmap(context.contentResolver, profilePictureUri)
-        } else {
-            val source = ImageDecoder.createSource(context.contentResolver, profilePictureUri!!)
-            ImageDecoder.decodeBitmap(source)
+            // 오류 발생 시 스낵바를 표시
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "이미지 선택 취소",
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
     }
 
     Scaffold(
+        containerColor = Color.White,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("프로필 수정", fontSize = 20.sp) },
+                title = { Text("프로필 수정", fontSize = 16.sp, color = Color.Black) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack()
+                        }
+                    ) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로 가기")
                     }
                 },
                 actions = {
-                    TextButton(onClick = {
-                        myPageViewModel.updateProfile(
-                            context = context,
-                            nickname = myPageData?.nickname ?: "",
-                            introduction = oneLineIntroduction,
-                            profileImageUri = profilePictureUri,
-                            birth = selectedDate,
-                            gender = when (gender) {
-                                "남성" -> "M"
-                                "여성" -> "F"
-                                else -> null
-                            }
-                        )
-                        Toast.makeText(context, "프로필 업데이트를 요청했습니다.", Toast.LENGTH_SHORT).show()
-                    }) {
+                    TextButton(
+                        onClick = {
+                            myPageViewModel.updateProfile(
+                                context = context,
+                                nickname = myPageData?.nickname ?: "",
+                                introduction = oneLineIntroduction,
+                                profileImageUri = profilePictureUri,
+                                deleteFileOrder = 0, //todo: 이거 바꿔줘야함 실제 값으로
+                                birth = selectedDate,
+                                gender = when (gender) {
+                                    "남성" -> "M"
+                                    "여성" -> "F"
+                                    else -> null
+                                }
+                            )
+                            navController.popBackStack()
+                        }) {
                         Text("저장")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -160,7 +166,11 @@ fun ProfileEditScreen(
                 ProfilePictureInputField(
                     profilePictureUri = profilePictureUri,
                     onImageSelected = {
-                        val cropImageOptions = CropImageContractOptions(null, CropImageOptions())
+                        // CropImageContractOptions 객체를 생성하여 이미지 선택 및 크롭 로직 호출
+                        val cropImageOptions = CropImageContractOptions(
+                            CropImage.CancelledResult.uriContent,
+                            CropImageOptions()
+                        )
                         imagePickerLauncher.launch(cropImageOptions)
                     },
                     onImageRemoved = {

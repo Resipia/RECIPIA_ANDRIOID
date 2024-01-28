@@ -7,8 +7,11 @@ import android.os.Build
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -53,10 +56,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.canhub.cropper.CropImage
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
+import com.recipia.aos.ui.components.common.ProfilePictureInputField
 import com.recipia.aos.ui.components.signup.function.GenderSelector
 import com.recipia.aos.ui.components.signup.function.MyDatePickerDialog
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
@@ -172,7 +178,10 @@ fun SignUpThirdFormScreen(
                     profilePictureUri = profilePictureUri,
                     onImageSelected = {
                         // CropImageContractOptions 객체를 생성하여 이미지 선택 및 크롭 로직 호출
-                        val cropImageOptions = CropImageContractOptions(CropImage.CancelledResult.uriContent, CropImageOptions())
+                        val cropImageOptions = CropImageContractOptions(
+                            CropImage.CancelledResult.uriContent,
+                            CropImageOptions()
+                        )
                         imagePickerLauncher.launch(cropImageOptions)
                     },
                     onImageRemoved = {
@@ -326,55 +335,3 @@ fun SignUpThirdFormScreen(
         }
     }
 }
-
-// 프로필 사진 입력 필드 컴포저블 함수
-@Composable
-fun ProfilePictureInputField(
-    profilePictureUri: Uri?,
-    onImageSelected: () -> Unit,
-    onImageRemoved: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(150.dp)
-            .aspectRatio(1f),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .border(2.dp, Color.Gray, shape = CircleShape)
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            if (profilePictureUri != null) {
-                Image(
-                    painter = rememberAsyncImagePainter(profilePictureUri),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-                // 여기에 새로운 이미지를 선택할 수 있는 IconButton 추가
-                IconButton(onClick = { onImageSelected() }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "프로필 사진 변경",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(24.dp) // 아이콘 크기 조정
-                    )
-                }
-            } else {
-                IconButton(onClick = { onImageSelected() }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "프로필 사진 추가",
-                        tint = Color.Gray
-                    )
-                }
-            }
-        }
-    }
-}
-

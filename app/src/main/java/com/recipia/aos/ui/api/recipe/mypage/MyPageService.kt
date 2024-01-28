@@ -34,6 +34,7 @@ interface MyPageService {
         @Part("nickname") nickname: RequestBody,
         @Part("introduction") introduction: RequestBody?,
         @Part profileImage: MultipartBody.Part?,
+        @Part("deleteFileOrder") deleteFileOrder: RequestBody?,
         @Part("birth") birth: RequestBody?,
         @Part("gender") gender: RequestBody?
     ): Response<ResponseDto<Void>>

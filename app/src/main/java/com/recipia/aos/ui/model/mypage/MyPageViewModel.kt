@@ -167,6 +167,7 @@ class MyPageViewModel(
         context: Context, // Context 추가
         nickname: String,
         introduction: String?,
+        deleteFileOrder: Int?,
         profileImageUri: Uri?,
         birth: String?,
         gender: String?
@@ -174,6 +175,7 @@ class MyPageViewModel(
         viewModelScope.launch {
             val nicknameRequestBody = nickname.toRequestBody("text/plain".toMediaTypeOrNull())
             val introductionRequestBody = introduction?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val deleteFileOrderRequestBody = deleteFileOrder?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
             val birthRequestBody = birth?.toRequestBody("text/plain".toMediaTypeOrNull())
             val genderRequestBody = gender?.toRequestBody("text/plain".toMediaTypeOrNull())
 
@@ -196,6 +198,7 @@ class MyPageViewModel(
                     nicknameRequestBody,
                     introductionRequestBody,
                     profileImagePart,
+                    deleteFileOrderRequestBody,
                     birthRequestBody,
                     genderRequestBody
                 )

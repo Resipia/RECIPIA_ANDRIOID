@@ -81,6 +81,10 @@ fun MyPageScreen(
     val targetId = targetMemberId ?: tokenManager.loadMemberId() // memberId 결정
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
 
+    LaunchedEffect(Unit) {
+        myPageViewModel.loadMyPageData(targetId) // 데이터를 불러오는 함수 호출
+    }
+
     // targetMemberId가 존재하면 해당 멤버의 레시피를 가져오고, 그렇지 않으면 기본 마이페이지 기능을 표시
     LaunchedEffect(key1 = targetMemberId) {
         targetMemberId?.let {
