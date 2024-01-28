@@ -196,7 +196,8 @@ fun SignUpSecondFormScreen(
                     title = {
                         Text(
                             text = "회원가입 (2/3)",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black
                         )
                     },
                     navigationIcon = {

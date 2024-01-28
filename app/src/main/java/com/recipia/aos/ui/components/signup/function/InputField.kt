@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -54,6 +55,11 @@ fun InputField(
     ) {
 
         OutlinedTextField(
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color(27, 94, 32), // 포커스 상태일 때의 태두리 색상
+                unfocusedBorderColor = Color.Gray, // 포커스가 없을 때의 태두리 색상
+                focusedLabelColor = Color(27, 94, 32) // 포커스 상태일 때의 라벨 색상
+            ),
             value = value,
             onValueChange = { newValue ->
                 onValueChange(newValue)

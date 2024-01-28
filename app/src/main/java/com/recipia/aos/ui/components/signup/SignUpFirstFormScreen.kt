@@ -159,7 +159,8 @@ fun SignUpFirstFormScreen(
                     title = {
                         Text(
                             text = "회원가입 (1/3)",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black
                         )
                     },
                     navigationIcon = {
@@ -421,7 +422,7 @@ fun SignUpFirstFormScreen(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // 첫 번째 체크박스 영역 (모두 동의)
                         Row(

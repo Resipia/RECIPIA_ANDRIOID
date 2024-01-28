@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +39,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -44,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.canhub.cropper.CropImage
 import com.canhub.cropper.CropImageContract
@@ -129,7 +133,13 @@ fun SignUpThirdFormScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(text = "회원가입 (3/3)", style = MaterialTheme.typography.bodyMedium) },
+                title = {
+                    Text(
+                        text = "회원가입 (3/3)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { showDialog = true }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -155,6 +165,7 @@ fun SignUpThirdFormScreen(
                 // 여기에 "프로필 설정 (선택)" 텍스트 추가
                 Text(
                     text = "프로필 설정 (선택)",
+                    fontSize = 12.sp,
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), // 스타일 설정
                     modifier = Modifier
                         .fillMaxWidth()
@@ -180,7 +191,6 @@ fun SignUpThirdFormScreen(
                         profilePictureUri = null
                     }
                 )
-                Spacer(modifier = Modifier.height(8.dp))
             }
 
             // 문자 수를 계산하여 표시할 변수 추가
@@ -188,6 +198,13 @@ fun SignUpThirdFormScreen(
 
             // 한줄 소개 입력 필드
             item {
+                Text(
+                    "한 줄 소개 (선택)",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+
                 OutlinedTextField(
                     value = oneLineIntroduction,
                     onValueChange = { newValue ->
@@ -198,28 +215,24 @@ fun SignUpThirdFormScreen(
                             charCount = newValue.length
                         }
                     },
-                    label = { Text("한줄 소개") }, // 초기 문자 수 표시
+                    label = { Text("한 줄 소개") }, // 초기 문자 수 표시
                     isError = oneLineIntroduction.toByteArray(Charsets.UTF_8).size > 300, // 300바이트를 초과하면 에러 처리
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(oneLineIntroFocusRequester) // focusRequester를 Modifier에 추가
                 )
-                Spacer(modifier = Modifier.height(8.dp))
 
-                // 실시간으로 문자 수 표시
-                Text(
-                    text = "한줄 소개 (${charCount}/300)",
-                    color = if (charCount > 300) Color.Red else Color.Black, // 300자를 초과하면 빨간색으로 표시
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), // 굵은 스타일 적용
-                    modifier = Modifier.padding(horizontal = 2.dp, vertical = 4.dp) // 텍스트 내부 여백 조정
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             // "생년월일" 레이블과 선택 필드
             item {
-                Text("생년월일", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "생년월일 (선택)",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
 
                 // MyDatePickerDialog 호출
                 MyDatePickerDialog(onDateSelected = { date ->
@@ -231,6 +244,8 @@ fun SignUpThirdFormScreen(
             // 선택된 날짜를 보여주는 부분
             item {
                 if (selectedDate.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+
                     OutlinedTextField(
                         value = "선택된 날짜: $selectedDate",
                         onValueChange = {},
@@ -243,9 +258,14 @@ fun SignUpThirdFormScreen(
 
             // "성별" 레이블과 성별 선택 필드
             item {
-                Text("성별", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "성별 (선택)",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
                 GenderSelector(selectedGender = gender, onGenderSelect = { gender = it })
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(28.dp))
             }
 
             // 하단 버튼 영역
@@ -289,9 +309,17 @@ fun SignUpThirdFormScreen(
                                 }
                             )
                         },
-                        modifier = Modifier.weight(1f)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(27, 94, 32),
+                            contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .height(54.dp) // 높이 지정
+                            .weight(1f)
                     ) {
-                        Text("건너뛰기")
+                        Text("건너뛰기", fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
@@ -327,9 +355,17 @@ fun SignUpThirdFormScreen(
                                 }
                             )
                         },
-                        modifier = Modifier.weight(1f)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(27, 94, 32),
+                            contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .height(54.dp) // 높이 지정
+                            .weight(1f)
                     ) {
-                        Text("회원가입 완료")
+                        Text("회원가입 완료", fontSize = 14.sp)
                     }
                 }
             }

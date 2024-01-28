@@ -24,7 +24,7 @@ import java.util.Calendar
 fun MyDatePickerDialog(onDateSelected: (String) -> Unit) {
     val openDialog = remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val deepPurpleColor = Color(0xFF673AB7) // 진한 보라색
+    val deepPurpleColor = Color(27, 94, 32) // 초록색
 
     Button(
         onClick = { openDialog.value = true },

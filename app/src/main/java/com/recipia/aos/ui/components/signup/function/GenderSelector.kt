@@ -43,7 +43,7 @@ fun GenderSelector(selectedGender: String, onGenderSelect: (String) -> Unit) {
 // 성별 선택 박스
 @Composable
 fun GenderBox(gender: String, isSelected: Boolean, onSelect: () -> Unit, modifier: Modifier) {
-    val deepPurpleColor = Color(0xFF673AB7) // 예시 색상: 진한 보라색
+    val deepPurpleColor = Color(27, 94, 32) // 예시 색상: 초록색
 
     Row(
         modifier = modifier
