@@ -1,7 +1,6 @@
 package com.recipia.aos.ui.components.mypage
 
 import TokenManager
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,9 +59,10 @@ import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
+import kotlinx.coroutines.launch
 
 /**
- *
+ * 마이페이지 컴포저
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,6 +82,8 @@ fun MyPageScreen(
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
     val targetId = targetMemberId ?: tokenManager.loadMemberId() // memberId 결정
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope() // 코루틴 스코프 생성
 
     LaunchedEffect(Unit) {
         myPageViewModel.loadMyPageData(targetId) // 데이터를 불러오는 함수 호출
@@ -96,13 +100,10 @@ fun MyPageScreen(
     LaunchedEffect(key1 = targetId) { // memberId를 기반으로 데이터 로딩
         myPageViewModel.loadMyPageData(targetId)
     }
-    // 스낵바 설정
-    val snackbarHostState = remember { SnackbarHostState() }
+
 
     Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {
             TopAppBar(
@@ -266,7 +267,12 @@ fun MyPageScreen(
                             title = "문의하기",
                             icon = Icons.Default.QuestionAnswer,
                             onClick = {
-                                Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "준비중인 서비스입니다.",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         )
                     }
@@ -284,16 +290,19 @@ fun MyPageScreen(
                             title = "로그아웃",
                             icon = Icons.Default.ExitToApp,
                             onClick = {
-                                // todo: 다이얼로그 띄우기
                                 myPageViewModel.logout(
                                     onSuccess = {
                                         // 성공시 로그인 화면으로 이동
                                         navController.navigate("login")
                                     },
-                                    onError = { errorMessage ->
+                                    onError = {
                                         // 실패시 에러 메시지 표시
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
-                                            .show()
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "로그아웃 실패.",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     }
                                 )
                             }
@@ -305,16 +314,19 @@ fun MyPageScreen(
                             title = "탈퇴",
                             icon = Icons.Default.Delete,
                             onClick = {
-                                // todo: 다이얼로그 띄우기
                                 myPageViewModel.deactivateAccount(
                                     onSuccess = {
                                         // 성공시 로그인 화면으로 이동
                                         navController.navigate("login")
                                     },
-                                    onError = { errorMessage ->
+                                    onError = {
                                         // 실패시 에러 메시지 표시
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
-                                            .show()
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "탈퇴 실패.",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     }
                                 )
                             }

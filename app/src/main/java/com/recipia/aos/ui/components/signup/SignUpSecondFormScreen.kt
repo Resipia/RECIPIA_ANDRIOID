@@ -1,6 +1,5 @@
 package com.recipia.aos.ui.components.signup
 
-import android.widget.Toast
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +22,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -39,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -51,6 +53,7 @@ import androidx.navigation.NavController
 import com.recipia.aos.ui.components.signup.function.InputField
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -59,8 +62,6 @@ fun SignUpSecondFormScreen(
     signUpViewModel: SignUpViewModel,
     phoneNumberAuthViewModel: PhoneNumberAuthViewModel
 ) {
-    // Toast메시지를 위한 context 선언
-    val context = LocalContext.current
 
     // ViewModel에서 각 입력 필드의 현재 값을 가져옴
     val currentName by signUpViewModel.name.collectAsState()
@@ -92,12 +93,11 @@ fun SignUpSecondFormScreen(
     val confirmPasswordFocusRequester = remember { FocusRequester() }
 
     val emailDuplicateCheckResult by signUpViewModel.emailDuplicateCheckResult.observeAsState()
-    val isEmailVerified by signUpViewModel.isEmailVerified.observeAsState()
     val isPasswordMatching by signUpViewModel.isPasswordMatching.observeAsState()
     val nicknameDuplicateCheckResult by signUpViewModel.nicknameDuplicateCheckResult.observeAsState()
-
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
     val listState = rememberLazyListState()
-    val focusRequester = remember { FocusRequester() }
 
 
     // AlertDialog를 표시할지 여부를 관리하는 상태
@@ -174,7 +174,6 @@ fun SignUpSecondFormScreen(
 
     // 이메일 형식을 확인하는 정규식
     val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+".toRegex()
-
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Box(
@@ -189,6 +188,7 @@ fun SignUpSecondFormScreen(
             }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
                 TopAppBar(
                     title = {
@@ -259,7 +259,13 @@ fun SignUpSecondFormScreen(
                         Button(
                             onClick = {
                                 signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                    // 오류 발생 시 스낵바 알림
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = errorMessage,
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
                             },
                             modifier = Modifier
@@ -319,7 +325,12 @@ fun SignUpSecondFormScreen(
                         Button(
                             onClick = {
                                 signUpViewModel.checkDuplicateEmail(email) { errorMessage ->
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = errorMessage,
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
                             },
                             modifier = Modifier

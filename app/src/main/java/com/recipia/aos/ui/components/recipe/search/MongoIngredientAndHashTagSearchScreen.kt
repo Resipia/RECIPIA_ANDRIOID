@@ -5,7 +5,6 @@
 
 package com.recipia.aos.ui.components.recipe.search
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +34,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -45,13 +47,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -62,6 +64,7 @@ import androidx.navigation.NavController
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.search.MongoSearchViewModel
+import kotlinx.coroutines.launch
 
 
 /**
@@ -77,8 +80,6 @@ fun MongoIngredientAndHashTagSearchScreen(
     type: SearchType
 ) {
 
-    val context = LocalContext.current
-
     val searchText by mongoViewModel.searchText.collectAsState()
     val mongoSearchResults by mongoViewModel.mongoSearchResults.collectAsState()
     val showSearchResults by mongoViewModel.showSearchResults.collectAsState()
@@ -92,6 +93,9 @@ fun MongoIngredientAndHashTagSearchScreen(
     val selectedIngredients = remember { mutableStateListOf<String>() }
     val selectedHashtags = remember { mutableStateListOf<String>() }
 
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+
     // 화면이 로드될 때 ViewModel에서 현재 선택된 항목들을 로컬 상태 변수로 복사
     LaunchedEffect(key1 = Unit) {
         selectedIngredients.addAll(mongoViewModel.selectedIngredients.value)
@@ -103,6 +107,7 @@ fun MongoIngredientAndHashTagSearchScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = Modifier
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
@@ -195,11 +200,21 @@ fun MongoIngredientAndHashTagSearchScreen(
                     keyboardActions = KeyboardActions(
                         onDone = {
                             if (searchText.isNotBlank()) {
+
                                 // 정규 표현식으로 완전한 한글, 영문, 숫자만 허용
                                 if (!searchText.matches(Regex("^[가-힣a-zA-Z0-9\\s]+$"))) {
-                                    keyboardController?.hide() // 키보드를 먼저 숨깁니다.
-                                    Toast.makeText(context, "유효하지 않은 입력입니다. (자음, 모음 단독 사용 불가)", Toast.LENGTH_SHORT).show()
-                                    mongoViewModel.onSearchTextChange("") // 입력 필드 초기화
+
+                                    // 키보드를 먼저 숨긴다.
+                                    keyboardController?.hide()
+
+                                    // 오류 발생 시 스낵바 알림
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "유효하지 않은 입력입니다. (자음, 모음 단독 사용 불가)",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+
                                 } else {
                                     // 기존 로직
                                     if (type == SearchType.INGREDIENT && !selectedIngredients.contains(searchText)) {

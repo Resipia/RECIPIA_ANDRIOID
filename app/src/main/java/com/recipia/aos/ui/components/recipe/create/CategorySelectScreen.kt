@@ -161,6 +161,7 @@ fun CategorySelectScreen(
                 ),
             )
         },
+
         bottomBar = {
             Button(
                 onClick = {

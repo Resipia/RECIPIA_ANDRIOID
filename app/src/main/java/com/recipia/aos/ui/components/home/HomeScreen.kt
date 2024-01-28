@@ -69,11 +69,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.recipia.aos.R
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.HorizontalDivider
@@ -102,7 +97,7 @@ fun HomeScreen(
     val isLoading by recipeAllListViewModel.isLoading.observeAsState(initial = false)
     val loadFailed by recipeAllListViewModel.loadFailed.observeAsState(initial = false)
     val navigateToLogin by recipeAllListViewModel.navigateToLogin.observeAsState(initial = false)
-    val snackBarMessage by bookmarkViewModel.toastMessage.observeAsState()
+    val snackBarMessage by bookmarkViewModel.snackBarMessage.observeAsState()
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
@@ -216,7 +211,7 @@ fun HomeScreen(
                 message = it, // 스낵바에 표시할 메시지
                 duration = SnackbarDuration.Short // 스낵바가 표시되는 시간
             )
-            bookmarkViewModel.toastMessage.value = null // 메시지 초기화
+            bookmarkViewModel.snackBarMessage.value = null // 메시지 초기화
         }
     }
 

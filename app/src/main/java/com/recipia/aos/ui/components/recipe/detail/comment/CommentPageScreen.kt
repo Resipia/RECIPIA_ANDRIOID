@@ -1,7 +1,6 @@
 package com.recipia.aos.ui.components.recipe.detail.comment
 
 import TokenManager
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -23,6 +22,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -40,7 +42,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
@@ -48,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.HorizontalDivider
-import com.recipia.aos.ui.components.home.ElevatedDivider
 import com.recipia.aos.ui.model.comment.CommentViewModel
 import kotlinx.coroutines.launch
 
@@ -64,28 +64,31 @@ fun CommentPageScreen(
     tokenManager: TokenManager
 ) {
 
-    val coroutineScope = rememberCoroutineScope()
     val errorMessage by commentViewModel.errorMessage.collectAsState()
-    val context = LocalContext.current
     val editingComment by commentViewModel.editingComment.collectAsState()
     var textFieldValueState by remember { mutableStateOf(TextFieldValue("")) }
-
-    // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
 
     // 에러 메시지가 있을 경우 토스트 메시지로 표시
     LaunchedEffect(errorMessage) {
         errorMessage?.let {
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            commentViewModel.clearErrorMessage() // 메시지 표시 후 초기화
+            // 오류 발생 시 스낵바 알림
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
         }
+        commentViewModel.clearErrorMessage() // 메시지 표시 후 초기화
     }
 
     // 수정하려는 댓글이 있을 때 OutlinedTextField에 값을 세팅하고 커서를 텍스트 맨 끝으로 옮김
     LaunchedEffect(editingComment) {
         editingComment?.let { (_, commentValue) ->
-            textFieldValueState = TextFieldValue(text = commentValue, selection = TextRange(commentValue.length))
+            textFieldValueState =
+                TextFieldValue(text = commentValue, selection = TextRange(commentValue.length))
             // 포커스 요청과 함께 키보드를 자동으로 올림
             focusRequester.requestFocus()
             keyboardController?.show()
@@ -93,6 +96,7 @@ fun CommentPageScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(Unit) {
@@ -169,7 +173,11 @@ fun CommentPageScreen(
                         coroutineScope.launch {
                             editingComment?.let { (id, _) ->
                                 // TextFieldValue에서 text 속성을 사용하여 String 값을 전달
-                                commentViewModel.updateComment(id, recipeId, textFieldValueState.text)
+                                commentViewModel.updateComment(
+                                    id,
+                                    recipeId,
+                                    textFieldValueState.text
+                                )
                                 commentViewModel.clearEditingComment()
                                 textFieldValueState = TextFieldValue("")  // 텍스트 필드 상태 초기화
                                 keyboardController?.hide()  // 키보드 숨김

@@ -1,10 +1,12 @@
 package com.recipia.aos.ui.components.recipe.detail
 
 import TokenManager
-import android.widget.Toast
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +38,7 @@ fun RecipeDetailScreen(
     var showDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
 
     // BottomSheet(댓글창) 호출
     if (showSheet) {
@@ -62,15 +65,26 @@ fun RecipeDetailScreen(
                     recipeDetailViewModel.deleteRecipe(
                         recipeId = recipeId,
                         onSuccess = {
-                            // 삭제 성공 시 처리, 예를 들어 홈 화면으로 이동
-                            Toast.makeText(context, "레시피가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                            // 성공 시 스낵바 알림
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "레시피가 삭제되었습니다.",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+
                             // 현재 화면을 스택에서 제거하고 홈 화면으로 이동
                             navController.popBackStack()
                             navController.navigate("home")
                         },
                         onError = { errorMessage ->
-                            // 오류 발생 시 처리
-                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            // 오류 발생 시 스낵바 알림
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "레시피 삭제에 실패하였습니다.",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
                         }
                     )
                     showDialog = false
@@ -87,6 +101,7 @@ fun RecipeDetailScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {}
     ) { innerPadding ->

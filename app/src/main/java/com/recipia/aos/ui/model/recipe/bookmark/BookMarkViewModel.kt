@@ -22,7 +22,7 @@ class BookMarkViewModel(
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
-    val toastMessage = MutableLiveData<String>()
+    val snackBarMessage = MutableLiveData<String>()
 
     // 북마크 상태 업데이트를 위한 LiveData
     private val _bookmarkUpdateState = MutableLiveData<BookmarkUpdateState?>()
@@ -63,16 +63,16 @@ class BookMarkViewModel(
                     val newBookmarkId = response.body()?.result
                     newBookmarkId?.let { bookmarkId ->
                         _bookmarkUpdateState.postValue(BookmarkUpdateState.Added(recipeId, bookmarkId))
-                        toastMessage.postValue("북마크에 추가되었습니다.")
+                        snackBarMessage.postValue("북마크에 추가되었습니다.")
                     }
                 } else {
-                    toastMessage.postValue("북마크 추가 실패: ${response.message()}")
+                    snackBarMessage.postValue("북마크 추가 실패: ${response.message()}")
                 }
             }
 
             // 응답 실패
             override fun onFailure(call: Call<ResponseDto<Long>>, t: Throwable) {
-                toastMessage.postValue("네트워크 오류: ${t.message}")
+                snackBarMessage.postValue("네트워크 오류: ${t.message}")
             }
         })
     }
@@ -88,9 +88,9 @@ class BookMarkViewModel(
             ) {
                 if (response.isSuccessful) {
                     _bookmarkUpdateState.postValue(BookmarkUpdateState.Removed(bookmarkId))
-                    toastMessage.postValue("북마크가 제거되었습니다.")
+                    snackBarMessage.postValue("북마크가 제거되었습니다.")
                 } else {
-                    toastMessage.postValue("북마크 제거 실패: ${response.message()}")
+                    snackBarMessage.postValue("북마크 제거 실패: ${response.message()}")
                 }
             }
 
@@ -99,7 +99,7 @@ class BookMarkViewModel(
                 call: Call<ResponseDto<Void>>,
                 t: Throwable
             ) {
-                toastMessage.postValue("네트워크 오류: ${t.message}")
+                snackBarMessage.postValue("네트워크 오류: ${t.message}")
             }
         })
     }

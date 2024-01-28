@@ -1,9 +1,6 @@
 package com.recipia.aos.ui.components.signup
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -31,6 +28,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -40,13 +40,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +57,7 @@ import androidx.navigation.NavController
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * 회원가입 동의여부 페이지
@@ -72,7 +73,8 @@ fun SignUpFirstFormScreen(
     var isCheckedAll by remember { mutableStateOf(false) }
     var isPersonalInfoConsent by remember { mutableStateOf(false) }
     var isDataRetentionConsent by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
 
     // 인증번호 입력 영역 표시 여부를 관리하는 상태
     var isVerificationCodeVisible by remember { mutableStateOf(false) }
@@ -146,6 +148,7 @@ fun SignUpFirstFormScreen(
             }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             containerColor = Color.White, // 배경색을 하얀색으로 설정
             topBar = {
                 TopAppBar(
@@ -408,9 +411,13 @@ fun SignUpFirstFormScreen(
                                 // 동의한 경우 다음 단계로 이동
                                 navController.navigate("signUpSecondForm")
                             } else {
-                                // 필수 항목 중 하나라도 동의하지 않은 경우 토스트 메시지 표시
-                                Toast.makeText(context, "필수 항목은 동의해주셔야 합니다.", Toast.LENGTH_SHORT)
-                                    .show()
+                                // 필수 항목 중 하나라도 동의하지 않은 경우 스낵바 메시지 표시
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "필수 항목은 동의해주셔야 합니다.",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         }
 

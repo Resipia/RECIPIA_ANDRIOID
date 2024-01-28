@@ -2,7 +2,6 @@ package com.recipia.aos.ui.components.recipe.update
 
 import android.annotation.SuppressLint
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,6 +40,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -51,6 +53,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -74,6 +77,7 @@ import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 import com.recipia.aos.ui.model.search.MongoSearchViewModel
+import kotlinx.coroutines.launch
 
 
 /**
@@ -111,6 +115,9 @@ fun RecipeUpdateScreen(
     val isRecipeNameValid = remember { mutableStateOf(true) }
     val isRecipeDescValid = remember { mutableStateOf(true) }
     val isCategorySelected = remember { mutableStateOf(true) }
+
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
 
     // 문자열을 리스트로 변환하는 함수
     fun String.toList(): List<String> {
@@ -169,6 +176,7 @@ fun RecipeUpdateScreen(
             }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             containerColor = Color.White,
             topBar = {
                 TopAppBar(
@@ -251,13 +259,26 @@ fun RecipeUpdateScreen(
                                     mongoSearchViewModel.changeInitialized() // 몽고db 검색 초기값 세팅 후 initial값 변경
                                     categorySelectionViewModel.clearSelectedCategories()
                                     selectedImageUris.clear() // 이미지 제거
-                                    Toast.makeText(context, "레시피 업데이트 성공", Toast.LENGTH_SHORT).show()
+
+                                    // 오류 발생 시 스낵바 알림
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "레시피가 업데이트 되었습니다.",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
 
                                     // 레시피 상세보기 화면으로 네비게이션
                                     navController.navigate("recipeDetail/${recipeId}")
                                 }
                             ) { errorMessage ->
-                                Toast.makeText(context, "레시피 업데이트 실패: $errorMessage", Toast.LENGTH_LONG).show()
+                                // 오류 발생 시 스낵바 알림
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "레시피 업데이트 실패: $errorMessage",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         }
                     },

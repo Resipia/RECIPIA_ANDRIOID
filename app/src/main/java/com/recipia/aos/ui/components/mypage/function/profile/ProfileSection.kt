@@ -84,8 +84,7 @@ fun ProfileSection(
                 FollowAndShareButtons(
                     myPageViewModel = myPageViewModel,
                     followViewModel = followViewModel,
-                    targetId = targetMemberId ?: 0L,
-                    context = LocalContext.current
+                    targetId = targetMemberId ?: 0L
                 )
 
             }

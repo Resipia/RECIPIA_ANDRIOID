@@ -2,8 +2,8 @@ package com.recipia.aos.ui.components.mypage.function.profile
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -14,10 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -85,10 +87,10 @@ fun ProfileEditScreen(
     var oneLineIntroduction by remember { mutableStateOf(myPageData?.introduction ?: "") }
 //    var nickname by remember { mutableStateOf(myPageData?.nickname ?: "") }
     var selectedDate by remember { mutableStateOf(myPageData?.birth ?: "") }
-    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
     var nicknameError by remember { mutableStateOf("") }
     val nicknameFocusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
 
     // 중복 체크 결과 관찰
     val nicknameDuplicateCheckResult by signUpViewModel.nicknameDuplicateCheckResult.observeAsState()
@@ -164,7 +166,13 @@ fun ProfileEditScreen(
 
         // 닉네임 중복 체크 로직
         signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
-            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            // 오류 발생 시 스낵바 알림
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
     }
 
@@ -265,7 +273,7 @@ fun ProfileEditScreen(
                     .padding(innerPadding)
                     .padding(horizontal = 16.dp)
             ) {
-                item { Spacer(modifier = Modifier.height(10.dp)) }
+                item { Spacer(modifier = Modifier.height(24.dp)) }
 
                 // 사진
                 item {
@@ -284,10 +292,10 @@ fun ProfileEditScreen(
                             bitmap = null
                         }
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
 
-                // todo: 닉네임 수정 (중복된 닉네임이면 수정 못하게 해야함)
+                // 닉네임
                 item {
                     Row(
                         modifier = Modifier
@@ -308,13 +316,19 @@ fun ProfileEditScreen(
 
                         Button(
                             onClick = onCheckDuplicateClick, // 중복 체크 함수 호출
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                            border = BorderStroke(1.dp, Color(0xFF673AB7)),
                             modifier = Modifier
                                 .weight(0.3f) // Row 내에서 차지하는 비율 조정
-                                .padding(top = 8.dp)
+                                .padding(top = 7.dp)
                                 .height(54.dp), // 높이 지정
-                            shape = MaterialTheme.shapes.medium.copy(CornerSize(0.dp)) // 버튼 모서리를 직사각형으로 설정
+                            shape = RoundedCornerShape(4.dp),
                         ) {
-                            Text("중복체크")
+                            Text(
+                                "중복 체크",
+                                color = Color(0xFF673AB7),
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
 
@@ -327,7 +341,7 @@ fun ProfileEditScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 // 한줄 소개
@@ -338,19 +352,25 @@ fun ProfileEditScreen(
                         label = { Text("한줄 소개") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 // 생년월일
                 item {
                     Text("생년월일", style = MaterialTheme.typography.bodyMedium)
-                    MyDatePickerDialog(onDateSelected = { selectedDate = it })
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    MyDatePickerDialog(
+                        onDateSelected = { selectedDate = it }
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
                 // 날짜 선택
                 if (selectedDate.isNotEmpty()) {
                     item {
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         OutlinedTextField(
                             value = "선택된 날짜: $selectedDate",
                             onValueChange = {},
@@ -364,6 +384,9 @@ fun ProfileEditScreen(
                 // 성별 선택
                 item {
                     Text("성별", style = MaterialTheme.typography.bodyMedium)
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
                     // 성별 선택 컴포저블
                     GenderSelector(
                         selectedGender = gender,

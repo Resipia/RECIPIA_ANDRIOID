@@ -2,7 +2,6 @@ package com.recipia.aos.ui.components.recipe.create
 
 import android.annotation.SuppressLint
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,16 +40,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -70,6 +72,7 @@ import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 import com.recipia.aos.ui.model.search.MongoSearchViewModel
+import kotlinx.coroutines.launch
 
 
 /**
@@ -98,6 +101,8 @@ fun RecipeCreateScreen(
     val selectedHashtags by mongoSearchViewModel.selectedHashtags.collectAsState()
     var selectedImageUris = recipeCreateModel.selectedImageUris
     val selectedCategories = categorySelectionViewModel.selectedCategories.value
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    val scope = rememberCoroutineScope() // 코루틴 스코프 생성
 
     // 필수 필드에 대한 유효성 상태
     val isRecipeNameValid = remember { mutableStateOf(true) }
@@ -130,6 +135,7 @@ fun RecipeCreateScreen(
             }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             containerColor = Color.White,
             topBar = {
                 TopAppBar(
@@ -212,13 +218,23 @@ fun RecipeCreateScreen(
                                     mongoSearchViewModel.resetSelectedIngredients()
                                     mongoSearchViewModel.resetSelectedHashtags()
 
-                                    Toast.makeText(context, "레시피 생성 성공", Toast.LENGTH_SHORT).show()
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "레시피 생성 성공",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
 
                                     // 레시피 상세보기 화면으로 네비게이션
                                     navController.navigate("recipeDetail/$recipeId")
                                 }
-                            ) { errorMessage ->
-                                Toast.makeText(context, "레시피 생성 실패: $errorMessage", Toast.LENGTH_LONG).show()
+                            ) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "레시피 생성 실패",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         }
                     },
