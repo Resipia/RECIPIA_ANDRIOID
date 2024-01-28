@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -46,6 +47,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.recipia.aos.ui.components.HorizontalDivider
+import com.recipia.aos.ui.components.home.ElevatedDivider
 import com.recipia.aos.ui.model.comment.CommentViewModel
 import kotlinx.coroutines.launch
 
@@ -125,14 +128,22 @@ fun CommentPageScreen(
             )
         },
         bottomBar = {
+            // 상단 경계선 추가
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth(), // 전체 너비를 채우도록 설정
+                thickness = 0.5.dp, // 구분선의 두께 설정
+                color = Color(222, 226, 230) // 구분선의 색상 설정
+            )
+
             // 댓글 입력 영역
             Row(
                 modifier = Modifier
                     .padding(
-                        top = 8.dp,
+                        top = 12.dp,
                         start = 12.dp,
                         end = 12.dp, // Row의 끝에도 패딩 추가
-                        bottom = 24.dp
+                        bottom = 12.dp
                     )
                     .imePadding()  // 키보드에 의해 가려지지 않도록 패딩 추가
             ) {
