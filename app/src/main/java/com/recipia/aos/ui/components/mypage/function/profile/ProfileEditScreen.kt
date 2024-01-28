@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +37,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -47,8 +51,10 @@ import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
 import com.recipia.aos.ui.components.common.ProfilePictureInputField
 import com.recipia.aos.ui.components.signup.function.GenderSelector
+import com.recipia.aos.ui.components.signup.function.InputField
 import com.recipia.aos.ui.components.signup.function.MyDatePickerDialog
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
+import com.recipia.aos.ui.model.signup.SignUpViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -59,6 +65,7 @@ import kotlinx.coroutines.launch
 fun ProfileEditScreen(
     navController: NavController,
     myPageViewModel: MyPageViewModel,
+    signUpViewModel: SignUpViewModel
 ) {
 
     // 사용자 프로필 정보 가져오기
@@ -73,8 +80,11 @@ fun ProfileEditScreen(
 
     // 초기값 설정
     var oneLineIntroduction by remember { mutableStateOf(myPageData?.introduction ?: "") }
+    var nickname by remember { mutableStateOf(myPageData?.nickname ?: "") }
     var selectedDate by remember { mutableStateOf(myPageData?.birth ?: "") }
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    var nicknameError by remember { mutableStateOf("") }
+    val nicknameFocusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
 
     // 초기 성별 값을 "M", "F"에서 "남성", "여성"으로 변환
@@ -128,12 +138,15 @@ fun ProfileEditScreen(
                 actions = {
                     TextButton(
                         onClick = {
+                            // "s3" 문자열이 포함되어 있는지 검사
+                            val finalProfilePictureUri = if (profilePictureUri?.toString()?.contains("s3") == true) null else profilePictureUri
+
                             myPageViewModel.updateProfile(
                                 context = context,
-                                nickname = myPageData?.nickname ?: "",
+                                nickname = nickname, // nickname을 입력받은 값으로 변경
                                 introduction = oneLineIntroduction,
-                                profileImageUri = profilePictureUri,
-                                deleteFileOrder = 0, //todo: 이거 바꿔줘야함 실제 값으로
+                                profileImageUri = finalProfilePictureUri, // 조건에 따라 변경된 URI 사용
+                                deleteFileOrder = 0, // TODO: 이 부분을 실제 값으로 업데이트 필요
                                 birth = selectedDate,
                                 gender = when (gender) {
                                     "남성" -> "M"
@@ -178,6 +191,47 @@ fun ProfileEditScreen(
                         bitmap = null
                     }
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // todo: 닉네임 수정 (중복된 닉네임이면 수정 못하게 해야함)
+            // "닉네임" 입력 필드 및 중복체크 버튼
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    InputField(
+                        label = "닉네임",
+                        value = nickname,
+                        onValueChange = {
+                            nickname = it
+                            signUpViewModel.resetNicknameDuplicateCheck() // 중복 체크 결과 초기화
+                            nicknameError = ""
+                        },
+                        focusRequester = nicknameFocusRequester,
+                        errorMessage = nicknameError,
+                        onErrorMessageChange = { nicknameError = it }, // 에러 메시지 업데이트 함수 전달
+                        modifier = Modifier.weight(0.7f)
+                    )
+
+                    Button(
+                        onClick = {
+                            signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(0.3f)
+                            .height(70.dp)
+                            .padding(top = 18.dp)
+                    ) {
+                        Text("중복체크")
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
             }
 

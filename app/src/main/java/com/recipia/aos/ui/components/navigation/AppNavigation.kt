@@ -182,7 +182,8 @@ fun AppNavigation(
         composable("profile-edit") {
             ProfileEditScreen(
                 navController = navController,
-                myPageViewModel = myPageViewModel
+                myPageViewModel = myPageViewModel,
+                signUpViewModel = signUpViewModel
             )
         }
         // 팔로잉/팔로워 페이지
