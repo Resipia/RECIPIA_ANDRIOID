@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -26,7 +27,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -53,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
@@ -171,22 +174,46 @@ fun SignUpFirstFormScreen(
                 )
             }
         ) { innerPadding ->
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
 //                Spacer(modifier = Modifier.height(80.dp))
+
+                Text(
+                    text = "휴대폰 번호를 입력해주세요.",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "입력된 번호로 인증번호가 전송됩니다.",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.LightGray
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+
                     // 전화번호 입력 필드
                     OutlinedTextField(
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color(27, 94, 32), // 포커스 상태일 때의 태두리 색상
+                            unfocusedBorderColor = Color.Gray, // 포커스가 없을 때의 태두리 색상
+                            focusedLabelColor = Color(27, 94, 32) // 포커스 상태일 때의 라벨 색상
+                        ),
                         value = phoneNumber,
                         onValueChange = { input ->
                             val filteredInput = input.filter { it.isDigit() }
@@ -207,7 +234,7 @@ fun SignUpFirstFormScreen(
                                 phoneNumber = filteredInput
                             }
                         },
-                        label = { Text("전화번호") },
+                        label = { Text("휴대폰 번호", color = Color.LightGray) },
                         placeholder = {
                             Text(
                                 "01012345678",
@@ -235,10 +262,20 @@ fun SignUpFirstFormScreen(
                             // 키보드 숨기기
                             keyboardController?.hide()
                         },
+                        shape = RoundedCornerShape(4.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isValidPhoneNumber(phoneNumber)) Color(
+                                27,
+                                94,
+                                32
+                            ) else Color.LightGray, // 유효한 번호일 때와 아닐 때의 색상 설정
+                            contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                        ),
                         enabled = isValidPhoneNumber(phoneNumber), // 버튼 활성화 여부
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(start = 8.dp) // 오른쪽 여백 추가
+                            .height(62.dp) // 높이 지정
+                            .padding(top = 6.dp, start = 8.dp) // 오른쪽 여백 추가
                     ) {
                         Text("인증코드 전송")
                     }
@@ -282,7 +319,12 @@ fun SignUpFirstFormScreen(
                                     keyboardType = KeyboardType.Number,
                                     imeAction = ImeAction.Next
                                 ),
-                                singleLine = true
+                                singleLine = true,
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    focusedBorderColor = Color(27, 94, 32), // 포커스 상태일 때의 태두리 색상
+                                    unfocusedBorderColor = Color.Gray, // 포커스가 없을 때의 태두리 색상
+                                    focusedLabelColor = Color(27, 94, 32) // 포커스 상태일 때의 라벨 색상
+                                )
                             )
 
                             Spacer(modifier = Modifier.width(8.dp)) // 필드와 메시지 사이의 간격
@@ -300,37 +342,61 @@ fun SignUpFirstFormScreen(
                                     keyboardController?.hide()
                                 },
                                 enabled = isValidVerificationCode(verificationCode), // 버튼 활성화 여부
-                                modifier = Modifier.align(Alignment.CenterVertically),
+                                shape = RoundedCornerShape(4.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isValidVerificationCode(verificationCode)) Color(
+                                        27,
+                                        94,
+                                        32
+                                    ) else Color.LightGray, // 유효한 번호일 때와 아닐 때의 색상 설정
+                                    contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                                ),
+                                modifier = Modifier
+                                    .align(Alignment.CenterVertically)
+                                    .height(62.dp) // 높이 지정
+                                    .padding(top = 6.dp, start = 8.dp) // 오른쪽 여백 추가
                             ) {
                                 Text("인증하기")
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
+                        Spacer(modifier = Modifier.height(4.dp)) // 필드와 메시지 사이의 간격
 
-                        // 타이머 및 인증 성공 메시지 처리
+                        // 타이머 및 인증 성공/실패 메시지 처리
                         if (phoneNumberAuthViewModel.isVerificationSuccess) {
                             // 인증 성공 메시지 표시
-                            Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
                             Text(
                                 phoneNumberAuthViewModel.verificationSuccessMessage,
-                                color = Color(0xFF006633), // 초록색,
+                                color = Color(0xFF006633), // 초록색
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.align(Alignment.Start)
                             )
+                            // 인증 성공 시 타이머 비활성화
+                            isTimerRunning = false
                         } else {
-                            if (isTimerRunning) {
+                            // 인증 실패 메시지 표시
+                            if (phoneNumberAuthViewModel.verificationSuccessMessage.isNotEmpty()) {
+                                Text(
+                                    phoneNumberAuthViewModel.verificationSuccessMessage,
+                                    color = Color.Red, // 빨간색으로 실패 메시지 표시
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.align(Alignment.Start)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(2.dp)) // 필드와 메시지 사이의 간격
+
+                            // 타이머와 관련된 UI는 인증 실패 메시지가 표시된 경우에만 보여주도록 함
+                            if (isTimerRunning && phoneNumberAuthViewModel.verificationSuccessMessage.isNotEmpty()) {
                                 if (timeLeft > 0) {
                                     // 타이머가 활성화되어 있고 시간이 남아 있는 경우
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        // 시간과 분을 00 형식으로 표시
                                         val minutes = timeLeft / 60
                                         val seconds = timeLeft % 60
-                                        val timerText =
-                                            String.format("남은 시간: %02d:%02d", minutes, seconds)
+                                        val timerText = String.format("남은 시간: %02d:%02d", minutes, seconds)
 
                                         Text(
                                             text = timerText,

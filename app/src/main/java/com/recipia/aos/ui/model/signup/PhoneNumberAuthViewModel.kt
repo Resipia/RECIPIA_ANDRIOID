@@ -91,7 +91,7 @@ class PhoneNumberAuthViewModel() : ViewModel() {
                 verificationSuccessMessage = "인증에 성공했습니다."
                 isVerificationSuccess = true
             } else {
-                verificationSuccessMessage = "인증에 실패했습니다."
+                verificationSuccessMessage = "다시 인증해주세요" // 실패 메시지 업데이트
                 isVerificationSuccess = false
             }
         }

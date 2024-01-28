@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
@@ -78,7 +78,8 @@ fun LoginScreen(
             // 로그인 타이틀
             Text(
                 text = "Recipia",
-                style = MaterialTheme.typography.h4,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
                 color = Color(27, 94, 32)
             )
 
@@ -98,8 +99,9 @@ fun LoginScreen(
                 label = { Text("사용자 이메일") },
                 shape = RoundedCornerShape(8.dp),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colors.primary,
-                    unfocusedBorderColor = Color.Gray
+                    focusedBorderColor = Color(27, 94, 32), // 포커스 상태일 때의 태두리 색상
+                    unfocusedBorderColor = Color.Gray, // 포커스가 없을 때의 태두리 색상
+                    focusedLabelColor = Color(27, 94, 32) // 포커스 상태일 때의 라벨 색상
                 ),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Next
@@ -133,8 +135,9 @@ fun LoginScreen(
                 label = { Text("비밀번호") },
                 shape = RoundedCornerShape(8.dp),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colors.primary,
-                    unfocusedBorderColor = Color.Gray
+                    focusedBorderColor = Color(27, 94, 32), // 포커스 상태일 때의 태두리 색상
+                    unfocusedBorderColor = Color.Gray, // 포커스가 없을 때의 태두리 색상
+                    focusedLabelColor = Color(27, 94, 32) // 포커스 상태일 때의 라벨 색상
                 ),
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions.Default.copy(
@@ -230,7 +233,7 @@ fun LoginScreen(
                     text = " | ",
                     fontSize = 12.sp
                 )
-
+                Spacer(modifier = Modifier.width(4.dp))
                 // 비밀번호 찾기 텍스트
                 Text(
                     text = "비밀번호 찾기",
@@ -243,7 +246,7 @@ fun LoginScreen(
                     text = " | ",
                     fontSize = 12.sp
                 )
-
+                Spacer(modifier = Modifier.width(4.dp))
                 // 회원가입 텍스트
                 Text(
                     text = "회원가입",
