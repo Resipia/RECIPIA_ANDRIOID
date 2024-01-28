@@ -54,13 +54,13 @@ class PhoneNumberAuthViewModel() : ViewModel() {
 
                 // 성공적인 응답 처리
                 if (response.isSuccessful) {
-                    verificationSentMessage = "인증코드가 발송되었습니다."
+                    verificationMessage = "인증코드가 발송되었습니다."
                     responseCode = 200
                 } else {
                     // 실패한 응답 처리
                     responseCode = response.code()
                     val errorResponseBody = response.errorBody()?.string()
-                    val errorJson = JSONObject(errorResponseBody)
+                    val errorJson = errorResponseBody?.let { JSONObject(it) }
 
                     if (errorJson != null) {
                         val errorCode = errorJson.optInt("code")

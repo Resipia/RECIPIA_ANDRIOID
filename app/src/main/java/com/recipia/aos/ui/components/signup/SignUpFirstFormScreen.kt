@@ -175,8 +175,8 @@ fun SignUpFirstFormScreen(
                                 // ViewModel 상태 초기화
                                 phoneNumberAuthViewModel.resetVerificationState()
                                 // 서버 응답 메시지 초기화
-                                phoneNumberAuthViewModel.verificationSentMessage = ""
                                 phoneNumberAuthViewModel.responseCode = 0
+                                phoneNumberAuthViewModel.verificationMessage = ""
                             }
                             phoneNumber = filteredInput
                         }
@@ -213,12 +213,10 @@ fun SignUpFirstFormScreen(
             Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
 
             // 인증코드 전송 버튼 아래의 서버 응답 메시지 표시
-            if (phoneNumberAuthViewModel.responseCode != 0 &&
-                phoneNumberAuthViewModel.verificationSentMessage.isNotEmpty()
-            ) {
+            if (phoneNumberAuthViewModel.responseCode != 0) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    phoneNumberAuthViewModel.verificationSentMessage,
+                    phoneNumberAuthViewModel.verificationMessage,
                     color = if (phoneNumberAuthViewModel.responseCode == 400) Color.Red else Color(0xFF006633),
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Start)
@@ -227,7 +225,7 @@ fun SignUpFirstFormScreen(
 
             Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
 
-            if (isVerificationCodeVisible) {
+            if (isVerificationCodeVisible && phoneNumberAuthViewModel.responseCode != 400) {
                 // 인증코드 입력 영역
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -268,57 +266,59 @@ fun SignUpFirstFormScreen(
                         Text("인증하기")
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
-
-            // 타이머 및 인증 성공 메시지 처리
-            if (phoneNumberAuthViewModel.isVerificationSuccess) {
-                // 인증 성공 메시지 표시
                 Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
-                Text(
-                    phoneNumberAuthViewModel.verificationSuccessMessage,
-                    color = Color(0xFF006633), // 초록색,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Start)
-                )
-            } else {
-                if (isTimerRunning) {
-                    if (timeLeft > 0) {
-                        // 타이머가 활성화되어 있고 시간이 남아 있는 경우
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            // 시간과 분을 00 형식으로 표시
-                            val minutes = timeLeft / 60
-                            val seconds = timeLeft % 60
-                            val timerText = String.format("남은 시간: %02d:%02d", minutes, seconds)
 
+                // 타이머 및 인증 성공 메시지 처리
+                if (phoneNumberAuthViewModel.isVerificationSuccess) {
+                    // 인증 성공 메시지 표시
+                    Spacer(modifier = Modifier.height(8.dp)) // 필드와 메시지 사이의 간격
+                    Text(
+                        phoneNumberAuthViewModel.verificationSuccessMessage,
+                        color = Color(0xFF006633), // 초록색,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.Start)
+                    )
+                } else {
+                    if (isTimerRunning) {
+                        if (timeLeft > 0) {
+                            // 타이머가 활성화되어 있고 시간이 남아 있는 경우
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                // 시간과 분을 00 형식으로 표시
+                                val minutes = timeLeft / 60
+                                val seconds = timeLeft % 60
+                                val timerText = String.format("남은 시간: %02d:%02d", minutes, seconds)
+
+                                Text(
+                                    text = timerText,
+                                    color = Color.Red,
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = timerText,
-                                color = Color.Red,
-                                style = MaterialTheme.typography.titleSmall
+                                "인증코드가 도착하지 않았다면 다시 전송 버튼을 눌러주세요.",
+                                modifier = Modifier.align(Alignment.Start),
+                                fontWeight = FontWeight.Bold
+                            )
+                        } else {
+                            // 타이머가 0이 되었을 때
+                            Text(
+                                "인증코드 재전송이 필요합니다.",
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.align(Alignment.Start)
                             )
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            "인증코드가 도착하지 않았다면 다시 전송 버튼을 눌러주세요.",
-                            modifier = Modifier.align(Alignment.Start),
-                            fontWeight = FontWeight.Bold
-                        )
-                    } else {
-                        // 타이머가 0이 되었을 때
-                        Text(
-                            "인증코드 재전송이 필요합니다.",
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.align(Alignment.Start)
-                        )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+
 
             // 첫 번째 체크박스 영역 (모두 동의)
             Row(
