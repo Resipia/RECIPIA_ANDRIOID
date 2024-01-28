@@ -50,7 +50,8 @@ fun ProfileSection(
 
         // 프로필 이미지
         val painter = rememberAsyncImagePainter(
-            ImageRequest.Builder(context).data(myPageData?.profileImageUrl ?: R.drawable.ic_launcher_foreground)
+            ImageRequest.Builder(context)
+                .data(myPageData?.profileImageUrl ?: R.drawable.ic_launcher_foreground)
                 .placeholder(R.drawable.ic_launcher_foreground)
                 .error(R.drawable.ic_launcher_foreground)
                 .transformations(CircleCropTransformation())

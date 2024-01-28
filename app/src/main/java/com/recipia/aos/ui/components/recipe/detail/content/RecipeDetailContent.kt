@@ -119,7 +119,12 @@ fun RecipeDetailContent(
                         }
 
                         TopAppBar(
-                            title = { Text(text = "", style = MaterialTheme.typography.bodyMedium) },
+                            title = {
+                                Text(
+                                    text = "",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            },
                             navigationIcon = {
                                 IconButton(onClick = {
                                     // 댓글 목록 초기화 및 홈 화면으로 이동

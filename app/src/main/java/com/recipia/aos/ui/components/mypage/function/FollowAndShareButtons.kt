@@ -92,7 +92,10 @@ fun FollowAndShareButtons(
                     .width(120.dp)
                     .height(32.dp),
                 colors = buttonColors,
-                border = BorderStroke(1.dp, if (isFollowing) Color(222,226,230) else Color(56, 142, 60)),
+                border = BorderStroke(
+                    1.dp,
+                    if (isFollowing) Color(222, 226, 230) else Color(56, 142, 60)
+                ),
                 shape = RoundedCornerShape(4.dp)
             ) {
                 Icon(

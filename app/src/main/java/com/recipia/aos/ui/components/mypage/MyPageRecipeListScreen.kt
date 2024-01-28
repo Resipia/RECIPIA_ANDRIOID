@@ -82,7 +82,10 @@ fun MyPageRecipeListScreen(
         when (currentPageType) {
             MyPageViewModel.PageType.BOOKMARK -> myPageViewModel.getAllMyBookmarkRecipeList()
             MyPageViewModel.PageType.LIKE -> myPageViewModel.getAllMyLikeRecipeList()
-            MyPageViewModel.PageType.TARGET_MEMBER -> myPageViewModel.loadMoreTargetMemberRecipes(targetId)
+            MyPageViewModel.PageType.TARGET_MEMBER -> myPageViewModel.loadMoreTargetMemberRecipes(
+                targetId
+            )
+
             else -> {}
         }
     }
@@ -96,7 +99,10 @@ fun MyPageRecipeListScreen(
         when (pageType) {
             MyPageViewModel.PageType.BOOKMARK -> viewModel.loadMoreMyBookmarkRecipes()
             MyPageViewModel.PageType.LIKE -> viewModel.loadMoreMyLikeRecipes()
-            MyPageViewModel.PageType.TARGET_MEMBER -> viewModel.loadMoreTargetMemberRecipes(targetMemberId)
+            MyPageViewModel.PageType.TARGET_MEMBER -> viewModel.loadMoreTargetMemberRecipes(
+                targetMemberId
+            )
+
             else -> {}
         }
     }
@@ -177,7 +183,11 @@ fun MyPageRecipeListScreen(
 
                             // 마지막 아이템에 도달했을 때 추가 데이터 로드
                             if (index == myPageViewModel.items.value.lastIndex && !myPageViewModel.isLastPage && !isLoading) {
-                                loadMoreRecipesBasedOnCurrentPageType(myPageViewModel, currentPageType, targetId)
+                                loadMoreRecipesBasedOnCurrentPageType(
+                                    myPageViewModel,
+                                    currentPageType,
+                                    targetId
+                                )
                             }
                         }
                     }
