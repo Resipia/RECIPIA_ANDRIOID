@@ -265,7 +265,7 @@ fun SignUpThirdFormScreen(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 GenderSelector(selectedGender = gender, onGenderSelect = { gender = it })
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
             // 하단 버튼 영역
