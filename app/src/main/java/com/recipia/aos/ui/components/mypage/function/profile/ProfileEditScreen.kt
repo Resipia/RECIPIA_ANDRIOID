@@ -1,10 +1,7 @@
 package com.recipia.aos.ui.components.mypage.function.profile
 
 import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -35,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -58,7 +56,6 @@ import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
 import com.recipia.aos.ui.components.common.ProfilePictureInputField
 import com.recipia.aos.ui.components.signup.function.GenderSelector
-import com.recipia.aos.ui.components.signup.function.InputField
 import com.recipia.aos.ui.components.signup.function.MyDatePickerDialog
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
@@ -86,7 +83,7 @@ fun ProfileEditScreen(
 
     // 초기값 설정
     var oneLineIntroduction by remember { mutableStateOf(myPageData?.introduction ?: "") }
-    var nickname by remember { mutableStateOf(myPageData?.nickname ?: "") }
+//    var nickname by remember { mutableStateOf(myPageData?.nickname ?: "") }
     var selectedDate by remember { mutableStateOf(myPageData?.birth ?: "") }
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
     var nicknameError by remember { mutableStateOf("") }
@@ -129,6 +126,18 @@ fun ProfileEditScreen(
         }
     }
 
+    // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // 사용자의 원래 닉네임을 저장
+    val originalNickname = myPageViewModel.myPageData.value?.nickname ?: ""
+
+    // 닉네임 변경 여부를 확인하기 위한 상태
+    var isNicknameChanged by remember { mutableStateOf(false) }
+
+    // 닉네임 필드의 값을 추적
+    var nickname by remember { mutableStateOf(originalNickname) }
+
     // 입력 필드 검증
     fun validateFields() {
         // 닉네임 검증
@@ -140,8 +149,73 @@ fun ProfileEditScreen(
         }
     }
 
-    // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
-    val keyboardController = LocalSoftwareKeyboardController.current
+    // 닉네임이 변경될 때마다 호출되는 이벤트 핸들러
+    val onNicknameChange: (String) -> Unit = { newNickname ->
+        nickname = newNickname
+        isNicknameChanged = newNickname != originalNickname
+        // 닉네임이 변경될 때마다 중복 체크 결과를 초기화
+        signUpViewModel.resetNicknameDuplicateCheck()
+    }
+
+    // "중복체크" 버튼의 onClick 이벤트
+    val onCheckDuplicateClick: () -> Unit = {
+        // 키보드를 내립니다.
+        keyboardController?.hide()
+
+        // 닉네임 중복 체크 로직
+        signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 저장 버튼 클릭 이벤트
+    val onSaveClick: () -> Unit = {
+        // 입력 필드 검증
+        validateFields()
+
+        // 닉네임 변경 여부와 중복 체크 결과 확인
+        val canUpdateProfile = when {
+            // 닉네임이 변경되지 않았거나, 변경되었으나 중복 체크를 통과한 경우
+            !isNicknameChanged || (isNicknameChanged && nicknameDuplicateCheckResult == "사용 가능한 닉네임입니다.") -> true
+            // 그 외의 경우
+            else -> false
+        }
+
+        if (canUpdateProfile) {
+            // "s3" 문자열이 포함되어 있는지 검사
+            val finalProfilePictureUri = if (profilePictureUri?.toString()?.contains("s3") == true) null else profilePictureUri
+
+            // 프로필 업데이트 로직 실행
+            myPageViewModel.updateProfile(
+                context = context,
+                nickname = nickname,
+                introduction = oneLineIntroduction,
+                profileImageUri = finalProfilePictureUri,
+                deleteFileOrder = 0, // TODO: 이 부분을 실제 값으로 업데이트 필요
+                birth = selectedDate,
+                gender = when (gender) {
+                    "남성" -> "M"
+                    "여성" -> "F"
+                    else -> null
+                }
+            )
+            // 화면 이동
+            navController.popBackStack()
+        } else {
+            // 중복 체크를 통과하지 못한 경우 사용자에게 알림
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "닉네임 변경을 위해 중복체크는 필수입니다.",
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    // Composable이 화면에 나타날 때 중복 체크 결과를 초기화
+    LaunchedEffect(Unit) {
+        signUpViewModel.resetNicknameDuplicateCheck()
+    }
 
     Box(
         modifier = Modifier
@@ -173,31 +247,8 @@ fun ProfileEditScreen(
                         }
                     },
                     actions = {
-                        TextButton(
-                            onClick = {
-                                // 닉네임 입력필드 검증
-                                validateFields()
-
-                                // "s3" 문자열이 포함되어 있는지 검사
-                                val finalProfilePictureUri = if (profilePictureUri?.toString()
-                                        ?.contains("s3") == true
-                                ) null else profilePictureUri
-
-                                myPageViewModel.updateProfile(
-                                    context = context,
-                                    nickname = nickname, // nickname을 입력받은 값으로 변경
-                                    introduction = oneLineIntroduction,
-                                    profileImageUri = finalProfilePictureUri, // 조건에 따라 변경된 URI 사용
-                                    deleteFileOrder = 0, // TODO: 이 부분을 실제 값으로 업데이트 필요
-                                    birth = selectedDate,
-                                    gender = when (gender) {
-                                        "남성" -> "M"
-                                        "여성" -> "F"
-                                        else -> null
-                                    }
-                                )
-                                navController.popBackStack()
-                            }) {
+                        // 저장 버튼
+                        TextButton(onClick = onSaveClick) {
                             Text("저장")
                         }
                     },
@@ -245,12 +296,7 @@ fun ProfileEditScreen(
                     ) {
                         OutlinedTextField(
                             value = nickname,
-                            onValueChange = {
-                                nickname = it
-                                // 중복 체크 결과 초기화 및 에러 메시지 업데이트
-                                signUpViewModel.resetNicknameDuplicateCheck()
-                                nicknameError = ""
-                            },
+                            onValueChange = onNicknameChange,
                             label = { Text("닉네임") },
                             modifier = Modifier
                                 .weight(0.7f), // Row 내에서 차지하는 비율 조정
@@ -261,11 +307,7 @@ fun ProfileEditScreen(
                         Spacer(modifier = Modifier.width(8.dp)) // 닉네임 필드와 버튼 사이의 간격 추가
 
                         Button(
-                            onClick = {
-                                signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                                }
-                            },
+                            onClick = onCheckDuplicateClick, // 중복 체크 함수 호출
                             modifier = Modifier
                                 .weight(0.3f) // Row 내에서 차지하는 비율 조정
                                 .padding(top = 8.dp)
@@ -281,7 +323,7 @@ fun ProfileEditScreen(
                         Text(
                             text = it,
                             color = if (it.contains("사용 가능")) Color(0xFF006633) else Color.Red,
-                            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
+                            modifier = Modifier.padding(start = 2.dp, top = 4.dp, bottom = 4.dp)
                         )
                     }
 
