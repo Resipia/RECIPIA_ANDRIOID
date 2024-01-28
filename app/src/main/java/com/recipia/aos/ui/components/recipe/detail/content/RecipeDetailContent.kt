@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,13 +20,25 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,7 +60,7 @@ import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 /**
  * 레시피 상세보기 콘텐츠 컴포저
  */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailContent(
     recipeId: Long,
@@ -59,6 +72,7 @@ fun RecipeDetailContent(
 
     val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
     val isLoading = recipeDetailViewModel.isLoading.observeAsState()
+    var menuExpanded by remember { mutableStateOf(false) }
 
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
@@ -85,22 +99,54 @@ fun RecipeDetailContent(
                         recipeDetail.recipeFileUrlList.size
                     }
 
-                    Spacer(modifier = Modifier.height(28.dp))
-
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .fillMaxWidth() // 전체 너비를 채우도록 설정
-                            .height(300.dp) // 높이 설정
-                    ) { page ->
-                        Image(
-                            painter = rememberAsyncImagePainter(
-                                model = recipeDetail.recipeFileUrlList[page].preUrl
-                            ),
-                            contentDescription = null,
+                    Box {
+                        // 이미지 슬라이더 (HorizontalPager)
+                        HorizontalPager(
+                            state = pagerState,
                             modifier = Modifier
                                 .fillMaxWidth() // 전체 너비를 채우도록 설정
-                                .aspectRatio(1.0f / 2.0f) // 이미지의 세로 길이를 가로 길이의 절반으로 설정
+                                .height(300.dp) // 높이 설정
+                        ) { page ->
+                            Image(
+                                painter = rememberAsyncImagePainter(
+                                    model = recipeDetail.recipeFileUrlList[page].preUrl
+                                ),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxWidth() // 전체 너비를 채우도록 설정
+                                    .aspectRatio(1.0f / 2.0f) // 이미지의 세로 길이를 가로 길이의 절반으로 설정
+                            )
+                        }
+
+                        TopAppBar(
+                            title = { Text(text = "", style = MaterialTheme.typography.bodyMedium) },
+                            navigationIcon = {
+                                IconButton(onClick = {
+                                    // 댓글 목록 초기화 및 홈 화면으로 이동
+                                    commentViewModel.clearComments()
+                                    navController.popBackStack()
+                                    navController.navigate("home")
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowBack,
+                                        contentDescription = "뒤로 가기"
+                                    )
+                                }
+                            },
+                            actions = {
+                                // TopAppBar의 액션 아이템들
+                                IconButton(onClick = { menuExpanded = true }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.MoreVert,
+                                        contentDescription = "더보기"
+                                    )
+                                }
+                                // DropdownMenu 로직 생략...
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                                titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
                         )
                     }
 

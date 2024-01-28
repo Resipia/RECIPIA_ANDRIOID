@@ -46,13 +46,9 @@ fun RecipeDetailScreen(
     tokenManager: TokenManager
 ) {
     val context = LocalContext.current
-    var menuExpanded by remember { mutableStateOf(false) }
-    val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
-    val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
     var showDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
-    val setShowSheet = { value: Boolean -> showSheet = value }
 
     // BottomSheet(댓글창) 호출
     if (showSheet) {
@@ -105,67 +101,7 @@ fun RecipeDetailScreen(
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "", style = MaterialTheme.typography.bodyMedium) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        // 댓글 목록 초기화
-                        commentViewModel.clearComments()
-                        // 현재 화면을 스택에서 제거하고 홈 화면으로 이동
-                        navController.popBackStack()
-                        navController.navigate("home")
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "뒤로 가기"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { menuExpanded = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.MoreVert,
-                            contentDescription = "더보기"
-                        )
-                    }
-                    CustomDropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
-                    ) {
-                        // 레시피 작성자가 현재 로그인한 사용자와 같은 경우에만 수정 및 삭제 옵션을 보여줌
-                        if (recipeDetailState.value?.memberId == currentUserMemberId) {
-                            // 레시피 수정하기
-                            DropdownMenuItem(
-                                text = { Text("레시피 수정") },
-                                onClick = {
-                                    navController.navigate("update-recipe")
-                                }
-                            )
-                            // 레시피 삭제 버튼
-                            DropdownMenuItem(
-                                text = { Text("레시피 삭제") },
-                                onClick = {
-                                    showDialog = true
-                                }
-                            )
-                        }
-                        DropdownMenuItem(
-                            text = { Text("설정") },
-                            onClick = { /* 설정 처리 */ }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("피드백 보내기") },
-                            onClick = { /* 피드백 처리 */ }
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
+        topBar = {}
     ) { innerPadding ->
         RecipeDetailContent(
             recipeId = recipeId,
