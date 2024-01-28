@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.mypage.function
+package com.recipia.aos.ui.components.mypage.function.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -25,6 +25,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.recipia.aos.R
+import com.recipia.aos.ui.components.mypage.function.FollowAndShareButtons
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 

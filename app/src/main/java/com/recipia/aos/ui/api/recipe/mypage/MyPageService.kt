@@ -6,10 +6,14 @@ import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.mypage.MyPageRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
 import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Query
 
 /**
@@ -22,6 +26,17 @@ interface MyPageService {
     suspend fun viewMyPage(
         @Body dto: ViewMyPageRequestDto
     ): Response<ResponseDto<MyPageViewResponseDto>>
+
+    // 프로필 수정
+    @Multipart
+    @POST("/member/myPage/update")
+    suspend fun updateProfile(
+        @Part("nickname") nickname: RequestBody,
+        @Part("introduction") introduction: RequestBody?,
+        @Part profileImage: MultipartBody.Part?,
+        @Part("birth") birth: RequestBody?,
+        @Part("gender") gender: RequestBody?
+    ): Response<ResponseDto<Void>>
 
     // targetMemberId가 작성한 레시피 갯수 가져오기
     @POST("/recipe/mypage/recipeCnt")

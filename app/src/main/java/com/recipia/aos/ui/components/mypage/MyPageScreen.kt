@@ -53,7 +53,7 @@ import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.components.mypage.function.FollowStatsSection
 import com.recipia.aos.ui.components.mypage.function.MyPageFeatureItem
 import com.recipia.aos.ui.components.mypage.function.PersonalInfoSection
-import com.recipia.aos.ui.components.mypage.function.ProfileSection
+import com.recipia.aos.ui.components.mypage.function.profile.ProfileSection
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
@@ -125,8 +125,11 @@ fun MyPageScreen(
                     ) {
                         // 드롭다운 메뉴 아이템들
                         DropdownMenuItem(
-                            text = { Text("수정") },
-                            onClick = { /* 수정 처리 */ }
+                            text = { Text("수정하기") },
+                            onClick = {
+                                // "profile-edit" 라우트로 이동
+                                navController.navigate("profile-edit")
+                            }
                         )
                         DropdownMenuItem(
                             text = { Text("설정") },
@@ -134,6 +137,10 @@ fun MyPageScreen(
                         )
                         DropdownMenuItem(
                             text = { Text("피드백 보내기") },
+                            onClick = { /* 피드백 처리 */ }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("문의하기") },
                             onClick = { /* 피드백 처리 */ }
                         )
                     }

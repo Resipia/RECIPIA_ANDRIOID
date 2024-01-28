@@ -1,6 +1,12 @@
 package com.recipia.aos.ui.model.mypage
 
 import TokenManager
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
@@ -9,14 +15,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.ui.api.recipe.mypage.MyPageService
 import com.recipia.aos.ui.dto.RecipeListResponseDto
+import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.mypage.MyPageRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
 import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.ByteArrayOutputStream
 
 /**
  * 마이페이지 전용 Model
@@ -52,8 +63,13 @@ class MyPageViewModel(
     val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+    // api로 받아온 마이페이지 데이터
     private val _myPageData = MutableLiveData<MyPageViewResponseDto?>()
     val myPageData: MutableLiveData<MyPageViewResponseDto?> = _myPageData
+
+    // 프로필 업데이트 상태
+    private val _updateResult = MutableLiveData<ResponseDto<Void>?>()
+    val updateResult: LiveData<ResponseDto<Void>?> = _updateResult
 
     // _myPageData를 초기화하는 함수
     fun resetMyPageData() {
@@ -142,6 +158,54 @@ class MyPageViewModel(
                 highCountRecipe.value = response.body()?.result!!
             } else {
                 // 오류 처리
+            }
+        }
+    }
+
+    // 프로필 업데이트 로직
+    fun updateProfile(
+        context: Context, // Context 추가
+        nickname: String,
+        introduction: String?,
+        profileImageUri: Uri?,
+        birth: String?,
+        gender: String?
+    ) {
+        viewModelScope.launch {
+            val nicknameRequestBody = nickname.toRequestBody("text/plain".toMediaTypeOrNull())
+            val introductionRequestBody = introduction?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val birthRequestBody = birth?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val genderRequestBody = gender?.toRequestBody("text/plain".toMediaTypeOrNull())
+
+            // 여기서 context를 사용하여 Bitmap을 로드
+            val profileImagePart = profileImageUri?.let { uri ->
+                val bitmap = if (Build.VERSION.SDK_INT < 28) {
+                    MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                } else {
+                    val source = ImageDecoder.createSource(context.contentResolver, uri)
+                    ImageDecoder.decodeBitmap(source)
+                }
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+                val requestBody = byteArrayOutputStream.toByteArray().toRequestBody("image/jpeg".toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("profileImage", "file.jpg", requestBody)
+            }
+
+            try {
+                val response = myPageService.updateProfile(
+                    nicknameRequestBody,
+                    introductionRequestBody,
+                    profileImagePart,
+                    birthRequestBody,
+                    genderRequestBody
+                )
+                if (response.isSuccessful) {
+                    _updateResult.postValue(response.body())
+                } else {
+                    Log.e("MyPageViewModel", "Profile update failed: ${response.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                Log.e("MyPageViewModel", "Exception in profile update", e)
             }
         }
     }
