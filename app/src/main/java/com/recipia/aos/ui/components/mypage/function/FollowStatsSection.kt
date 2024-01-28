@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.mypage.detail
+package com.recipia.aos.ui.components.mypage.function
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

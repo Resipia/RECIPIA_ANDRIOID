@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.mypage.detail
+package com.recipia.aos.ui.components.mypage.function
 
 import android.content.Context
 import android.widget.Toast

@@ -50,10 +50,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
-import com.recipia.aos.ui.components.mypage.detail.FollowStatsSection
-import com.recipia.aos.ui.components.mypage.detail.MyPageFeatureItem
-import com.recipia.aos.ui.components.mypage.detail.PersonalInfoSection
-import com.recipia.aos.ui.components.mypage.detail.ProfileSection
+import com.recipia.aos.ui.components.mypage.function.FollowStatsSection
+import com.recipia.aos.ui.components.mypage.function.MyPageFeatureItem
+import com.recipia.aos.ui.components.mypage.function.PersonalInfoSection
+import com.recipia.aos.ui.components.mypage.function.ProfileSection
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
