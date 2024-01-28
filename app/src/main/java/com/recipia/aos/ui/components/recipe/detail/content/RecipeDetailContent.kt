@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -147,7 +148,8 @@ fun RecipeDetailContent(
                         Image(
                             painter = rememberAsyncImagePainter(
                                 ImageRequest.Builder(LocalContext.current).data(
-                                    data = recipeDetail.recipeFileUrlList?.firstOrNull() ?: "https://example.com/default_profile.jpg"
+                                    data = recipeDetail.recipeFileUrlList?.firstOrNull()
+                                        ?: "https://example.com/default_profile.jpg"
                                 ).apply {
                                     // 이미지 로드 중 및 에러 발생 시 대체 이미지 지정
                                     placeholder(R.drawable.ic_launcher_foreground)
@@ -158,13 +160,13 @@ fun RecipeDetailContent(
                             ),
                             contentDescription = "작성자 프로필",
                             modifier = Modifier
-                                .size(40.dp) // 이미지 크기
+                                .size(50.dp) // 이미지 크기
                                 .clip(CircleShape) // 원형 클리핑
                                 .border(0.5.dp, Color.Gray, CircleShape) // 회색 테두리 추가
                                 .padding(horizontal = 4.dp)
                         )
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
 
                         // 닉네임
                         Text(
@@ -250,48 +252,67 @@ fun RecipeDetailContent(
                 }
 
                 item {
-                    // todo: 소요 시간
-                    Text(
-                        text = "소요 시간: ${recipeDetail.timeTaken}분",
-                        style = MaterialTheme.typography.bodyMedium,
+                    // 소요 시간
+                    Row(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // todo: 재료 목록
-                    Text(
-                        text = "재료: ${recipeDetail.ingredient}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // todo: 해시태그 정보
-                    Text(
-                        text = "해시태그: ${recipeDetail.hashtag}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // todo: 영양 정보
-                    recipeDetail.nutritionalInfoDto?.let { info ->
+                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+                        verticalAlignment = Alignment.CenterVertically // 세로축 중앙 정렬
+                    ) {
                         Text(
-                            text = "영양 정보: 탄수화물 ${info.carbohydrates}(g)," +
-                                    " 단백질 ${info.protein}(g)," +
-                                    " 지방 ${info.fat}(g)," +
-                                    " 비타민 ${info.vitamins}(g)," +
-                                    " 미네랄 ${info.minerals}(g)",
+                            text = "소요 시간",
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
+                            modifier = Modifier.weight(1f) // 좌측 텍스트를 위해 가중치 적용
                         )
+                        Text(
+                            text = "${recipeDetail.timeTaken}분",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f) // 우측 텍스트를 위해 가중치 적용
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+
+                    // 재료
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+                        verticalAlignment = Alignment.CenterVertically // 세로축 중앙 정렬
+                    ) {
+                        Text(
+                            text = "재료",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f) // 좌측 텍스트를 위해 가중치 적용
+                        )
+                        Text(
+                            text = recipeDetail.ingredient,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f) // 우측 텍스트를 위해 가중치 적용
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+
+                    // 해시태그
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "해시태그",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = recipeDetail.hashtag,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f) // 우측 텍스트를 위해 가중치 적용
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
                     }
 
                     HorizontalDivider(
@@ -301,11 +322,74 @@ fun RecipeDetailContent(
                         thickness = 0.5.dp, // 구분선의 두께 설정
                         color = Color(222, 226, 230) // 구분선의 색상 설정
                     )
+
+                    // 영양 정보
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "영양 정보",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Column(
+                            modifier = Modifier.weight(1f) // 우측 텍스트를 위해 가중치 적용
+                        ) {
+                            recipeDetail.nutritionalInfoDto?.let { info ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    // 여기에 아이콘 추가, 예를 들어 Image(...)를 사용
+                                    Text(
+                                        text = "탄수화물: ${info.carbohydrates}g",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    // 아이콘 추가
+                                    Text(
+                                        text = "단백질: ${info.protein}g",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    // 아이콘 추가
+                                    Text(
+                                        text = "지방: ${info.fat}g",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    // 아이콘 추가
+                                    Text(
+                                        text = "비타민: ${info.vitamins}g",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    // 아이콘 추가
+                                    Text(
+                                        text = "미네랄: ${info.minerals}g",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
+                    }
+
+//                    HorizontalDivider(
+//                        modifier = Modifier
+//                            .fillMaxWidth() // 전체 너비를 채우도록 설정
+//                            .padding(horizontal = 16.dp, vertical = 8.dp), // 양쪽에 패딩 적용
+//                        thickness = 0.5.dp, // 구분선의 두께 설정
+//                        color = Color(222, 226, 230) // 구분선의 색상 설정
+//                    )
                 }
 
-
                 item {
-
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // 댓글보기
@@ -319,7 +403,7 @@ fun RecipeDetailContent(
                             .padding(horizontal = 16.dp, vertical = 8.dp), // 주변 여백 설정
                         shape = RoundedCornerShape(12.dp), // 모서리를 둥글게 설정
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(241,243,245), // 버튼 배경색
+                            containerColor = Color(241, 243, 245), // 버튼 배경색
                             contentColor = MaterialTheme.colorScheme.onPrimary // 텍스트 및 아이콘 색상
                         )
                     ) {
