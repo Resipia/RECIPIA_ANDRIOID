@@ -134,9 +134,13 @@ fun CategorySelectScreen(
     // 서브카테고리를 categoryId 별로 그룹화
     val groupedSubCategories = subCategories.groupBy { it.categoryId }
 
-    // 선택된 서브 카테고리를 추적하는 상태
-    var selectedSubCategories by remember { mutableStateOf(setOf<SubCategoryDto>()) }
 
+    // 선택된 서브 카테고리를 추적하는 상태 : viewModel에서 가져온 selectedCategories를 초기값으로 설정
+    var selectedSubCategories by remember {
+        mutableStateOf(viewModel.selectedCategories.value.map { subCategoryDto ->
+            SubCategoryDto(subCategoryDto.id, subCategoryDto.subCategoryNm)
+        }.toSet())
+    }
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
@@ -146,7 +150,6 @@ fun CategorySelectScreen(
                 title = { },
                 navigationIcon = {
                     IconButton(onClick = {
-                        viewModel.clearCategories()
                         navController.popBackStack()
                     }) {
                         Icon(Icons.Default.Close, contentDescription = "닫기")
