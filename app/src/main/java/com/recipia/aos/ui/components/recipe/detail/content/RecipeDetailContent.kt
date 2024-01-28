@@ -298,9 +298,16 @@ fun RecipeDetailContent(
                             color = Color.DarkGray
                         )
 
-                        recipeDetail.subCategoryDtoList.forEach { subCategory ->
+                        recipeDetail.subCategoryDtoList.forEachIndexed { index, subCategory ->
+                            // 서브 카테고리 이름과 조건부로 쉼표 및 공백 추가
                             Text(
-                                subCategory.subCategoryNm.orEmpty(),
+                                text = buildString {
+                                    append(subCategory.subCategoryNm.orEmpty())
+                                    // 리스트의 크기가 1 초과이고, 현재 요소가 마지막 요소가 아닐 경우, 쉼표와 공백 추가
+                                    if (recipeDetail.subCategoryDtoList.size > 1 && index < recipeDetail.subCategoryDtoList.size - 1) {
+                                        append(", ")
+                                    }
+                                },
                                 fontSize = 12.sp,
                                 color = Color.DarkGray
                             )

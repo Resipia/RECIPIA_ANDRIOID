@@ -34,7 +34,6 @@ fun RecipeDetailScreen(
     navController: NavController,
     tokenManager: TokenManager
 ) {
-    val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
