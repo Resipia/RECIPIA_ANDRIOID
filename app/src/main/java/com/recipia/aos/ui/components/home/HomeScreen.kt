@@ -348,6 +348,7 @@ fun HomeScreen(
                                         .fillMaxWidth()
                                         .padding(top = 8.dp)
                                 ) {
+                                    // 최상단 카테고리 조회 아이콘
                                     AssistChip(
                                         onClick = {
                                             navController.navigate("category-recipe-search")
@@ -371,7 +372,10 @@ fun HomeScreen(
 //                                        elevation = null, // 그림자 제거
                                         border = null, // 테두리 제거
                                     )
+
                                     Spacer(modifier = Modifier.width(8.dp)) // 칩 사이의 간격
+
+                                    // 최상단 정렬 아이콘
                                     AssistChip(
                                         onClick = { /* 두 번째 AssistChip 클릭 시 동작 */ },
                                         label = {
@@ -477,7 +481,7 @@ fun ListItem(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 2.dp),
+                            .padding(start = 1.dp, bottom = 2.dp),
                         verticalAlignment = Alignment.CenterVertically // 여기에 추가
                     ) {
                         // 닉네임
@@ -537,7 +541,7 @@ fun ListItem(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 13.sp, // 글씨 크기를 줄임 (기존 값보다 작게 설정)
-                        modifier = Modifier.padding(end = 16.dp) // 오른쪽에 패딩 추가
+                        modifier = Modifier.padding(start = 1.dp, end = 16.dp) // 오른쪽에 패딩 추가
                     )
 
                     // 서브 카테고리 Assist Chips
