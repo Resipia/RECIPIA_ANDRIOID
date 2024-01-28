@@ -205,7 +205,7 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(67, 160, 71))
+                colors = ButtonDefaults.buttonColors(containerColor = Color(27, 94, 32))
             ) {
                 Text(
                     text = "로그인",
@@ -214,7 +214,7 @@ fun LoginScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
