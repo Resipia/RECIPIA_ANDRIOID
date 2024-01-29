@@ -2,6 +2,7 @@ package com.recipia.aos.ui.components.recipe.create
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -113,12 +114,11 @@ fun RecipeCreateScreen(
     val multiplePhotosPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(
             maxItems = 10
-        ),
-        onResult = {
-//            recipeCreateModel.selectedImageUris.clear()
-            recipeCreateModel.selectedImageUris.addAll(it)
-        }
-    )
+        )
+    ) {
+        recipeCreateModel.selectedImageUris.addAll(it)
+        Log.d("selectedImageUris", "received: ${selectedImageUris.joinToString { uri -> uri.toString() }}")
+    }
 
     // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -307,10 +307,21 @@ fun RecipeCreateScreen(
 
                 item {
                     // 이미지 썸네일 목록
-                    ImageThumbnails(selectedImageUris) { removedUri ->
-                        // 이미지 제거
-                        selectedImageUris.remove(removedUri)
-                    }
+                    ImageThumbnails(
+                        selectedImageUris = selectedImageUris,
+                        onRemoveImage = { uriToRemove ->
+                            // 이미지 제거 로직
+                            recipeCreateModel.selectedImageUris.remove(uriToRemove)
+                        },
+                        onMove = { fromIndex, toIndex ->
+                            // 순서 변경 로직
+                            val updatedList = recipeCreateModel.selectedImageUris.toMutableList()
+                            val item = updatedList.removeAt(fromIndex)
+                            updatedList.add(toIndex, item)
+                            recipeCreateModel.selectedImageUris.clear()
+                            recipeCreateModel.selectedImageUris.addAll(updatedList)
+                        }
+                    )
                 }
 
                 // 레시피 이름 작성 필드
