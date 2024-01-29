@@ -97,4 +97,8 @@ dependencies {
 
     // image Cropper
     implementation("com.github.CanHub:Android-Image-Cropper:4.0.0")
+
+    // 이미지 드래그 앤 드롭
+    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
+
 }

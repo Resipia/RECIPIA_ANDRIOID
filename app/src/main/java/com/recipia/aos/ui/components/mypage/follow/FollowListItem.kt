@@ -53,24 +53,18 @@ fun FollowListItem(
 
         Spacer(modifier = Modifier.width(16.dp)) // 이미지와 닉네임 사이 간격 추가
 
-        Column(
+        // 닉네임
+        Text(
+            text = followData.nickname,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier
-                .weight(1f) // 이름과 닉네임 영역이 남은 공간을 모두 차지하도록 설정
-        ) {
-            // 닉네임
-            Text(
-                text = followData.nickname,
-                fontSize = 14.sp, // 폰트 크기를 12.sp로 설정
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(end = 16.dp) // 닉네임과 팔로우 버튼 사이의 간격 추가
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f)) // 중간 공간을 채우기 위한 Spacer 추가
+                .weight(1f) // 남은 공간을 모두 차지하도록 설정
+                .padding(end = 16.dp) // 닉네임과 팔로우 버튼 사이의 간격 추가
+        )
 
         // 팔로우 버튼 (isMe필드로 검증해서 다른 사람 팔로잉 페이지에서 내 계정은 팔로우 버튼 안보이게 하기)
-        if (!followData.isMe) {
+        if (!followData.me) {
             FollowButton(
                 isFollowing = followData.followId != null, // 이미 팔로우한 상태라면 true
                 onFollowClick = { onFollowClick(followData) }

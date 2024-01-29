@@ -177,5 +177,19 @@ class MongoSearchViewModel(
         }
     }
 
+    // 재료 삭제 메서드
+    fun removeSelectedIngredient(ingredient: String) {
+        val updatedIngredients = _selectedIngredients.value.toMutableList()
+        updatedIngredients.remove(ingredient)
+        _selectedIngredients.value = updatedIngredients
+    }
+
+    // 해시태그 삭제 메서드
+    fun removeSelectedHashtag(hashtag: String) {
+        val updatedHashtags = _selectedHashtags.value.toMutableList()
+        updatedHashtags.remove(hashtag)
+        _selectedHashtags.value = updatedHashtags
+    }
+
 
 }

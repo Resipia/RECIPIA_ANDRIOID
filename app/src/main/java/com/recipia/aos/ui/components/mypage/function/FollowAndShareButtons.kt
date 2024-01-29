@@ -1,7 +1,5 @@
-package com.recipia.aos.ui.components.mypage.detail
+package com.recipia.aos.ui.components.mypage.function
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,9 +13,13 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
+import kotlinx.coroutines.launch
 
 /**
  * 팔로우, 공유하기 버튼 컴포저
@@ -33,12 +36,13 @@ import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 fun FollowAndShareButtons(
     myPageViewModel: MyPageViewModel,
     followViewModel: FollowViewModel,
-    targetId: Long,
-    context: Context
+    targetId: Long
 ) {
 
     val myPageData = myPageViewModel.myPageData.observeAsState().value
     val isFollowing = myPageViewModel.isFollowing.observeAsState(false).value
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
 
     Row(
         modifier = Modifier
@@ -83,7 +87,12 @@ fun FollowAndShareButtons(
                                 myPageViewModel.loadMyPageData(targetId)
 
                             } else {
-                                Toast.makeText(context, "작업 실패", Toast.LENGTH_SHORT).show()
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "작업 실패",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         }
                     )
@@ -92,7 +101,10 @@ fun FollowAndShareButtons(
                     .width(120.dp)
                     .height(32.dp),
                 colors = buttonColors,
-                border = BorderStroke(1.dp, if (isFollowing) Color(222,226,230) else Color(56, 142, 60)),
+                border = BorderStroke(
+                    1.dp,
+                    if (isFollowing) Color(222, 226, 230) else Color(56, 142, 60)
+                ),
                 shape = RoundedCornerShape(4.dp)
             ) {
                 Icon(

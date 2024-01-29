@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.mypage.detail
+package com.recipia.aos.ui.components.mypage.function
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -101,14 +101,8 @@ fun FollowStatsSection(
             Spacer(modifier = Modifier.height(5.dp)) // 간격 추가
 
             // 레시피 카운트 표시
-            val recipeCount = myPageViewModel.recipeCount.value
-            if (recipeCount != null) {
-                Text(text = "$recipeCount", color = textColor)
-            } else {
-                // 데이터가 로드되기 전에는 "로딩 중" 또는 공백 표시
-                Text(text = "0", color = textColor)
-                // 또는 Text를 아예 표시하지 않음
-            }
+            val recipeCount = myPageViewModel.recipeCount.value ?: 0 // recipeCount가 null일 경우 0으로 대체
+            Text(text = "$recipeCount", color = textColor)
         }
 
         // 위글위글 영역

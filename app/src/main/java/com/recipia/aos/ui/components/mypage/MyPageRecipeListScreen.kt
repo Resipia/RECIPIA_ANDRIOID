@@ -50,13 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.recipia.aos.R
 import com.recipia.aos.ui.components.HorizontalDivider
+import com.recipia.aos.ui.components.common.AnimatedPreloader
 import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
@@ -65,7 +61,6 @@ import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 @Composable
 fun MyPageRecipeListScreen(
     navController: NavController,
-//    recipeAllListViewModel: RecipeAllListViewModel,
     bookmarkViewModel: BookMarkViewModel,
     myPageViewModel: MyPageViewModel,
     targetMemberId: Long? = null,
@@ -86,7 +81,10 @@ fun MyPageRecipeListScreen(
         when (currentPageType) {
             MyPageViewModel.PageType.BOOKMARK -> myPageViewModel.getAllMyBookmarkRecipeList()
             MyPageViewModel.PageType.LIKE -> myPageViewModel.getAllMyLikeRecipeList()
-            MyPageViewModel.PageType.TARGET_MEMBER -> myPageViewModel.loadMoreTargetMemberRecipes(targetId)
+            MyPageViewModel.PageType.TARGET_MEMBER -> myPageViewModel.loadMoreTargetMemberRecipes(
+                targetId
+            )
+
             else -> {}
         }
     }
@@ -100,7 +98,10 @@ fun MyPageRecipeListScreen(
         when (pageType) {
             MyPageViewModel.PageType.BOOKMARK -> viewModel.loadMoreMyBookmarkRecipes()
             MyPageViewModel.PageType.LIKE -> viewModel.loadMoreMyLikeRecipes()
-            MyPageViewModel.PageType.TARGET_MEMBER -> viewModel.loadMoreTargetMemberRecipes(targetMemberId)
+            MyPageViewModel.PageType.TARGET_MEMBER -> viewModel.loadMoreTargetMemberRecipes(
+                targetMemberId
+            )
+
             else -> {}
         }
     }
@@ -113,13 +114,13 @@ fun MyPageRecipeListScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 85.dp)
+                            .padding(start = 100.dp)
                     ) {
                         Text(
                             text = when (currentPageType) {
-                                MyPageViewModel.PageType.BOOKMARK -> "북마크한 레시피 목록"
-                                MyPageViewModel.PageType.LIKE -> "좋아요한 레시피 목록"
-                                MyPageViewModel.PageType.TARGET_MEMBER -> "타겟 멤버 레시피"
+                                MyPageViewModel.PageType.BOOKMARK -> "북마크한 레시피"
+                                MyPageViewModel.PageType.LIKE -> "좋아요한 레시피"
+                                MyPageViewModel.PageType.TARGET_MEMBER -> "작성한 레시피"
                                 else -> ""
                             },
                             style = MaterialTheme.typography.bodyMedium.copy(
@@ -160,7 +161,7 @@ fun MyPageRecipeListScreen(
             ) {
                 // 로딩 중이라면 로딩 인디케이터 표시
                 if (isLoading) {
-                    MyPageAnimatedPreloader(modifier = Modifier.size(100.dp)) // 로딩 바의 크기 조절 가능
+                    AnimatedPreloader(modifier = Modifier.size(100.dp))
                 } else {
                     LazyColumn(
                         contentPadding = PaddingValues(
@@ -181,7 +182,11 @@ fun MyPageRecipeListScreen(
 
                             // 마지막 아이템에 도달했을 때 추가 데이터 로드
                             if (index == myPageViewModel.items.value.lastIndex && !myPageViewModel.isLastPage && !isLoading) {
-                                loadMoreRecipesBasedOnCurrentPageType(myPageViewModel, currentPageType, targetId)
+                                loadMoreRecipesBasedOnCurrentPageType(
+                                    myPageViewModel,
+                                    currentPageType,
+                                    targetId
+                                )
                             }
                         }
                     }
@@ -193,7 +198,7 @@ fun MyPageRecipeListScreen(
 
 
 @Composable
-fun     MyPageRecipeListItem(
+fun MyPageRecipeListItem(
     item: RecipeListResponseDto,
     bookmarkViewModel: BookMarkViewModel,
     navController: NavController
@@ -333,27 +338,3 @@ fun     MyPageRecipeListItem(
         )
     }
 }
-
-@Composable
-fun MyPageAnimatedPreloader(modifier: Modifier = Modifier) {
-    val preloaderLottieComposition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(
-            R.raw.loading // 여기에 애니메이션 리소스를 지정합니다.
-        )
-    )
-
-    val preloaderProgress by animateLottieCompositionAsState(
-        preloaderLottieComposition,
-        iterations = LottieConstants.IterateForever,
-        isPlaying = true
-    )
-
-    // Lottie 애니메이션을 화면에 표시합니다.
-    // `modifier` 매개변수를 사용하여 사이즈 조절
-    LottieAnimation(
-        composition = preloaderLottieComposition,
-        progress = preloaderProgress,
-        modifier = modifier.size(100.dp) // 여기에서 원하는 크기로 조절합니다.
-    )
-}
-

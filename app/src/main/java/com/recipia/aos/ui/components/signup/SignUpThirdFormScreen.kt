@@ -5,34 +5,31 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -40,27 +37,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
 import com.canhub.cropper.CropImage
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
+import com.recipia.aos.ui.components.common.ProfilePictureInputField
 import com.recipia.aos.ui.components.signup.function.GenderSelector
 import com.recipia.aos.ui.components.signup.function.MyDatePickerDialog
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +75,8 @@ fun SignUpThirdFormScreen(
     var oneLineIntroduction by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    val scope = rememberCoroutineScope() // 코루틴 스코프 생성
 
     // 입력 필드 검증 상태
     val oneLineIntroFocusRequester = remember { FocusRequester() }
@@ -108,31 +108,54 @@ fun SignUpThirdFormScreen(
 
     if (showDialog) {
         AlertDialog(
+            containerColor = Color.White, // AlertDialog 배경색을 하얀색으로 설정
+            textContentColor = Color.Black, // 글자색을 검정색으로 설정
             onDismissRequest = { showDialog = false },
-            title = { Text("주의") },
-            text = { Text("뒤로 가시면 입력했던 모든 정보가 초기화 되며 다시 회원가입을 진행하셔야 합니다.") },
+            title = { Text("주의", color = Color.Black) },
+            text = { Text("뒤로 이동하시면 입력했던 모든 정보가 초기화 되며 다시 회원가입을 진행하셔야 합니다.", color = Color.Black) },
             confirmButton = {
-                Button(onClick = {
-                    signUpViewModel.clearData() // SignUpViewModel 초기화
-                    phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
-                    showDialog = false
-                    navController.navigate("login") // "login" 화면으로 이동
-                }) {
-                    Text("확인")
+                Button(
+                    onClick = {
+                        signUpViewModel.clearData() // SignUpViewModel 초기화
+                        phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
+                        showDialog = false
+                        navController.navigate("login") // "login" 화면으로 이동
+                    },
+                    shape = RoundedCornerShape(4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(27, 94, 32),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("확인", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                Button(onClick = { showDialog = false }) {
-                    Text("취소")
+                Button(
+                    onClick = { showDialog = false },
+                    shape = RoundedCornerShape(4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(27, 94, 32),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("취소", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         )
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(text = "회원가입 (3/3)", style = MaterialTheme.typography.bodyMedium) },
+                title = {
+                    Text(
+                        text = "회원가입 (3/3)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { showDialog = true }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -158,6 +181,7 @@ fun SignUpThirdFormScreen(
                 // 여기에 "프로필 설정 (선택)" 텍스트 추가
                 Text(
                     text = "프로필 설정 (선택)",
+                    fontSize = 12.sp,
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), // 스타일 설정
                     modifier = Modifier
                         .fillMaxWidth()
@@ -172,7 +196,10 @@ fun SignUpThirdFormScreen(
                     profilePictureUri = profilePictureUri,
                     onImageSelected = {
                         // CropImageContractOptions 객체를 생성하여 이미지 선택 및 크롭 로직 호출
-                        val cropImageOptions = CropImageContractOptions(CropImage.CancelledResult.uriContent, CropImageOptions())
+                        val cropImageOptions = CropImageContractOptions(
+                            CropImage.CancelledResult.uriContent,
+                            CropImageOptions()
+                        )
                         imagePickerLauncher.launch(cropImageOptions)
                     },
                     onImageRemoved = {
@@ -180,7 +207,6 @@ fun SignUpThirdFormScreen(
                         profilePictureUri = null
                     }
                 )
-                Spacer(modifier = Modifier.height(8.dp))
             }
 
             // 문자 수를 계산하여 표시할 변수 추가
@@ -188,6 +214,13 @@ fun SignUpThirdFormScreen(
 
             // 한줄 소개 입력 필드
             item {
+                Text(
+                    "한 줄 소개 (선택)",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+
                 OutlinedTextField(
                     value = oneLineIntroduction,
                     onValueChange = { newValue ->
@@ -198,28 +231,24 @@ fun SignUpThirdFormScreen(
                             charCount = newValue.length
                         }
                     },
-                    label = { Text("한줄 소개") }, // 초기 문자 수 표시
+                    label = { Text("한 줄 소개") }, // 초기 문자 수 표시
                     isError = oneLineIntroduction.toByteArray(Charsets.UTF_8).size > 300, // 300바이트를 초과하면 에러 처리
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(oneLineIntroFocusRequester) // focusRequester를 Modifier에 추가
                 )
-                Spacer(modifier = Modifier.height(8.dp))
 
-                // 실시간으로 문자 수 표시
-                Text(
-                    text = "한줄 소개 (${charCount}/300)",
-                    color = if (charCount > 300) Color.Red else Color.Black, // 300자를 초과하면 빨간색으로 표시
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), // 굵은 스타일 적용
-                    modifier = Modifier.padding(horizontal = 2.dp, vertical = 4.dp) // 텍스트 내부 여백 조정
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             // "생년월일" 레이블과 선택 필드
             item {
-                Text("생년월일", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "생년월일 (선택)",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
 
                 // MyDatePickerDialog 호출
                 MyDatePickerDialog(onDateSelected = { date ->
@@ -231,6 +260,8 @@ fun SignUpThirdFormScreen(
             // 선택된 날짜를 보여주는 부분
             item {
                 if (selectedDate.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+
                     OutlinedTextField(
                         value = "선택된 날짜: $selectedDate",
                         onValueChange = {},
@@ -243,9 +274,14 @@ fun SignUpThirdFormScreen(
 
             // "성별" 레이블과 성별 선택 필드
             item {
-                Text("성별", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "성별 (선택)",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
                 GenderSelector(selectedGender = gender, onGenderSelect = { gender = it })
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
             // 하단 버튼 영역
@@ -279,14 +315,27 @@ fun SignUpThirdFormScreen(
                                     phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
                                     navController.navigate("login-success-page")
                                 },
-                                onFailure = { errorMessage ->
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                onFailure = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "회원가입 실패",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
                             )
                         },
-                        modifier = Modifier.weight(1f)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(27, 94, 32),
+                            contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .height(54.dp) // 높이 지정
+                            .weight(1f)
                     ) {
-                        Text("건너뛰기")
+                        Text("건너뛰기", fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
@@ -312,69 +361,30 @@ fun SignUpThirdFormScreen(
                                     phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
                                     navController.navigate("login-success-page")
                                 },
-                                onFailure = { errorMessage ->
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                onFailure = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "회원가입 실패",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
                             )
                         },
-                        modifier = Modifier.weight(1f)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(27, 94, 32),
+                            contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .height(54.dp) // 높이 지정
+                            .weight(1f)
                     ) {
-                        Text("회원가입 완료")
+                        Text("회원가입 완료", fontSize = 14.sp)
                     }
                 }
             }
         }
     }
 }
-
-// 프로필 사진 입력 필드 컴포저블 함수
-@Composable
-fun ProfilePictureInputField(
-    profilePictureUri: Uri?,
-    onImageSelected: () -> Unit,
-    onImageRemoved: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(150.dp)
-            .aspectRatio(1f),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .border(2.dp, Color.Gray, shape = CircleShape)
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            if (profilePictureUri != null) {
-                Image(
-                    painter = rememberAsyncImagePainter(profilePictureUri),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-                // 여기에 새로운 이미지를 선택할 수 있는 IconButton 추가
-                IconButton(onClick = { onImageSelected() }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "프로필 사진 변경",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(24.dp) // 아이콘 크기 조정
-                    )
-                }
-            } else {
-                IconButton(onClick = { onImageSelected() }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "프로필 사진 추가",
-                        tint = Color.Gray
-                    )
-                }
-            }
-        }
-    }
-}
-

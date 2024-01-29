@@ -2,7 +2,7 @@ package com.recipia.aos.ui.components.recipe.create
 
 import android.annotation.SuppressLint
 import android.net.Uri
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CornerSize
@@ -39,17 +41,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -68,12 +72,12 @@ import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
 import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
-import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 import com.recipia.aos.ui.model.search.MongoSearchViewModel
+import kotlinx.coroutines.launch
 
 
 /**
- * 레시피 생성 필드
+ * 레시피 생성 컴포저
  */
 @SuppressLint("UnrememberedMutableState")
 @OptIn(
@@ -81,84 +85,53 @@ import com.recipia.aos.ui.model.search.MongoSearchViewModel
     ExperimentalLayoutApi::class
 )
 @Composable
-fun UpdateRecipeScreen(
+fun RecipeCreateScreen(
     navController: NavController,
-    recipeDetailViewModel: RecipeDetailViewModel?, // 작성했던 데이터 받기
     categorySelectionViewModel: CategorySelectionViewModel,
-    recipeCreateModel: RecipeCreateModel,
-    mongoSearchViewModel: MongoSearchViewModel
+    mongoSearchViewModel: MongoSearchViewModel,
+    recipeCreateModel: RecipeCreateModel
 ) {
 
-    // 상태 변수를 사용하여 각 필드에 데이터 바인딩
-    val recipeName = rememberSaveable { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.recipeName ?: "") }
-
-    val recipeDesc = rememberSaveable { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.recipeDesc ?: "") }
-
-    val timeTaken = rememberSaveable { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.timeTaken.toString()) }
-
-    // 기존 이미지 URL들을 Uri 객체로 변환하여 저장할 리스트
-    val selectedImageUris = remember { mutableStateListOf<Uri?>() }
-
-    val nutritionalInfo = remember { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.nutritionalInfoDto ?: NutritionalInfoDto()) } // 영양 정보 상태 변수
-
-    val selectedCategoriesBefore = remember { mutableStateOf(
-        recipeDetailViewModel?.recipeDetail?.value?.subCategoryDtoList ?: emptyList()) }  // 선택된 카테고리 상태 변수
-
+    var recipeName = recipeCreateModel.recipeName.value
+    var recipeDesc = recipeCreateModel.recipeDesc.value
+    var timeTaken = recipeCreateModel.timeTaken.value
+    val nutritionalInfoList = recipeCreateModel.nutritionalInfoList
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
     val showNutritionalInfo = mutableStateOf(false)
+    val selectedIngredients by mongoSearchViewModel.selectedIngredients.collectAsState()
+    val selectedHashtags by mongoSearchViewModel.selectedHashtags.collectAsState()
+    var selectedImageUris = recipeCreateModel.selectedImageUris
+    val selectedCategories = categorySelectionViewModel.selectedCategories.value
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    val scope = rememberCoroutineScope() // 코루틴 스코프 생성
 
     // 필수 필드에 대한 유효성 상태
     val isRecipeNameValid = remember { mutableStateOf(true) }
     val isRecipeDescValid = remember { mutableStateOf(true) }
     val isCategorySelected = remember { mutableStateOf(true) }
 
-    // 문자열을 리스트로 변환하는 함수
-    fun String.toList(): List<String> {
-        return this.split(", ").filter { it.isNotBlank() }
-    }
-
-    // 초기 재료/해시태그 값 세팅
-    LaunchedEffect(key1 = Unit) {
-        val initialIngredients = recipeDetailViewModel?.recipeDetail?.value?.ingredient?.toList() ?: emptyList()
-        val initialHashtags = recipeDetailViewModel?.recipeDetail?.value?.hashtag?.toList() ?: emptyList()
-        mongoSearchViewModel.initializeSelectedIngredientsAndHashtags(initialIngredients, initialHashtags)
-    }
-
-    // 초기 카테고리 값 세팅
-    LaunchedEffect(key1 = recipeDetailViewModel?.recipeDetail?.value?.id) {
-        // List를 Set으로 변환하여 ViewModel에 설정
-        categorySelectionViewModel.initializeCategories(selectedCategoriesBefore.value.toSet())
-    }
-
-    // 초기 이미지에 기존 저장되어있던 이미지 정보 추가
-    LaunchedEffect(key1 = recipeDetailViewModel?.recipeDetail) {
-        recipeDetailViewModel?.recipeDetail?.value?.recipeFileUrlList?.forEach { fileResponse ->
-            selectedImageUris.add(Uri.parse(fileResponse.preUrl))
-        }
-    }
-
-    // selectedCategories의 현재 값을 가져옴
-    val selectedCategories = categorySelectionViewModel.selectedCategories.value
-
-    // mongo Model에서 데이터를 가져온다.
-    val selectedIngredients by mongoSearchViewModel.selectedIngredients.collectAsState()
-    val selectedHashtags by mongoSearchViewModel.selectedHashtags.collectAsState()
-
     // 사진 선택기 선언
     val multiplePhotosPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickMultipleVisualMedia(
-            maxItems = 10
-        ),
-        onResult = {uris ->
-//            selectedImageUris.clear()
-            // 기존 이미지를 유지하면서 새로운 이미지 추가
-            selectedImageUris.addAll(uris)
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 10)
+    ) { uris ->
+        // 이미 선택된 이미지 목록에 없는 이미지만 필터링하여 새로운 이미지를 찾음
+        val newUris = uris.filter { uri -> selectedImageUris.none { it == uri } }
+
+        // 중복된 이미지가 있는지 확인
+        val duplicateUris = uris.size - newUris.size
+
+        // 새로운 이미지가 있으면 목록에 추가
+        if (newUris.isNotEmpty()) {
+            selectedImageUris.addAll(newUris)
         }
-    )
+
+        // 중복된 이미지가 있으면 Snackbar 메시지 표시
+        if (duplicateUris > 0) {
+            scope.launch {
+                snackbarHostState.showSnackbar("이미 추가된 이미지는 중복으로 추가되지 않습니다.")
+            }
+        }
+    }
 
     // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -175,22 +148,27 @@ fun UpdateRecipeScreen(
             }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             containerColor = Color.White,
             topBar = {
                 TopAppBar(
                     modifier = Modifier.background(Color.White),
                     title = {
                         Text(
-                            text = "레시피 수정",
+                            text = "레시피 작성",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = {
-                            categorySelectionViewModel.selectedCategories.value = emptySet() // 카테고리 선택 초기화
-                            mongoSearchViewModel.changeInitialized() // 몽고db 검색 초기값 세팅 후 initial값 변경
-                            categorySelectionViewModel.changeInitialized() // 카테고리 초기값 세팅 후 initial값 변경
                             selectedImageUris.clear() // 이미지 제거
+                            recipeCreateModel.recipeName.value = ""
+                            recipeCreateModel.recipeDesc.value = ""
+                            recipeCreateModel.timeTaken.value = ""
+                            mongoSearchViewModel.resetSelectedIngredients()
+                            mongoSearchViewModel.resetSelectedHashtags()
+                            categorySelectionViewModel.clearCategories()
+                            nutritionalInfoList.clear()
                             navController.popBackStack()
                         }) {
                             Icon(Icons.Default.Close, contentDescription = "닫기")
@@ -205,14 +183,15 @@ fun UpdateRecipeScreen(
             bottomBar = {
                 Button(
                     onClick = {
-                        isRecipeNameValid.value = recipeName.value.isNotBlank()
-                        isRecipeDescValid.value = recipeDesc.value.isNotBlank()
+                        isRecipeNameValid.value = recipeName.isNotBlank()
+                        isRecipeDescValid.value = recipeDesc.isNotBlank()
                         isCategorySelected.value = categorySelectionViewModel.selectedCategories.value.isNotEmpty()
 
                         // 유효성 검증 실시
                         if (isRecipeNameValid.value && isRecipeDescValid.value && isCategorySelected.value) {
 
-                            // 서브 카테고리를 가져오는 로직
+                            // 데이터 전송 로직
+                            val lastNutritionalInfo = nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
                             val subCategoryDtoList =
                                 categorySelectionViewModel.createSubCategoryDtoList(
                                     categorySelectionViewModel.selectedCategories.value
@@ -223,45 +202,52 @@ fun UpdateRecipeScreen(
                             val hashtagsString = selectedHashtags.joinToString(separator = ", ")
 
                             val requestDto = RecipeCreateUpdateRequestDto(
-                                id = recipeDetailViewModel?.recipeDetail?.value?.id, // 수정할 레시피의 ID todo: 여기서 1이 들어옴
-                                recipeName = recipeName.value, // .value를 사용하여 실제 문자열 값 추출
-                                recipeDesc = recipeDesc.value, // .value를 사용하여 실제 문자열 값 추출
-                                timeTaken = timeTaken.value.toIntOrNull() ?: 0,
+                                id = null,
+                                recipeName = recipeName,
+                                recipeDesc = recipeDesc,
+                                timeTaken = timeTaken.toIntOrNull() ?: 0,
                                 ingredient = ingredientsString,
                                 hashtag = hashtagsString,
-                                nutritionalInfo = nutritionalInfo.value, // 수정된 영양 정보 (여기에 id값 넣어줘야함)
+                                nutritionalInfo = lastNutritionalInfo,
                                 subCategoryDtoList = subCategoryDtoList,
                                 deleteFileOrder = listOf()
                             )
 
                             // 모델을 사용하여 서버로 데이터와 이미지 전송
-                            recipeCreateModel.updateRecipeRequest(
+                            recipeCreateModel.createRecipeRequest(
                                 requestDto = requestDto,
                                 imageUris = selectedImageUris,
                                 context = context,
-                                onSuccess = {
+                                onSuccess = { recipeId ->
                                     // 서버로 데이터 전송 성공 후에 상태 초기화
                                     recipeCreateModel.recipeName.value = ""
                                     recipeCreateModel.recipeDesc.value = ""
                                     recipeCreateModel.timeTaken.value = ""
                                     recipeCreateModel.ingredient.value = ""
                                     recipeCreateModel.hashtag.value = ""
-                                    nutritionalInfo.value = NutritionalInfoDto() // 새 NutritionalInfoDto 객체로 초기화
+                                    nutritionalInfoList.clear()
                                     recipeCreateModel.selectedImageUris = mutableStateListOf<Uri?>()
-                                    categorySelectionViewModel.selectedCategories.value = emptySet()
-                                    // MongoSearchViewModel 내의 선택된 재료와 해시태그를 초기화
+                                    categorySelectionViewModel.clearCategories()
                                     mongoSearchViewModel.resetSelectedIngredients()
                                     mongoSearchViewModel.resetSelectedHashtags()
-                                    mongoSearchViewModel.changeInitialized() // 몽고db 검색 초기값 세팅 후 initial값 변경
-                                    categorySelectionViewModel.changeInitialized() // 카테고리 초기값 세팅 후 initial값 변경
 
-                                    Toast.makeText(context, "레시피 업데이트 성공", Toast.LENGTH_SHORT).show()
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "레시피 생성 성공",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
 
                                     // 레시피 상세보기 화면으로 네비게이션
-                                    navController.navigate("recipeDetail/${recipeDetailViewModel?.recipeDetail?.value?.id}")
+                                    navController.navigate("recipeDetail/$recipeId")
                                 }
-                            ) { errorMessage ->
-                                Toast.makeText(context, "레시피 업데이트 실패: $errorMessage", Toast.LENGTH_LONG).show()
+                            ) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "레시피 생성 실패",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         }
                     },
@@ -274,7 +260,7 @@ fun UpdateRecipeScreen(
                     shape = MaterialTheme.shapes.small.copy(CornerSize(10.dp))
                 ) {
                     Text(
-                        "수정하기",
+                        "작성 완료",
                         style = MaterialTheme.typography.labelLarge,
                         color = Color.White
                     )
@@ -334,19 +320,31 @@ fun UpdateRecipeScreen(
 
                 item {
                     // 이미지 썸네일 목록
-                    ImageThumbnails(selectedImageUris) { removedUri ->
-                        // 이미지 제거
-                        selectedImageUris.remove(removedUri)
-                    }
+                    ImageThumbnails(
+                        selectedImageUris = selectedImageUris,
+                        onRemoveImage = { uriToRemove ->
+                            // 이미지 제거 로직
+                            recipeCreateModel.selectedImageUris.remove(uriToRemove)
+                        },
+                        onMove = { fromIndex, toIndex ->
+                            // 순서 변경 로직
+                            // 이미지 순서 변경 로직
+                            val updatedList = selectedImageUris.toMutableList().apply {
+                                add(toIndex, removeAt(fromIndex))
+                            }
+                            recipeCreateModel.selectedImageUris.clear()
+                            recipeCreateModel.selectedImageUris.addAll(updatedList)
+                        }
+                    )
                 }
 
                 // 레시피 이름 작성 필드
                 item {
                     OutlinedTextField(
-                        value = recipeName.value,
-                        onValueChange = { newValue ->
-                            recipeName.value = newValue
-                            isRecipeNameValid.value = newValue.isNotBlank() // 유효성 검사
+                        value = recipeCreateModel.recipeName.value,
+                        onValueChange = {
+                            recipeCreateModel.recipeName.value = it
+                            isRecipeNameValid.value = it.isNotBlank() // 유효성 검사
                         },
                         label = { Text("레시피 이름 (*)") },
                         modifier = Modifier.fillMaxWidth(),
@@ -365,10 +363,10 @@ fun UpdateRecipeScreen(
                 // 레시피 설명 작성 필드
                 item {
                     OutlinedTextField(
-                        value = recipeDesc.value,
-                        onValueChange = { newValue ->
-                            recipeDesc.value = newValue
-                            isRecipeDescValid.value = newValue.isNotBlank() // 유효성 검사
+                        value = recipeCreateModel.recipeDesc.value,
+                        onValueChange = {
+                            recipeCreateModel.recipeDesc.value = it
+                            isRecipeDescValid.value = it.isNotBlank() // 유효성 검사
                         },
                         label = { Text("레시피 설명 (*)") },
                         modifier = Modifier
@@ -389,9 +387,9 @@ fun UpdateRecipeScreen(
                 // 소요 시간 작성 필드
                 item {
                     OutlinedTextField(
-                        value = timeTaken.value,
+                        value = recipeCreateModel.timeTaken.value,
                         onValueChange = { newValue ->
-                            timeTaken.value = newValue
+                            recipeCreateModel.timeTaken.value = newValue
                         },
                         label = { Text("소요 시간 (분)") },
                         modifier = Modifier.fillMaxWidth(),
@@ -429,20 +427,47 @@ fun UpdateRecipeScreen(
                 // 선택된 재료를 AssistChip으로 표시
                 item {
                     FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, end = 4.dp),
                         horizontalArrangement = Arrangement.Start,
                         verticalArrangement = Arrangement.Top,
                         maxItemsInEachRow = Int.MAX_VALUE
                     ) {
                         selectedIngredients.forEach { ingredient ->
-                            ElevatedAssistChip(
-                                onClick = {},
-                                label = { Text(ingredient) },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = Color(200, 230, 201),
-                                    labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                            Box(contentAlignment = Alignment.TopEnd) {
+                                ElevatedAssistChip(
+                                    onClick = {
+                                        // 클릭한 재료 삭제
+                                        mongoSearchViewModel.removeSelectedIngredient(ingredient)
+                                    },
+                                    label = { Text(ingredient) },
+                                    colors = AssistChipDefaults.assistChipColors(
+                                        containerColor = Color(200, 230, 201),
+                                        labelColor = Color.Black
+                                    ),
+                                    border = AssistChipDefaults.assistChipBorder(
+                                        borderColor = Color(189, 189, 189)
+                                    )
                                 )
-                            )
+                                IconButton(
+                                    onClick = {
+                                        // 클릭한 재료 삭제
+                                        mongoSearchViewModel.removeSelectedIngredient(ingredient)
+                                    },
+                                    modifier = Modifier
+                                        .size(20.dp) // 아이콘 버튼의 크기 조절
+                                        .offset(x = (1).dp, y = 7.dp) // 아이콘 버튼을 우측 상단으로 조정
+                                        .padding(0.dp) // 필요한 경우 패딩 조정
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "삭제",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(12.dp) // 아이콘 크기 조절
+                                    )
+                                }
+                            }
                             Spacer(modifier = Modifier.width(4.dp)) // 여백 추가
                         }
                     }
@@ -469,20 +494,47 @@ fun UpdateRecipeScreen(
                 // 선택된 해시태그를 AssistChip으로 표시
                 item {
                     FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, end = 4.dp),
                         horizontalArrangement = Arrangement.Start,
                         verticalArrangement = Arrangement.Top,
                         maxItemsInEachRow = Int.MAX_VALUE
                     ) {
                         selectedHashtags.forEach { hashtag ->
-                            ElevatedAssistChip(
-                                onClick = {},
-                                label = { Text("#$hashtag") },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = Color(200, 230, 201),
-                                    labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                            Box(contentAlignment = Alignment.TopEnd) {
+                                ElevatedAssistChip(
+                                    onClick = {
+                                        // 클릭한 해시태그 삭제
+                                        mongoSearchViewModel.removeSelectedHashtag(hashtag)
+                                    },
+                                    label = { Text("#$hashtag") },
+                                    colors = AssistChipDefaults.assistChipColors(
+                                        containerColor = Color(200, 230, 201),
+                                        labelColor = Color.Black
+                                    ),
+                                    border = AssistChipDefaults.assistChipBorder(
+                                        borderColor = Color(189, 189, 189)
+                                    )
                                 )
-                            )
+                                IconButton(
+                                    onClick = {
+                                        // 클릭한 해시태그 삭제
+                                        mongoSearchViewModel.removeSelectedHashtag(hashtag)
+                                    },
+                                    modifier = Modifier
+                                        .size(20.dp) // 아이콘 버튼의 크기 조절
+                                        .offset(x = (1).dp, y = 7.dp) // 아이콘 버튼을 우측 상단으로 조정
+                                        .padding(0.dp) // 필요한 경우 패딩 조정
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "삭제",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(12.dp) // 아이콘 크기 조절
+                                    )
+                                }
+                            }
                             Spacer(modifier = Modifier.width(4.dp)) // 여백 추가
                         }
                     }
@@ -510,28 +562,52 @@ fun UpdateRecipeScreen(
                     }
                 }
 
-                // 카테고리 정보 표시
+                // RecipeCreateScreen 내에서 ElevatedAssistChip 수정
                 item {
                     // 선택한 카테고리를 가로로 나열하기 위해 Row 사용
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         // 각 AssistChip과 Spacer를 추가
                         selectedCategories.forEachIndexed { index, category ->
-                            ElevatedAssistChip(
-                                onClick = { /* 각 AssistChip 클릭 시 동작 */ },
-                                label = {
-                                    Text(
-                                        category.subCategoryNm.toString(),
-                                        fontSize = 12.sp, // 글씨 크기 조절
+                            Box(contentAlignment = Alignment.TopEnd) {
+                                ElevatedAssistChip(
+                                    onClick = {
+                                        // 여기서 클릭한 카테고리 삭제
+                                        categorySelectionViewModel.removeSelectedCategory(category)
+                                    },
+                                    label = {
+                                        Text(
+                                            category.subCategoryNm.toString(),
+                                            fontSize = 12.sp, // 글씨 크기 조절
+                                        )
+                                    },
+                                    colors = AssistChipDefaults.assistChipColors(
+                                        containerColor = Color(200, 230, 201),
+                                        labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
+                                    ),
+                                    border = AssistChipDefaults.assistChipBorder(
+                                        borderColor = Color(189, 189, 189)
                                     )
-                                },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = Color(200, 230, 201),
-                                    labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
-                                ),
-                                border = AssistChipDefaults.assistChipBorder(
-                                    borderColor = Color(189, 189, 189)
                                 )
-                            )
+                                IconButton(
+                                    onClick = {
+                                        // 여기서 클릭한 카테고리 삭제
+                                        categorySelectionViewModel.removeSelectedCategory(category)
+                                    },
+                                    modifier = Modifier
+                                        .size(20.dp) // 아이콘 버튼의 크기 조절
+                                        .offset(x = (1).dp, y = 7.dp) // 아이콘 버튼을 우측 상단으로 조정
+                                        .padding(0.dp) // 필요한 경우 패딩 조정
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "삭제",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(12.dp) // 아이콘 크기 조절
+                                    )
+                                }
+                            }
 
                             // Spacer를 추가하여 간격 설정
                             if (index < selectedCategories.size - 1) {
@@ -562,16 +638,33 @@ fun UpdateRecipeScreen(
                 // 영양소 입력 영역
                 if (showNutritionalInfo.value) {
                     item {
+                        Spacer(modifier = Modifier.height(10.dp))
+
                         NutritionalInfoInputScreen(
-                            nutritionalInfo = nutritionalInfo.value,
-                            onNutritionalInfoChanged = { updatedInfo ->
-                                nutritionalInfo.value = updatedInfo
-                            }
-                        )
+                            nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
+                        ) { updatedInfo ->
+                            // 사용자가 입력한 영양소 정보 가져오기
+                            val carbohydrates = updatedInfo.carbohydrates
+                            val protein = updatedInfo.protein
+                            val fat = updatedInfo.fat
+                            val vitamins = updatedInfo.vitamins
+                            val minerals = updatedInfo.minerals
+
+                            // 영양소 정보를 NutritionalInfoDto 객체로 생성
+                            val nutritionalInfoDto = NutritionalInfoDto(
+                                carbohydrates = carbohydrates,
+                                protein = protein,
+                                fat = fat,
+                                vitamins = vitamins,
+                                minerals = minerals
+                            )
+
+                            // 생성된 NutritionalInfoDto 객체를 nutritionalInfoList에 추가
+                            nutritionalInfoList.add(nutritionalInfoDto)
+                        }
                     }
                 }
             }
         }
     }
 }
-

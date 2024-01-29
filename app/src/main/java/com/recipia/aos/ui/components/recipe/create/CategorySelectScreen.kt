@@ -26,6 +26,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,8 +47,7 @@ import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 @Composable
 fun CategorySelectScreen(
     navController: NavController, // NavController 인자 추가
-    viewModel: CategorySelectionViewModel,
-    onSelectedCategories: (Set<Int>) -> Unit // 콜백 함수 추가
+    viewModel: CategorySelectionViewModel
 ) {
     val subCategories = listOf(
         SubCategory(2, "냉면", 1),
@@ -133,9 +134,13 @@ fun CategorySelectScreen(
     // 서브카테고리를 categoryId 별로 그룹화
     val groupedSubCategories = subCategories.groupBy { it.categoryId }
 
-    // 선택된 서브 카테고리를 추적하는 상태
-    var selectedSubCategories by remember { mutableStateOf(setOf<SubCategoryDto>()) }
 
+    // 선택된 서브 카테고리를 추적하는 상태 : viewModel에서 가져온 selectedCategories를 초기값으로 설정
+    var selectedSubCategories by remember {
+        mutableStateOf(viewModel.selectedCategories.value.map { subCategoryDto ->
+            SubCategoryDto(subCategoryDto.id, subCategoryDto.subCategoryNm)
+        }.toSet())
+    }
 
     Scaffold(
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
@@ -145,7 +150,6 @@ fun CategorySelectScreen(
                 title = { },
                 navigationIcon = {
                     IconButton(onClick = {
-                        viewModel.selectedCategories.value = emptySet() // 카테고리 선택 초기화
                         navController.popBackStack()
                     }) {
                         Icon(Icons.Default.Close, contentDescription = "닫기")
@@ -157,6 +161,7 @@ fun CategorySelectScreen(
                 ),
             )
         },
+
         bottomBar = {
             Button(
                 onClick = {

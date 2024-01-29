@@ -1,6 +1,5 @@
 package com.recipia.aos.ui.components.signup
 
-import android.widget.Toast
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,15 +13,20 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -39,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -47,10 +51,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.signup.function.InputField
 import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -59,8 +65,6 @@ fun SignUpSecondFormScreen(
     signUpViewModel: SignUpViewModel,
     phoneNumberAuthViewModel: PhoneNumberAuthViewModel
 ) {
-    // Toast메시지를 위한 context 선언
-    val context = LocalContext.current
 
     // ViewModel에서 각 입력 필드의 현재 값을 가져옴
     val currentName by signUpViewModel.name.collectAsState()
@@ -92,12 +96,11 @@ fun SignUpSecondFormScreen(
     val confirmPasswordFocusRequester = remember { FocusRequester() }
 
     val emailDuplicateCheckResult by signUpViewModel.emailDuplicateCheckResult.observeAsState()
-    val isEmailVerified by signUpViewModel.isEmailVerified.observeAsState()
     val isPasswordMatching by signUpViewModel.isPasswordMatching.observeAsState()
     val nicknameDuplicateCheckResult by signUpViewModel.nicknameDuplicateCheckResult.observeAsState()
-
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
     val listState = rememberLazyListState()
-    val focusRequester = remember { FocusRequester() }
 
 
     // AlertDialog를 표시할지 여부를 관리하는 상태
@@ -105,22 +108,38 @@ fun SignUpSecondFormScreen(
 
     if (showDialog) {
         AlertDialog(
+            containerColor = Color.White, // AlertDialog 배경색을 하얀색으로 설정
+            textContentColor = Color.Black, // 글자색을 검정색으로 설정
             onDismissRequest = { showDialog = false },
-            title = { Text("주의") },
-            text = { Text("뒤로 가시면 입력했던 모든 정보가 초기화 되며 다시 회원가입을 진행하셔야 합니다.") },
+            title = { Text("주의", color = Color.Black) },
+            text = { Text("뒤로 이동하시면 입력했던 모든 정보가 초기화 되며 다시 회원가입을 진행하셔야 합니다.", color = Color.Black) },
             confirmButton = {
-                Button(onClick = {
-                    signUpViewModel.clearData() // SignUpViewModel 초기화
-                    phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
-                    showDialog = false
-                    navController.navigate("login") // "login" 화면으로 이동
-                }) {
-                    Text("확인")
+                Button(
+                    onClick = {
+                        signUpViewModel.clearData() // SignUpViewModel 초기화
+                        phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
+                        showDialog = false
+                        navController.navigate("login") // "login" 화면으로 이동
+                    },
+                    shape = RoundedCornerShape(4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(27, 94, 32),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("확인", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                Button(onClick = { showDialog = false }) {
-                    Text("취소")
+                Button(
+                    onClick = { showDialog = false },
+                    shape = RoundedCornerShape(4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(27, 94, 32),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("취소", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         )
@@ -174,7 +193,6 @@ fun SignUpSecondFormScreen(
 
     // 이메일 형식을 확인하는 정규식
     val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+".toRegex()
-
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Box(
@@ -189,12 +207,14 @@ fun SignUpSecondFormScreen(
             }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
                 TopAppBar(
                     title = {
                         Text(
                             text = "회원가입 (2/3)",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black
                         )
                     },
                     navigationIcon = {
@@ -215,11 +235,23 @@ fun SignUpSecondFormScreen(
                     .fillMaxSize()
                     .imePadding() // 키보드가 활성화될 때 패딩 적용
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp)
-                .fillMaxHeight(), // 화면 크기에 맞게 최대 높이로 설정
-//                horizontalAlignment = Alignment.CenterHorizontally,
+                    .padding(horizontal = 9.dp)
+                    .fillMaxHeight(), // 화면 크기에 맞게 최대 높이로 설정
                 verticalArrangement = Arrangement.Top
             ) {
+
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+
+                // 각 입력 필드 및 검증 로직...
+                item {
+                    Text(
+                        text = "모든 입력값과 중복체크는 필수입니다.",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        modifier = Modifier.padding(start = 9.dp)
+                    )
+                }
 
                 item { Spacer(modifier = Modifier.height(10.dp)) }
 
@@ -259,13 +291,25 @@ fun SignUpSecondFormScreen(
                         Button(
                             onClick = {
                                 signUpViewModel.checkDuplicateNickname(nickname) { errorMessage ->
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                    // 오류 발생 시 스낵바 알림
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = errorMessage,
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
                             },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(27, 94, 32),
+                                contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                            ),
+                            shape = RoundedCornerShape(4.dp),
                             modifier = Modifier
+                                .align(Alignment.CenterVertically)
                                 .weight(0.3f)
-                                .height(70.dp)
-                                .padding(top = 18.dp)
+                                .height(54.dp) // 높이 지정
+                                .padding(start = 8.dp, end = 8.dp) // 오른쪽 여백 추가
                         ) {
                             Text("중복체크")
                         }
@@ -278,12 +322,12 @@ fun SignUpSecondFormScreen(
                         Text(
                             text = nicknameDuplicateCheckResult!!,
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = if (nicknameDuplicateCheckResult == "사용가능한 닉네임입니다.") Color(
+                            color = if (nicknameDuplicateCheckResult == "사용 가능한 닉네임입니다.") Color(
                                 0xFF006633
                             ) else Color.Red,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 9.dp, bottom = 4.dp),
+                                .padding(start = 9.dp, bottom = 8.dp),
                             textAlign = TextAlign.Start
                         )
                     }
@@ -319,13 +363,24 @@ fun SignUpSecondFormScreen(
                         Button(
                             onClick = {
                                 signUpViewModel.checkDuplicateEmail(email) { errorMessage ->
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = errorMessage,
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
                             },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(27, 94, 32),
+                                contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                            ),
+                            shape = RoundedCornerShape(4.dp),
                             modifier = Modifier
+                                .align(Alignment.CenterVertically)
                                 .weight(0.3f)
-                                .height(70.dp)
-                                .padding(top = 18.dp)
+                                .height(54.dp) // 높이 지정
+                                .padding(start = 8.dp, end = 8.dp) // 오른쪽 여백 추가
                         ) {
                             Text("중복체크")
                         }
@@ -338,12 +393,12 @@ fun SignUpSecondFormScreen(
                         Text(
                             text = emailDuplicateCheckResult!!,
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = if (emailDuplicateCheckResult == "사용가능한 이메일입니다.") Color(
+                            color = if (emailDuplicateCheckResult == "사용 가능한 이메일입니다.") Color(
                                 0xFF006633
                             ) else Color.Red,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 9.dp, bottom = 4.dp),
+                                .padding(start = 9.dp, bottom = 8.dp),
                             textAlign = TextAlign.Start
                         )
                     }
@@ -404,7 +459,6 @@ fun SignUpSecondFormScreen(
                         isPasswordConfirm = true,
                         modifier = Modifier
                             .imePadding() // 키보드가 활성화될 때 패딩 적용
-                            .padding(bottom = 4.dp) // 키보드와 겹치지 않도록 하기 위한 패딩 추가
                     )
 
                     // 비밀번호 일치 메시지 표시
@@ -415,7 +469,7 @@ fun SignUpSecondFormScreen(
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 9.dp, top = 2.dp),
+                                .padding(start = 9.dp),
                             textAlign = TextAlign.Start
                         )
                     }
@@ -427,7 +481,7 @@ fun SignUpSecondFormScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 16.dp),
+                            .padding(vertical = 16.dp, horizontal = 8.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         // 사용자가 "다음" 버튼을 클릭했을 때 데이터 업데이트
@@ -435,8 +489,8 @@ fun SignUpSecondFormScreen(
                             onClick = {
                                 validateFields()
                                 if (emailError.isBlank() && passwordError.isBlank() &&
-                                    emailDuplicateCheckResult == "사용가능한 이메일입니다." &&
-                                    nicknameDuplicateCheckResult == "사용가능한 닉네임입니다." &&
+                                    emailDuplicateCheckResult == "사용 가능한 이메일입니다." &&
+                                    nicknameDuplicateCheckResult == "사용 가능한 닉네임입니다." &&
                                     isPasswordMatching == true
                                 ) {
 
@@ -450,13 +504,28 @@ fun SignUpSecondFormScreen(
                                     navController.navigate("signUpThirdForm")
                                 }
                             },
+                            shape = RoundedCornerShape(4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (emailError.isBlank() && passwordError.isBlank() &&
+                                    emailDuplicateCheckResult == "사용 가능한 이메일입니다." &&
+                                    nicknameDuplicateCheckResult == "사용 가능한 닉네임입니다." &&
+                                    isPasswordMatching == true
+                                ) Color(
+                                    27,
+                                    94,
+                                    32
+                                ) else Color.LightGray, // 유효한 번호일 때와 아닐 때의 색상 설정
+                                contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                            ),
                             enabled = emailError.isBlank() && passwordError.isBlank() &&
-                                    emailDuplicateCheckResult == "사용가능한 이메일입니다." &&
-                                    nicknameDuplicateCheckResult == "사용가능한 닉네임입니다." &&
+                                    emailDuplicateCheckResult == "사용 가능한 이메일입니다." &&
+                                    nicknameDuplicateCheckResult == "사용 가능한 닉네임입니다." &&
                                     isPasswordMatching == true,
                             modifier = Modifier
-                                .weight(1f)
                                 .fillMaxWidth()
+                                .align(Alignment.CenterVertically)
+                                .height(62.dp) // 높이 지정
+                                .padding(top = 6.dp),
                         ) {
                             Text("다음")
                         }

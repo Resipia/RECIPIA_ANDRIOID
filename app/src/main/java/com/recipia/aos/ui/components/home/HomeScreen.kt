@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -69,14 +70,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.recipia.aos.R
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.HorizontalDivider
+import com.recipia.aos.ui.components.common.AnimatedPreloader
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
@@ -101,7 +98,7 @@ fun HomeScreen(
     val isLoading by recipeAllListViewModel.isLoading.observeAsState(initial = false)
     val loadFailed by recipeAllListViewModel.loadFailed.observeAsState(initial = false)
     val navigateToLogin by recipeAllListViewModel.navigateToLogin.observeAsState(initial = false)
-    val snackBarMessage by bookmarkViewModel.toastMessage.observeAsState()
+    val snackBarMessage by bookmarkViewModel.snackBarMessage.observeAsState()
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
@@ -215,7 +212,7 @@ fun HomeScreen(
                 message = it, // 스낵바에 표시할 메시지
                 duration = SnackbarDuration.Short // 스낵바가 표시되는 시간
             )
-            bookmarkViewModel.toastMessage.value = null // 메시지 초기화
+            bookmarkViewModel.snackBarMessage.value = null // 메시지 초기화
         }
     }
 
@@ -327,7 +324,7 @@ fun HomeScreen(
             ) {
                 // 로딩 중이라면 로딩 인디케이터 표시
                 if (isLoading) {
-                    AnimatedPreloader(modifier = Modifier.size(100.dp)) // 로딩 바의 크기 조절 가능
+                    AnimatedPreloader(modifier = Modifier.size(100.dp))
                 } else {
                     LazyColumn(
                         contentPadding = PaddingValues(
@@ -347,6 +344,7 @@ fun HomeScreen(
                                         .fillMaxWidth()
                                         .padding(top = 8.dp)
                                 ) {
+                                    // 최상단 카테고리 조회 아이콘
                                     AssistChip(
                                         onClick = {
                                             navController.navigate("category-recipe-search")
@@ -370,7 +368,10 @@ fun HomeScreen(
 //                                        elevation = null, // 그림자 제거
                                         border = null, // 테두리 제거
                                     )
+
                                     Spacer(modifier = Modifier.width(8.dp)) // 칩 사이의 간격
+
+                                    // 최상단 정렬 아이콘
                                     AssistChip(
                                         onClick = { /* 두 번째 AssistChip 클릭 시 동작 */ },
                                         label = {
@@ -476,7 +477,7 @@ fun ListItem(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 2.dp),
+                            .padding(start = 1.dp, bottom = 2.dp),
                         verticalAlignment = Alignment.CenterVertically // 여기에 추가
                     ) {
                         // 닉네임
@@ -536,13 +537,14 @@ fun ListItem(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 13.sp, // 글씨 크기를 줄임 (기존 값보다 작게 설정)
-                        modifier = Modifier.padding(end = 16.dp) // 오른쪽에 패딩 추가
+                        modifier = Modifier.padding(start = 1.dp, end = 16.dp) // 오른쪽에 패딩 추가
                     )
 
                     // 서브 카테고리 Assist Chips
                     if (item.subCategoryList.isNotEmpty()) {
                         Row(
-                            modifier = Modifier.padding(top = 2.dp)
+                            modifier = Modifier.padding(top = 2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp) // AssistChip 사이의 간격을 조절
                         ) {
                             item.subCategoryList.take(3).forEach { subCategory ->
                                 AssistChip(
@@ -568,27 +570,3 @@ fun ListItem(
         )
     }
 }
-
-@Composable
-fun AnimatedPreloader(modifier: Modifier = Modifier) {
-    val preloaderLottieComposition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(
-            R.raw.loading // 여기에 애니메이션 리소스를 지정합니다.
-        )
-    )
-
-    val preloaderProgress by animateLottieCompositionAsState(
-        preloaderLottieComposition,
-        iterations = LottieConstants.IterateForever,
-        isPlaying = true
-    )
-
-    // Lottie 애니메이션을 화면에 표시합니다.
-    // `modifier` 매개변수를 사용하여 사이즈 조절
-    LottieAnimation(
-        composition = preloaderLottieComposition,
-        progress = preloaderProgress,
-        modifier = modifier.size(100.dp) // 여기에서 원하는 크기로 조절합니다.
-    )
-}
-

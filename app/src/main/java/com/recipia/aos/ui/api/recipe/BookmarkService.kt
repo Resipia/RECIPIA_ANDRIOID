@@ -11,9 +11,13 @@ interface BookmarkService {
 
     // 북마크 추가
     @POST("/recipe/addBookmark")
-    fun addBookmark(@Body request: BookmarkRequestDto): Call<ResponseDto<Long>>
+    fun addBookmark(
+        @Body request: BookmarkRequestDto
+    ): Call<ResponseDto<Long>>
 
     // 북마크 삭제
     @POST("/recipe/removeBookmark")
-    fun removeBookmark(@Query("bookmarkId") bookmarkId: Long): Call<ResponseDto<Void>>
+    fun removeBookmark(
+        @Query("bookmarkId") bookmarkId: Long
+    ): Call<ResponseDto<Void>>
 }

@@ -18,11 +18,13 @@ import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageRecipeListScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
+import com.recipia.aos.ui.components.mypage.function.profile.ProfileEditScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
-import com.recipia.aos.ui.components.recipe.create.CreateRecipeScreen
-import com.recipia.aos.ui.components.recipe.create.UpdateRecipeScreen
+import com.recipia.aos.ui.components.recipe.create.RecipeCreateScreen
+import com.recipia.aos.ui.components.recipe.update.RecipeUpdateScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
-import com.recipia.aos.ui.components.search.MongoIngredientAndHashTagSearchScreen
+import com.recipia.aos.ui.components.recipe.detail.comment.CommentPageScreen
+import com.recipia.aos.ui.components.recipe.search.MongoIngredientAndHashTagSearchScreen
 import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSuccessScreen
@@ -34,6 +36,7 @@ import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
 import com.recipia.aos.ui.model.factory.CommentViewModelFactory
 import com.recipia.aos.ui.model.factory.FollowViewModelFactory
+import com.recipia.aos.ui.model.factory.LikeViewModelFactory
 import com.recipia.aos.ui.model.factory.MongoSearchViewModelFactory
 import com.recipia.aos.ui.model.factory.MyPageViewModelFactory
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
@@ -46,6 +49,7 @@ import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
+import com.recipia.aos.ui.model.recipe.like.LikeViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 import com.recipia.aos.ui.model.search.MongoSearchViewModel
@@ -92,6 +96,9 @@ fun AppNavigation(
     )
     val commentViewModel: CommentViewModel = viewModel(
         factory = CommentViewModelFactory(tokenManager)
+    )
+    val likeViewModel: LikeViewModel = viewModel(
+        factory = LikeViewModelFactory(tokenManager)
     )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
@@ -176,6 +183,14 @@ fun AppNavigation(
                 tokenManager = tokenManager
             )
         }
+        // 프로필 수정 화면
+        composable("profile-edit") {
+            ProfileEditScreen(
+                navController = navController,
+                myPageViewModel = myPageViewModel,
+                signUpViewModel = signUpViewModel
+            )
+        }
         // 팔로잉/팔로워 페이지
         composable(
             route = "followList/{type}/{memberId}",
@@ -204,14 +219,24 @@ fun AppNavigation(
             RecipeDetailScreen(
                 recipeId = recipeId,
                 recipeDetailViewModel = recipeDetailViewModel,
+                likeViewModel = likeViewModel,
                 commentViewModel = commentViewModel,
+                myPageViewModel = myPageViewModel,
                 navController = navController,
                 tokenManager = tokenManager
             )
         }
+        // 댓글 화면
+        composable(
+            "comment/{recipeId}",
+            arguments = listOf(navArgument("recipeId") { type = NavType.LongType })
+        ) {backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L
+            CommentPageScreen(commentViewModel, navController, recipeId, tokenManager)
+        }
         // 레시피 생성하기
         composable("create-recipe") {
-            CreateRecipeScreen(
+            RecipeCreateScreen(
                 navController,
                 categorySelectionViewModel,
                 mongoSearchViewModel,
@@ -220,7 +245,7 @@ fun AppNavigation(
         }
         // 레시피 수정하기
         composable("update-recipe") {
-            UpdateRecipeScreen(
+            RecipeUpdateScreen(
                 navController = navController,
                 recipeDetailViewModel = recipeDetailViewModel,
                 categorySelectionViewModel = categorySelectionViewModel,
@@ -260,11 +285,7 @@ fun AppNavigation(
         composable("categorySelect") {
             CategorySelectScreen(
                 navController = navController,
-                viewModel = categorySelectionViewModel,
-                onSelectedCategories = { selectedIds ->
-                    println("선택된 서브 카테고리 ID: $selectedIds")
-                    // 여기에서 선택된 ID들을 처리하는 로직을 추가할 수 있음
-                }
+                viewModel = categorySelectionViewModel
             )
         }
     }

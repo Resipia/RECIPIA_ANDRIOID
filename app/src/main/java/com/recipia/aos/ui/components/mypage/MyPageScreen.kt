@@ -1,7 +1,7 @@
 package com.recipia.aos.ui.components.mypage
 
 import TokenManager
-import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -39,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,18 +51,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
+import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
-import com.recipia.aos.ui.components.mypage.detail.FollowStatsSection
-import com.recipia.aos.ui.components.mypage.detail.MyPageFeatureItem
-import com.recipia.aos.ui.components.mypage.detail.PersonalInfoSection
-import com.recipia.aos.ui.components.mypage.detail.ProfileSection
+import com.recipia.aos.ui.components.mypage.function.FollowStatsSection
+import com.recipia.aos.ui.components.mypage.function.MyPageFeatureItem
+import com.recipia.aos.ui.components.mypage.function.PersonalInfoSection
+import com.recipia.aos.ui.components.mypage.function.profile.ProfileSection
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
+import kotlinx.coroutines.launch
 
 /**
- *
+ * 마이페이지 컴포저
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,6 +84,12 @@ fun MyPageScreen(
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
     val targetId = targetMemberId ?: tokenManager.loadMemberId() // memberId 결정
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope() // 코루틴 스코프 생성
+
+    LaunchedEffect(Unit) {
+        myPageViewModel.loadMyPageData(targetId) // 데이터를 불러오는 함수 호출
+    }
 
     // targetMemberId가 존재하면 해당 멤버의 레시피를 가져오고, 그렇지 않으면 기본 마이페이지 기능을 표시
     LaunchedEffect(key1 = targetMemberId) {
@@ -92,13 +102,10 @@ fun MyPageScreen(
     LaunchedEffect(key1 = targetId) { // memberId를 기반으로 데이터 로딩
         myPageViewModel.loadMyPageData(targetId)
     }
-    // 스낵바 설정
-    val snackbarHostState = remember { SnackbarHostState() }
+
 
     Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {
             TopAppBar(
@@ -121,19 +128,42 @@ fun MyPageScreen(
                     }
                     CustomDropdownMenu(
                         expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
+                        onDismissRequest = { menuExpanded = false },
+                        modifier = Modifier.background(Color.White)
                     ) {
                         // 드롭다운 메뉴 아이템들
                         DropdownMenuItem(
-                            text = { Text("수정") },
-                            onClick = { /* 수정 처리 */ }
+                            text = { Text("프로필 수정", color = Color.Black) },
+                            onClick = {
+                                // "profile-edit" 라우트로 이동
+                                navController.navigate("profile-edit")
+                            }
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth(),
+                            thickness = 0.5.dp,
+                            color = Color(222, 226, 230)
                         )
                         DropdownMenuItem(
-                            text = { Text("설정") },
+                            text = { Text("설정", color = Color.Black) },
                             onClick = { /* 설정 처리 */ }
                         )
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth(),
+                            thickness = 0.5.dp,
+                            color = Color(222, 226, 230)
+                        )
                         DropdownMenuItem(
-                            text = { Text("피드백 보내기") },
+                            text = { Text("피드백 보내기", color = Color.Black) },
+                            onClick = { /* 피드백 처리 */ }
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth(),
+                            thickness = 0.5.dp,
+                            color = Color(222, 226, 230)
+                        )
+                        DropdownMenuItem(
+                            text = { Text("문의하기", color = Color.Black) },
                             onClick = { /* 피드백 처리 */ }
                         )
                     }
@@ -207,7 +237,7 @@ fun MyPageScreen(
                         )
 
                     }
-                    
+
                     // targetMemberId가 있을 경우 해당 멤버의 레시피 목록 표시
                     items(myPageViewModel.highCountRecipe.value) { recipe ->
                         MyPageRecipeListItem(
@@ -225,7 +255,7 @@ fun MyPageScreen(
                             onClick = {
                                 myPageViewModel.currentPageType.value =
                                     MyPageViewModel.PageType.BOOKMARK
-                                navController.navigate("select-recipe-screen")
+                                navController.navigate("select-recipe-screen/${myPageData!!.memberId}")
                             }
                         )
                     }
@@ -237,7 +267,7 @@ fun MyPageScreen(
                             onClick = {
                                 myPageViewModel.currentPageType.value =
                                     MyPageViewModel.PageType.LIKE
-                                navController.navigate("select-recipe-screen")
+                                navController.navigate("select-recipe-screen/${myPageData!!.memberId}")
                             }
                         )
                     }
@@ -255,7 +285,12 @@ fun MyPageScreen(
                             title = "문의하기",
                             icon = Icons.Default.QuestionAnswer,
                             onClick = {
-                                Toast.makeText(context, "준비중인 서비스입니다.", Toast.LENGTH_SHORT).show()
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "준비중인 서비스입니다.",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         )
                     }
@@ -273,16 +308,19 @@ fun MyPageScreen(
                             title = "로그아웃",
                             icon = Icons.Default.ExitToApp,
                             onClick = {
-                                // todo: 다이얼로그 띄우기
                                 myPageViewModel.logout(
                                     onSuccess = {
                                         // 성공시 로그인 화면으로 이동
                                         navController.navigate("login")
                                     },
-                                    onError = { errorMessage ->
+                                    onError = {
                                         // 실패시 에러 메시지 표시
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
-                                            .show()
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "로그아웃 실패.",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     }
                                 )
                             }
@@ -294,16 +332,19 @@ fun MyPageScreen(
                             title = "탈퇴",
                             icon = Icons.Default.Delete,
                             onClick = {
-                                // todo: 다이얼로그 띄우기
                                 myPageViewModel.deactivateAccount(
                                     onSuccess = {
                                         // 성공시 로그인 화면으로 이동
                                         navController.navigate("login")
                                     },
-                                    onError = { errorMessage ->
+                                    onError = {
                                         // 실패시 에러 메시지 표시
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
-                                            .show()
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "탈퇴 실패.",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     }
                                 )
                             }
