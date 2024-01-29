@@ -64,6 +64,7 @@ import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.common.AnimatedPreloader
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.model.comment.CommentViewModel
+import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 import kotlinx.coroutines.launch
 
@@ -76,6 +77,7 @@ fun RecipeDetailContent(
     recipeId: Long,
     recipeDetailViewModel: RecipeDetailViewModel,
     commentViewModel: CommentViewModel,
+    myPageViewModel: MyPageViewModel,
     navController: NavController,
     paddingValues: PaddingValues,
     tokenManager: TokenManager
@@ -176,8 +178,12 @@ fun RecipeDetailContent(
                     IconButton(onClick = {
                         // 댓글 목록 초기화 및 홈 화면으로 이동
                         commentViewModel.clearComments()
+
+                        // 마이페이지 관련 데이터도 초기화 시키기(이래야 바로 적용됨)
+                        myPageViewModel.resetItemsAndHighCountRecipe()
                         navController.popBackStack()
-                        navController.navigate("home")
+
+//                        navController.navigate("home")
                     }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,

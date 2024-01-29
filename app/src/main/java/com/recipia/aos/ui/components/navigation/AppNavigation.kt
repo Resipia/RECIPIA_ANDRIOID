@@ -221,6 +221,7 @@ fun AppNavigation(
                 recipeDetailViewModel = recipeDetailViewModel,
                 likeViewModel = likeViewModel,
                 commentViewModel = commentViewModel,
+                myPageViewModel = myPageViewModel,
                 navController = navController,
                 tokenManager = tokenManager
             )

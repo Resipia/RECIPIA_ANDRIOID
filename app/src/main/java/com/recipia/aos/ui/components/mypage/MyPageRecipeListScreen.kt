@@ -61,7 +61,6 @@ import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 @Composable
 fun MyPageRecipeListScreen(
     navController: NavController,
-//    recipeAllListViewModel: RecipeAllListViewModel,
     bookmarkViewModel: BookMarkViewModel,
     myPageViewModel: MyPageViewModel,
     targetMemberId: Long? = null,
@@ -115,13 +114,13 @@ fun MyPageRecipeListScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 85.dp)
+                            .padding(start = 100.dp)
                     ) {
                         Text(
                             text = when (currentPageType) {
-                                MyPageViewModel.PageType.BOOKMARK -> "북마크한 레시피 목록"
-                                MyPageViewModel.PageType.LIKE -> "좋아요한 레시피 목록"
-                                MyPageViewModel.PageType.TARGET_MEMBER -> "타겟 멤버 레시피"
+                                MyPageViewModel.PageType.BOOKMARK -> "북마크한 레시피"
+                                MyPageViewModel.PageType.LIKE -> "좋아요한 레시피"
+                                MyPageViewModel.PageType.TARGET_MEMBER -> "작성한 레시피"
                                 else -> ""
                             },
                             style = MaterialTheme.typography.bodyMedium.copy(

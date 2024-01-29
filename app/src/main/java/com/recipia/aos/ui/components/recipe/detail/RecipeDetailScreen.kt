@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.recipia.aos.ui.components.recipe.detail.comment.BottomSheet
 import com.recipia.aos.ui.components.recipe.detail.content.RecipeDetailContent
 import com.recipia.aos.ui.model.comment.CommentViewModel
+import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.recipe.like.LikeViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 import kotlinx.coroutines.launch
@@ -44,12 +45,12 @@ fun RecipeDetailScreen(
     recipeDetailViewModel: RecipeDetailViewModel,
     likeViewModel: LikeViewModel,
     commentViewModel: CommentViewModel,
+    myPageViewModel: MyPageViewModel,
     navController: NavController,
     tokenManager: TokenManager
 ) {
     var recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
     val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
-    var showDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
@@ -142,6 +143,7 @@ fun RecipeDetailScreen(
             recipeId = recipeId,
             recipeDetailViewModel = recipeDetailViewModel,
             commentViewModel = commentViewModel,
+            myPageViewModel = myPageViewModel,
             navController = navController,
             paddingValues = innerPadding,
             tokenManager = tokenManager
