@@ -297,8 +297,9 @@ fun HomeScreen(
         // 하단의 레시피 작성 버튼 설정
         floatingActionButton = {
             if (showFab) {
+                // 하단에 떠있는 작성 버튼
                 FloatingActionButton(
-                    containerColor = Color(56, 142, 60),
+                    containerColor = Color(27, 94, 32),
                     onClick = { navController.navigate("create-recipe") },
                     modifier = Modifier
                         .height(44.dp) // 높이 설정
@@ -308,12 +309,22 @@ fun HomeScreen(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        Icon(Icons.Filled.Add, "글쓰기", tint = Color.White)
+                        Icon(
+                            Icons.Filled.Add,
+                            "글쓰기",
+                            tint = Color.White
+                        )
                         if (!isScrolled) { // 스크롤 되지 않았을 때만 "작성" 텍스트 표시
                             Spacer(modifier = Modifier.width(2.dp))
-                            Text("작성", fontSize = 16.sp, color = Color.White)
+                            Text(
+                                "작성",
+                                fontSize = 16.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
@@ -573,8 +584,8 @@ fun ListItem(
 
                             Icon(
                                 imageVector = icon,
-                                contentDescription = "즐겨찾기",
-                                tint = Color(56, 142, 60)
+                                contentDescription = "북마크",
+                                tint = Color(27, 94, 32)
                             )
                         }
                     }

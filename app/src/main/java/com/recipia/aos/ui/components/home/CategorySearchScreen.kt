@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.dto.Category
 import com.recipia.aos.ui.dto.SubCategory
 import com.recipia.aos.ui.dto.SubCategoryDto
@@ -176,13 +179,14 @@ fun CategorySelectRecipeScreen(
                     .fillMaxWidth()
                     .padding(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(56, 142, 60)
+                    containerColor = Color(27, 94, 32)
                 ),
                 shape = MaterialTheme.shapes.small.copy(CornerSize(10.dp))
             ) {
                 Text(
                     "조회하기",
                     style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
             }
@@ -207,8 +211,19 @@ fun CategorySelectRecipeScreen(
                         Text(
                             categoryName,
                             style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
+                            fontWeight = FontWeight.Bold,
+                            color = Color(27, 94, 32),
                             modifier = Modifier.padding(vertical = 12.dp)
                         )
+
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth(), // 전체 너비를 채우도록 설정
+                            thickness = 1.dp, // 구분선의 두께 설정
+                            color = Color(222, 226, 230) // 구분선의 색상 설정
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
 
                     item {
