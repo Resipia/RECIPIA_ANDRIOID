@@ -1,6 +1,7 @@
 package com.recipia.aos.ui.components.mypage
 
 import TokenManager
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
+import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.components.mypage.function.FollowStatsSection
 import com.recipia.aos.ui.components.mypage.function.MyPageFeatureItem
@@ -126,26 +128,42 @@ fun MyPageScreen(
                     }
                     CustomDropdownMenu(
                         expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
+                        onDismissRequest = { menuExpanded = false },
+                        modifier = Modifier.background(Color.White)
                     ) {
                         // 드롭다운 메뉴 아이템들
                         DropdownMenuItem(
-                            text = { Text("수정하기") },
+                            text = { Text("프로필 수정", color = Color.Black) },
                             onClick = {
                                 // "profile-edit" 라우트로 이동
                                 navController.navigate("profile-edit")
                             }
                         )
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth(),
+                            thickness = 0.5.dp,
+                            color = Color(222, 226, 230)
+                        )
                         DropdownMenuItem(
-                            text = { Text("설정") },
+                            text = { Text("설정", color = Color.Black) },
                             onClick = { /* 설정 처리 */ }
                         )
-                        DropdownMenuItem(
-                            text = { Text("피드백 보내기") },
-                            onClick = { /* 피드백 처리 */ }
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth(),
+                            thickness = 0.5.dp,
+                            color = Color(222, 226, 230)
                         )
                         DropdownMenuItem(
-                            text = { Text("문의하기") },
+                            text = { Text("피드백 보내기", color = Color.Black) },
+                            onClick = { /* 피드백 처리 */ }
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth(),
+                            thickness = 0.5.dp,
+                            color = Color(222, 226, 230)
+                        )
+                        DropdownMenuItem(
+                            text = { Text("문의하기", color = Color.Black) },
                             onClick = { /* 피드백 처리 */ }
                         )
                     }
