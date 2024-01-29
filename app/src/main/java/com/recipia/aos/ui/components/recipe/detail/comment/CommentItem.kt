@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -155,12 +156,7 @@ fun CommentItem(
                 onClick = { showDialog = true },
                 modifier = Modifier
                     .height(40.dp)
-                    .padding(
-                        start = 4.dp,
-                        top = 4.dp,
-                        end = 16.dp,
-                        bottom = 8.dp
-                    )
+                    .padding(start = 4.dp, top = 4.dp, end = 16.dp, bottom = 8.dp)
                     .width(48.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
@@ -183,24 +179,38 @@ fun CommentItem(
             // 삭제 확인 다이얼로그
             if (showDialog) {
                 AlertDialog(
+                    containerColor = Color.White, // AlertDialog 배경색을 하얀색으로 설정
+                    textContentColor = Color.Black, // 글자색을 검정색으로 설정
                     onDismissRequest = { showDialog = false },
-                    title = { Text("삭제 확인") },
-                    text = { Text("이 댓글을 삭제하시겠습니까?") },
+                    title = { Text("삭제 확인", color = Color.Black) },
+                    text = { Text("정말 작성하신 댓글을 삭제하시겠습니까?", color = Color.Black) },
                     confirmButton = {
-                        Button(onClick = {
-                            commentViewModel.requestDeleteComment(commentDto.id, recipeId)
-                            showDialog = false  // 다이얼로그 닫기
-                        }) {
-                            Text("확인")
+                        Button(
+                            onClick = {
+                                commentViewModel.requestDeleteComment(commentDto.id, recipeId)
+                                showDialog = false  // 다이얼로그 닫기
+                            },
+                            shape = RoundedCornerShape(4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(27, 94, 32),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text("확인", color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     },
                     dismissButton = {
-                        Button(onClick = { showDialog = false }) {
-                            Text("취소")
+                        Button(
+                            onClick = { showDialog = false },
+                            shape = RoundedCornerShape(4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(27, 94, 32),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text("취소", color = Color.White, fontWeight = FontWeight.Bold)
                         }
-                    },
-                    containerColor = Color.White,  // 배경색을 하얀색으로 설정
-                    textContentColor = MaterialTheme.colorScheme.secondary  // 텍스트 색상을 테마의 onSurface 색상으로 설정
+                    }
                 )
             }
         }
