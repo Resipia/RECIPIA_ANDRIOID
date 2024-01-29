@@ -73,7 +73,6 @@ fun RecipeDetailContent(
     recipeId: Long,
     recipeDetailViewModel: RecipeDetailViewModel,
     commentViewModel: CommentViewModel,
-    likeViewModel: LikeViewModel,
     navController: NavController,
     paddingValues: PaddingValues,
     tokenManager: TokenManager
@@ -84,8 +83,6 @@ fun RecipeDetailContent(
     var menuExpanded by remember { mutableStateOf(false) }
     val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
     var showDialog by remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
-    val coroutineScope = rememberCoroutineScope()
 
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
@@ -221,35 +218,6 @@ fun RecipeDetailContent(
                                         .padding(horizontal = 16.dp)
                                 )
                             }
-
-                            // todo: 좋아요
-                            val isLiked =
-                                recipeDetailState.value?.recipeLikeId != null && recipeDetailState.value?.recipeLikeId != 0L
-                            Icon(
-                                imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                                contentDescription = "좋아요",
-                                modifier = Modifier.clickable {
-                                    // 현재 좋아요 상태에 따라 좋아요 추가 또는 삭제 처리
-                                    val recipeLikeId =
-                                        if (isLiked) recipeDetailState.value?.recipeLikeId else null
-                                    // 좋아요 아이콘 클릭 이벤트 내부
-                                    likeViewModel.toggleRecipeLike(
-                                        recipeLikeId,
-                                        recipeId,
-                                        currentUserMemberId,
-                                        onSuccess = { updatedLikeId ->
-                                            // 성공 시 (레시피 상세보기 모델의) 좋아요 상태 업데이트
-                                            recipeDetailViewModel.updateRecipeLikeId(updatedLikeId)
-                                        },
-                                        onError = { error ->
-                                            coroutineScope.launch {
-                                                snackbarHostState.showSnackbar("좋아요 실패")
-                                            }
-                                            // 에러 처리, 예를 들어 토스트 메시지 표시
-                                        })
-                                },
-                                tint = if (isLiked) Color.Red else Color.Gray
-                            )
 
                             // todo: 북마크
                         }
