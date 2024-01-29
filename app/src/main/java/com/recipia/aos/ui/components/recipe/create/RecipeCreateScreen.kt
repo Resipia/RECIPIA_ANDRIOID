@@ -112,12 +112,25 @@ fun RecipeCreateScreen(
 
     // 사진 선택기 선언
     val multiplePhotosPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickMultipleVisualMedia(
-            maxItems = 10
-        )
-    ) {
-        recipeCreateModel.selectedImageUris.addAll(it)
-        Log.d("selectedImageUris", "received: ${selectedImageUris.joinToString { uri -> uri.toString() }}")
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 10)
+    ) { uris ->
+        // 이미 선택된 이미지 목록에 없는 이미지만 필터링하여 새로운 이미지를 찾음
+        val newUris = uris.filter { uri -> selectedImageUris.none { it == uri } }
+
+        // 중복된 이미지가 있는지 확인
+        val duplicateUris = uris.size - newUris.size
+
+        // 새로운 이미지가 있으면 목록에 추가
+        if (newUris.isNotEmpty()) {
+            selectedImageUris.addAll(newUris)
+        }
+
+        // 중복된 이미지가 있으면 Snackbar 메시지 표시
+        if (duplicateUris > 0) {
+            scope.launch {
+                snackbarHostState.showSnackbar("이미 추가된 이미지는 중복으로 추가되지 않습니다.")
+            }
+        }
     }
 
     // 키보드 컨트롤러 (터치시 키보드 닫히게 하기)
@@ -315,9 +328,13 @@ fun RecipeCreateScreen(
                         },
                         onMove = { fromIndex, toIndex ->
                             // 순서 변경 로직
-                            val updatedList = recipeCreateModel.selectedImageUris.toMutableList()
-                            val item = updatedList.removeAt(fromIndex)
-                            updatedList.add(toIndex, item)
+                            // 이미지 순서 변경 로직
+                            val updatedList = selectedImageUris.toMutableList().apply {
+                                add(toIndex, removeAt(fromIndex))
+                            }
+//                            val updatedList = recipeCreateModel.selectedImageUris.toMutableList()
+//                            updatedList.add(toIndex, item)
+//                            val item = updatedList.removeAt(fromIndex)
                             recipeCreateModel.selectedImageUris.clear()
                             recipeCreateModel.selectedImageUris.addAll(updatedList)
                         }
