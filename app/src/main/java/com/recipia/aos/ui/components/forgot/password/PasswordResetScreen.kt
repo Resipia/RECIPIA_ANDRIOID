@@ -63,7 +63,13 @@ fun PasswordResetScreen(
         topBar = {
             TopAppBar(
                 modifier = Modifier.background(Color.White),
-                title = { Text(text = "임시 비밀번호 발급", style = MaterialTheme.typography.bodyMedium) },
+                title = {
+                    Text(
+                        text = "임시 비밀번호 발급",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -82,10 +88,13 @@ fun PasswordResetScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
-                text = "임시 비밀번호를 발급받을 이메일 정보를 입력해 주세요",
+                text = "이메일로 임시 비밀번호가 발급됩니다.",
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(start = 2.dp, bottom = 16.dp),
+                fontWeight = FontWeight.Bold
             )
 
             OutlinedTextField(
@@ -94,7 +103,7 @@ fun PasswordResetScreen(
                 readOnly = isEmailReadOnly,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 8.dp),
                 label = { Text("이메일 주소") }
             )
 
@@ -111,13 +120,17 @@ fun PasswordResetScreen(
                         })
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(206, 212, 218), // 버튼 배경색
+                        containerColor = Color(27, 94, 32), // 버튼 배경색
                         contentColor = Color.Black // 버튼 내부 글자색
                     ),
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("발급하기")
+                    Text(
+                        text = "발급하기",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             } else if (errorMessage != null) {
                 // 오류 메시지 및 다시 시도 버튼
@@ -184,7 +197,9 @@ fun PasswordResetScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
-                        .clickable { navController.navigate("findId") }
+                        .clickable {
+                            navController.navigate("emailVerificationScreen")
+                        }
                 )
             }
 

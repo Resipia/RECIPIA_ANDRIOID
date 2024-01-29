@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -77,7 +78,13 @@ fun EmailVerificationForgotIdScreen(
         topBar = {
             TopAppBar(
                 modifier = Modifier.background(Color.White),
-                title = { Text(text = "이메일 찾기", style = MaterialTheme.typography.bodyMedium) },
+                title = {
+                    Text(
+                        text = "이메일 찾기",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -100,14 +107,10 @@ fun EmailVerificationForgotIdScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "이메일 찾기",
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Text(
-                text = "* 가입 시 등록한 이름, 전화번호를 입력해주세요.",
+                text = "가입 시 등록한 이름, 전화번호를 입력해주세요.",
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 16.dp)
+                modifier = Modifier.padding(start = 2.dp, bottom = 16.dp),
+                fontWeight = FontWeight.Bold
             )
 
             // 이름
@@ -161,7 +164,9 @@ fun EmailVerificationForgotIdScreen(
                     },
                     enabled = isButtonEnabled, // 버튼 활성화 조건
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isButtonEnabled) Color(206, 212, 218) else Color.Gray, // 활성화 여부에 따른 배경색
+                        containerColor = if (isButtonEnabled) Color(
+                            27, 94, 32
+                        ) else Color.Gray, // 활성화 여부에 따른 배경색
                         contentColor = Color.Black
                     ),
                     shape = RoundedCornerShape(4.dp),
@@ -172,17 +177,21 @@ fun EmailVerificationForgotIdScreen(
                     if (isLoading) {
                         AnimatedPreloader(modifier = Modifier.size(100.dp))
                     } else {
-                        Text(text = "이메일 찾기")
+                        Text(
+                            text = "이메일 찾기",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
                 // 필드를 모두 채워야 함을 나타내는 안내 메시지
                 if (!isButtonEnabled) {
                     Text(
-                        text = "모든 필드를 채운 후 버튼이 활성화됩니다.",
+                        text = "모든 필드가 입력되어야 찾기 버튼이 활성화됩니다.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(top = 8.dp)
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }

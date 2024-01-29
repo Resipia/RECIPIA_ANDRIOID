@@ -226,7 +226,7 @@ fun LoginScreen(
                     text = "이메일 찾기",
                     fontSize = 12.sp,
                     modifier = Modifier.clickable {
-                        navController.navigate("findId")
+                        navController.navigate("emailVerificationScreen")
                     }
                 )
                 Text(
