@@ -45,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,7 +52,7 @@ import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
-import com.recipia.aos.ui.components.mypage.function.FollowStatsSection
+import com.recipia.aos.ui.components.mypage.function.profile.follow.FollowStatsSection
 import com.recipia.aos.ui.components.mypage.function.MyPageFeatureItem
 import com.recipia.aos.ui.components.mypage.function.PersonalInfoSection
 import com.recipia.aos.ui.components.mypage.function.profile.ProfileSection
@@ -310,7 +309,9 @@ fun MyPageScreen(
                         MyPageFeatureItem(
                             title = "계정 정보 수정",
                             icon = Icons.Default.ManageAccounts,
-                            onClick = { /* 페이지 이동 로직 */ }
+                            onClick = {
+                                navController.navigate("account-settings")
+                            }
                         )
                     }
 

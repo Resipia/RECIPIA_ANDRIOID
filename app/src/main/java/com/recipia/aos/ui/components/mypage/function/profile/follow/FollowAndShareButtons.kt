@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.mypage.function
+package com.recipia.aos.ui.components.mypage.function.profile.follow
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row

@@ -19,6 +19,7 @@ import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageRecipeListScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
+import com.recipia.aos.ui.components.mypage.function.accoount.AccountSettingsScreen
 import com.recipia.aos.ui.components.mypage.function.profile.ProfileEditScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.RecipeCreateScreen
@@ -182,6 +183,12 @@ fun AppNavigation(
                 myPageViewModel = myPageViewModel,
                 targetMemberId = memberId, // 여기서 전달된 데이터를 사용
                 tokenManager = tokenManager
+            )
+        }
+        // 계정 정보 수정(비밀번호, 전화번호)
+        composable("account-settings") {
+            AccountSettingsScreen(
+                navController = navController
             )
         }
         // 프로필 수정 화면

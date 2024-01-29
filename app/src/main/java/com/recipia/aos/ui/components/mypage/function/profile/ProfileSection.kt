@@ -25,7 +25,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.recipia.aos.R
-import com.recipia.aos.ui.components.mypage.function.FollowAndShareButtons
+import com.recipia.aos.ui.components.mypage.function.profile.follow.FollowAndShareButtons
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 
