@@ -271,7 +271,8 @@ fun SignUpFirstFormScreen(
                     Button(
                         onClick = {
                             phoneNumberAuthViewModel.phone = phoneNumber // ViewModel에 전화번호 저장
-                            phoneNumberAuthViewModel.sendVerificationCode(phoneNumber) // 인증코드 전송
+                            // 인증코드 전송 함수 호출
+                            phoneNumberAuthViewModel.sendVerificationCode(phoneNumber)
                             timeLeft = 300 // 타이머를 5분으로 재설정
                             isTimerRunning = true // 타이머 시작
                             isVerificationButtonEnabled = true // 인증하기 버튼 활성화
@@ -316,7 +317,8 @@ fun SignUpFirstFormScreen(
 
                 // 인증코드 입력 영역과 관련된 UI를 AnimatedVisibility로 감싸서 부드러운 표시/숨김 처리
                 AnimatedVisibility(
-                    visible = isVerificationCodeVisible && phoneNumberAuthViewModel.responseCode != 400,
+                    visible = isTimerRunning && phoneNumberAuthViewModel.verificationMessage == "인증코드가 발송되었습니다."
+//                    visible = isVerificationCodeVisible && phoneNumberAuthViewModel.responseCode != 400,
 //                enter = fadeIn(initialAlpha = 0.3f),
 //                exit = fadeOut(targetAlpha = 0f)
                 ) {
@@ -407,7 +409,7 @@ fun SignUpFirstFormScreen(
                             Spacer(modifier = Modifier.height(2.dp)) // 필드와 메시지 사이의 간격
 
                             // 타이머와 관련된 UI는 인증 실패 메시지가 표시된 경우에만 보여주도록 함
-                            if (isTimerRunning && phoneNumberAuthViewModel.verificationSuccessMessage.isNotEmpty()) {
+                            if (phoneNumberAuthViewModel.verificationMessage == "인증코드가 발송되었습니다.") {
                                 if (timeLeft > 0) {
                                     // 타이머가 활성화되어 있고 시간이 남아 있는 경우
                                     Row(
