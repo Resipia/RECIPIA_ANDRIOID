@@ -4,26 +4,18 @@ import TokenManager
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -73,52 +65,6 @@ fun RecipeDetailScreen(
             commentViewModel = commentViewModel,
             recipeId = recipeId,
             tokenManager = tokenManager
-        )
-    }
-
-    // dialog(알림창) 호출
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text("레시피 삭제") },
-            text = { Text("정말 작성한 레시피를 삭제하시겠습니까?") },
-            confirmButton = {
-                Button(onClick = {
-                    recipeDetailViewModel.deleteRecipe(
-                        recipeId = recipeId,
-                        onSuccess = {
-                            // 성공 시 스낵바 알림
-                            coroutineScope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = "레시피가 삭제되었습니다.",
-                                    duration = SnackbarDuration.Short
-                                )
-                            }
-
-                            // 현재 화면을 스택에서 제거하고 홈 화면으로 이동
-                            navController.popBackStack()
-                            navController.navigate("home")
-                        },
-                        onError = { errorMessage ->
-                            // 오류 발생 시 스낵바 알림
-                            coroutineScope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = "레시피 삭제에 실패하였습니다.",
-                                    duration = SnackbarDuration.Short
-                                )
-                            }
-                        }
-                    )
-                    showDialog = false
-                }) {
-                    Text("확인")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showDialog = false }) {
-                    Text("취소")
-                }
-            }
         )
     }
 

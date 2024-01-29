@@ -3,6 +3,7 @@ package com.recipia.aos.ui.components.recipe.detail.content
 import TokenManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -20,16 +21,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -60,7 +64,6 @@ import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.common.AnimatedPreloader
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.model.comment.CommentViewModel
-import com.recipia.aos.ui.model.recipe.like.LikeViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 import kotlinx.coroutines.launch
 
@@ -83,11 +86,76 @@ fun RecipeDetailContent(
     var menuExpanded by remember { mutableStateOf(false) }
     val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
     var showDialog by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
 
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
         recipeDetailViewModel.loadRecipeDetail(recipeId)
         commentViewModel.loadInitialComments(recipeId) // 수정된 함수 호출
+    }
+
+    // dialog(알림창) 호출
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("레시피 삭제", color = Color.Black) },
+            text = { Text("정말 작성한 레시피를 삭제하시겠습니까?", color = Color.Black) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        recipeDetailViewModel.deleteRecipe(
+                            recipeId = recipeId,
+                            onSuccess = {
+                                // 성공 시 스낵바 알림
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "레시피가 삭제되었습니다.",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+
+                                // 현재 화면을 스택에서 제거하고 홈 화면으로 이동
+                                navController.popBackStack()
+                                navController.navigate("home")
+                            },
+                            onError = { errorMessage ->
+                                // 오류 발생 시 스낵바 알림
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "레시피 삭제에 실패하였습니다.",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                        )
+                        showDialog = false
+                    },
+                    shape = RoundedCornerShape(4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(27, 94, 32),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("확인",  color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog = false },
+                    shape = RoundedCornerShape(4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(27, 94, 32),
+                        contentColor = Color.White
+                    ),
+                ) {
+                    Text("취소", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            // AlertDialog 스타일 커스텀
+            containerColor = Color.White, // AlertDialog 배경색을 하얀색으로 설정
+            textContentColor = Color.Black // 글자색을 검정색으로 설정
+        )
     }
 
     // 로딩중이면 인디케이터 표시
@@ -126,31 +194,47 @@ fun RecipeDetailContent(
                     }
                     CustomDropdownMenu(
                         expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
+                        onDismissRequest = { menuExpanded = false },
+                        modifier = Modifier.background(Color.White)
                     ) {
                         // 레시피 작성자가 현재 로그인한 사용자와 같은 경우에만 수정 및 삭제 옵션을 보여줌
                         if (recipeDetailState.value?.memberId == currentUserMemberId) {
-                            // 레시피 수정하기
+                            // 레시피 수정
                             DropdownMenuItem(
-                                text = { Text("레시피 수정") },
                                 onClick = {
                                     navController.navigate("update-recipe")
-                                }
+                                },
+                                text = { Text(text = "레시피 수정", color = Color.Black) }
                             )
-                            // 레시피 삭제 버튼
+                            HorizontalDivider(
+                                modifier = Modifier.fillMaxWidth(),
+                                thickness = 0.5.dp,
+                                color = Color(222, 226, 230)
+                            )
+                            // 레시피 삭제
                             DropdownMenuItem(
-                                text = { Text("레시피 삭제") },
                                 onClick = {
                                     showDialog = true
-                                }
+                                },
+                                text = { Text(text = "레시피 삭제", color = Color.Black) }
+                            )
+                            HorizontalDivider(
+                                modifier = Modifier.fillMaxWidth(),
+                                thickness = 0.5.dp,
+                                color = Color(222, 226, 230)
                             )
                         }
                         DropdownMenuItem(
-                            text = { Text("설정") },
+                            text = { Text(text = "설정", color = Color.Black) },
                             onClick = { /* 설정 처리 */ }
                         )
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth(),
+                            thickness = 0.5.dp,
+                            color = Color(222, 226, 230)
+                        )
                         DropdownMenuItem(
-                            text = { Text("피드백 보내기") },
+                            text = { Text(text = "피드백 보내기", color = Color.Black) },
                             onClick = { /* 피드백 처리 */ }
                         )
                     }
