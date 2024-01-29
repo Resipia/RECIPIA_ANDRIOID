@@ -132,18 +132,22 @@ fun MyPageScreen(
                         modifier = Modifier.background(Color.White)
                     ) {
                         // 드롭다운 메뉴 아이템들
-                        DropdownMenuItem(
-                            text = { Text("프로필 수정", color = Color.Black) },
-                            onClick = {
-                                // "profile-edit" 라우트로 이동
-                                navController.navigate("profile-edit")
-                            }
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.fillMaxWidth(),
-                            thickness = 0.5.dp,
-                            color = Color(222, 226, 230)
-                        )
+                        if (myPageData?.memberId?.equals(tokenManager.loadMemberId()) == true) {
+                            DropdownMenuItem(
+                                text = { Text("프로필 수정", color = Color.Black) },
+                                onClick = {
+                                    // "profile-edit" 라우트로 이동
+                                    navController.navigate("profile-edit")
+                                }
+                            )
+
+                            HorizontalDivider(
+                                modifier = Modifier.fillMaxWidth(),
+                                thickness = 0.5.dp,
+                                color = Color(222, 226, 230)
+                            )
+                        }
+
                         DropdownMenuItem(
                             text = { Text("설정", color = Color.Black) },
                             onClick = { /* 설정 처리 */ }
@@ -276,7 +280,14 @@ fun MyPageScreen(
                         MyPageFeatureItem(
                             title = "작성한 댓글/대댓글 보기",
                             icon = Icons.Default.Comment,
-                            onClick = { /* 페이지 이동 로직 */ }
+                            onClick = {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "준비중인 서비스입니다.",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
                         )
                     }
 

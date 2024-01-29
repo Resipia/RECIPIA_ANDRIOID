@@ -100,7 +100,7 @@ fun HomeScreen(
     val isLoading by recipeAllListViewModel.isLoading.observeAsState(initial = false)
     val loadFailed by recipeAllListViewModel.loadFailed.observeAsState(initial = false)
     val navigateToLogin by recipeAllListViewModel.navigateToLogin.observeAsState(initial = false)
-    val snackBarMessage by bookmarkViewModel.snackBarMessage.observeAsState()
+//    val snackBarMessage by bookmarkViewModel.snackBarMessage.observeAsState()
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
@@ -207,17 +207,17 @@ fun HomeScreen(
         }
     }
 
-    // snackBarMessage가 변경될 때 스낵바를 표시하는 로직
-    LaunchedEffect(snackBarMessage) {
-        snackBarMessage?.let {
-            // 스낵바 표시
-            snackbarHostState.showSnackbar(
-                message = it, // 스낵바에 표시할 메시지
-                duration = SnackbarDuration.Short // 스낵바가 표시되는 시간
-            )
-            bookmarkViewModel.snackBarMessage.value = null // 메시지 초기화
-        }
-    }
+//    // 북마크 추가/삭제에 따라 메시지가 변경될 때 스낵바를 표시하는 로직 (임시 주석처리)
+//    LaunchedEffect(snackBarMessage) {
+//        snackBarMessage?.let {
+//            // 스낵바 표시
+//            snackbarHostState.showSnackbar(
+//                message = it, // 스낵바에 표시할 메시지
+//                duration = SnackbarDuration.Short // 스낵바가 표시되는 시간
+//            )
+//            bookmarkViewModel.snackBarMessage.value = null // 메시지 초기화
+//        }
+//    }
 
     Scaffold(
         topBar = {
