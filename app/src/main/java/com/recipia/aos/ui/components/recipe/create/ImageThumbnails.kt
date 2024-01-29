@@ -69,7 +69,7 @@ fun ImageThumbnails(
                             onClick = { onRemoveImage(uri) },
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .offset(x = (11).dp, y = (-8).dp) // 아이콘 버튼을 우측 상단으로 조정
+                                .offset(x = (11).dp, y = (-14).dp) // 아이콘 버튼을 우측 상단으로 조정
                                 .padding(0.dp) // 필요한 경우 패딩 조정
                         ) {
                             Icon(

@@ -374,28 +374,22 @@ fun RecipeUpdateScreen(
                     }
                 }
 
-//                item {
-//                    // 이미지 썸네일 목록
-//                    ImageThumbnails(selectedImageUris) { removedUri ->
-//                        // 이미지 제거
-//                        selectedImageUris.remove(removedUri)
-//                    }
-//                }
                 item {
                     // 이미지 썸네일 목록
                     ImageThumbnails(
                         selectedImageUris = selectedImageUris,
                         onRemoveImage = { uriToRemove ->
                             // 이미지 제거 로직
-                            recipeCreateModel.selectedImageUris.remove(uriToRemove)
+                            selectedImageUris.remove(uriToRemove)
                         },
                         onMove = { fromIndex, toIndex ->
                             // 순서 변경 로직
-                            val updatedList = recipeCreateModel.selectedImageUris.toMutableList()
-                            val item = updatedList.removeAt(fromIndex)
-                            updatedList.add(toIndex, item)
-                            recipeCreateModel.selectedImageUris.clear()
-                            recipeCreateModel.selectedImageUris.addAll(updatedList)
+                            // 이미지 순서 변경 로직
+                            val updatedList = selectedImageUris.toMutableList().apply {
+                                add(toIndex, removeAt(fromIndex))
+                            }
+                            selectedImageUris.clear()
+                            selectedImageUris.addAll(updatedList)
                         }
                     )
                 }

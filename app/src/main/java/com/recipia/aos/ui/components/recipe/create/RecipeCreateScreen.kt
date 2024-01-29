@@ -332,9 +332,6 @@ fun RecipeCreateScreen(
                             val updatedList = selectedImageUris.toMutableList().apply {
                                 add(toIndex, removeAt(fromIndex))
                             }
-//                            val updatedList = recipeCreateModel.selectedImageUris.toMutableList()
-//                            updatedList.add(toIndex, item)
-//                            val item = updatedList.removeAt(fromIndex)
                             recipeCreateModel.selectedImageUris.clear()
                             recipeCreateModel.selectedImageUris.addAll(updatedList)
                         }
