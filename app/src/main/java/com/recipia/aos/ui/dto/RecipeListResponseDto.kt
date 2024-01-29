@@ -1,7 +1,5 @@
 package com.recipia.aos.ui.dto
 
-import java.time.LocalDateTime
-
 data class RecipeListResponseDto(
     val id: Long?,
     val recipeName: String,

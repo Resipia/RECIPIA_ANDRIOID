@@ -80,7 +80,6 @@ fun MyPageScreen(
     val myPageData by myPageViewModel.myPageData.observeAsState()
 
     // 색상 정의
-    val context = LocalContext.current // 현재 컨텍스트를 가져옴
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
     val targetId = targetMemberId ?: tokenManager.loadMemberId() // memberId 결정
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성

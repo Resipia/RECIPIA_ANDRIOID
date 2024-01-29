@@ -30,7 +30,7 @@ import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 
 /**
- * 프로필 이미지, 닉네임, 한줄소개
+ * 프로필 이미지, 닉네임, 한줄소개, 팔로우 버튼
  */
 @Composable
 fun ProfileSection(
@@ -81,6 +81,7 @@ fun ProfileSection(
                     modifier = Modifier.padding(start = 2.dp)
                 )
 
+                // 팔로우 버튼
                 FollowAndShareButtons(
                     myPageViewModel = myPageViewModel,
                     followViewModel = followViewModel,

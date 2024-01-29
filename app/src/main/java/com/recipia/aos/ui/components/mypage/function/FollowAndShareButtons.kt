@@ -40,22 +40,22 @@ fun FollowAndShareButtons(
 ) {
 
     val myPageData = myPageViewModel.myPageData.observeAsState().value
-    val isFollowing = myPageViewModel.isFollowing.observeAsState(false).value
     val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // MyPageViewResponseDto에서 followId의 존재 여부로 팔로우 상태 결정
+    val isFollowing = (myPageData?.followId != null)
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
-
         Spacer(modifier = Modifier.weight(1f))
 
-        // isMe가 true이면 버튼을 렌더링하지 않음
+        // 현재 사용자가 본인이 아닌 경우에만 버튼 표시
         if (myPageData != null && !myPageData.me) {
-
             val followButtonText = if (isFollowing) "팔로잉" else "팔로우"
             val textColor = if (isFollowing) Color.Black else Color(56, 142, 60)
+
             val buttonColors = ButtonDefaults.buttonColors(
                 containerColor = if (isFollowing) Color(222, 226, 230) else Color.White,
                 contentColor = textColor // 버튼 내용의 색상을 textColor로 설정
@@ -63,39 +63,38 @@ fun FollowAndShareButtons(
 
             Button(
                 onClick = {
-                    // 팔로우/언팔로우 처리
-                    followViewModel.followOrUnfollow(
+                    // 팔로우/언팔로우 처리 로직
+                    coroutineScope.launch {
+                        followViewModel.followOrUnfollow(
+                            targetMemberId = myPageData.memberId,
+                            onResult = { success, newFollowId ->
+                                if (success) {
+                                    // 팔로우 상태 업데이트
+                                    val isNowFollowing = newFollowId != null
+                                    myPageViewModel.updateFollowingStatus(isNowFollowing)
 
-                        targetMemberId = myPageData.memberId ?: 0,
-                        onResult = { success, newFollowId ->
-                            if (success) {
-                                // 팔로우 상태 업데이트
-                                val isNowFollowing = newFollowId != null
-                                myPageViewModel.updateFollowingStatus(isNowFollowing)
-
-                                // 데이터 재로딩 전에 상태 업데이트
-                                if (isNowFollowing) {
-                                    if (newFollowId != null) {
-                                        myPageData.followId = newFollowId
+                                    // 데이터 재로딩 전에 상태 업데이트
+                                    if (isNowFollowing) {
+                                        if (newFollowId != null) {
+                                            myPageData.followId = newFollowId
+                                        }
+                                    } else {
+                                        myPageData.followId = 0L
                                     }
+
+                                    // 데이터 리로드
+                                    myPageViewModel.loadMyPageData(targetId)
                                 } else {
-                                    myPageData.followId = 0L
-                                }
-
-                                myPageViewModel.resetMyPageData()
-                                // 마이페이지 데이터 리로드
-                                myPageViewModel.loadMyPageData(targetId)
-
-                            } else {
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = "작업 실패",
-                                        duration = SnackbarDuration.Short
-                                    )
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "작업 실패",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 },
                 modifier = Modifier
                     .width(120.dp)
