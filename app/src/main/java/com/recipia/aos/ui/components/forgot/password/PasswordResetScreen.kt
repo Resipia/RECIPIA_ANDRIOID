@@ -170,13 +170,17 @@ fun PasswordResetScreen(
                 Button(
                     onClick = { navController.navigate("login") },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(206, 212, 218), // 버튼 배경색
+                        containerColor = Color(27, 94, 32), // 버튼 배경색
                         contentColor = Color.Black // 버튼 내부 글자색
                     ),
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("로그인 하기")
+                    Text(
+                        text = "로그인 하기",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
 
