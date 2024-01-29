@@ -22,12 +22,15 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -37,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +60,9 @@ import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.common.AnimatedPreloader
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
 import com.recipia.aos.ui.model.comment.CommentViewModel
+import com.recipia.aos.ui.model.recipe.like.LikeViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
+import kotlinx.coroutines.launch
 
 /**
  * 레시피 상세보기 콘텐츠 컴포저
@@ -67,16 +73,19 @@ fun RecipeDetailContent(
     recipeId: Long,
     recipeDetailViewModel: RecipeDetailViewModel,
     commentViewModel: CommentViewModel,
+    likeViewModel: LikeViewModel,
     navController: NavController,
     paddingValues: PaddingValues,
     tokenManager: TokenManager
 ) {
 
-    val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
+    var recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
     val isLoading = recipeDetailViewModel.isLoading.observeAsState()
     var menuExpanded by remember { mutableStateOf(false) }
     val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
     var showDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    val coroutineScope = rememberCoroutineScope()
 
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
@@ -155,8 +164,7 @@ fun RecipeDetailContent(
                 ),
                 modifier = Modifier.zIndex(1f) // TopAppBar를 내용 위에 겹치도록 설정
             )
-
-
+            // 상세정보가 있다면 데이터 로딩
             recipeDetailState.value?.let { recipeDetail ->
                 LazyColumn(
                     modifier = Modifier
@@ -213,7 +221,35 @@ fun RecipeDetailContent(
                                         .padding(horizontal = 16.dp)
                                 )
                             }
+
                             // todo: 좋아요
+                            val isLiked =
+                                recipeDetailState.value?.recipeLikeId != null && recipeDetailState.value?.recipeLikeId != 0L
+                            Icon(
+                                imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                contentDescription = "좋아요",
+                                modifier = Modifier.clickable {
+                                    // 현재 좋아요 상태에 따라 좋아요 추가 또는 삭제 처리
+                                    val recipeLikeId =
+                                        if (isLiked) recipeDetailState.value?.recipeLikeId else null
+                                    // 좋아요 아이콘 클릭 이벤트 내부
+                                    likeViewModel.toggleRecipeLike(
+                                        recipeLikeId,
+                                        recipeId,
+                                        currentUserMemberId,
+                                        onSuccess = { updatedLikeId ->
+                                            // 성공 시 (레시피 상세보기 모델의) 좋아요 상태 업데이트
+                                            recipeDetailViewModel.updateRecipeLikeId(updatedLikeId)
+                                        },
+                                        onError = { error ->
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar("좋아요 실패")
+                                            }
+                                            // 에러 처리, 예를 들어 토스트 메시지 표시
+                                        })
+                                },
+                                tint = if (isLiked) Color.Red else Color.Gray
+                            )
 
                             // todo: 북마크
                         }

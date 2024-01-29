@@ -36,6 +36,7 @@ import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
 import com.recipia.aos.ui.model.factory.CommentViewModelFactory
 import com.recipia.aos.ui.model.factory.FollowViewModelFactory
+import com.recipia.aos.ui.model.factory.LikeViewModelFactory
 import com.recipia.aos.ui.model.factory.MongoSearchViewModelFactory
 import com.recipia.aos.ui.model.factory.MyPageViewModelFactory
 import com.recipia.aos.ui.model.factory.MyViewModelFactory
@@ -48,6 +49,7 @@ import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
+import com.recipia.aos.ui.model.recipe.like.LikeViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 import com.recipia.aos.ui.model.search.MongoSearchViewModel
@@ -94,6 +96,9 @@ fun AppNavigation(
     )
     val commentViewModel: CommentViewModel = viewModel(
         factory = CommentViewModelFactory(tokenManager)
+    )
+    val likeViewModel: LikeViewModel = viewModel(
+        factory = LikeViewModelFactory(tokenManager)
     )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
@@ -214,6 +219,7 @@ fun AppNavigation(
             RecipeDetailScreen(
                 recipeId = recipeId,
                 recipeDetailViewModel = recipeDetailViewModel,
+                likeViewModel = likeViewModel,
                 commentViewModel = commentViewModel,
                 navController = navController,
                 tokenManager = tokenManager

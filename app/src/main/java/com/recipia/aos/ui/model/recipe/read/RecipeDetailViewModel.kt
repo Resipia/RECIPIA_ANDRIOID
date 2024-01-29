@@ -99,4 +99,12 @@ class RecipeDetailViewModel(
         }
     }
 
+    // 좋아요 업데이트
+    fun updateRecipeLikeId(recipeLikeId: Long?) {
+        val currentDetail = _recipeDetail.value
+        if (currentDetail != null) {
+            _recipeDetail.value = currentDetail.copy(recipeLikeId = recipeLikeId)
+        }
+    }
+
 }

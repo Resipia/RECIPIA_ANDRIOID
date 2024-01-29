@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.recipia.aos.ui.components.recipe.detail.comment.BottomSheet
 import com.recipia.aos.ui.components.recipe.detail.content.RecipeDetailContent
 import com.recipia.aos.ui.model.comment.CommentViewModel
+import com.recipia.aos.ui.model.recipe.like.LikeViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
 import kotlinx.coroutines.launch
 
@@ -41,6 +42,7 @@ import kotlinx.coroutines.launch
 fun RecipeDetailScreen(
     recipeId: Long,
     recipeDetailViewModel: RecipeDetailViewModel,
+    likeViewModel: LikeViewModel,
     commentViewModel: CommentViewModel,
     navController: NavController,
     tokenManager: TokenManager
@@ -149,6 +151,7 @@ fun RecipeDetailScreen(
             recipeId = recipeId,
             recipeDetailViewModel = recipeDetailViewModel,
             commentViewModel = commentViewModel,
+            likeViewModel = likeViewModel,
             navController = navController,
             paddingValues = innerPadding,
             tokenManager = tokenManager
