@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.recipia.aos.ui.components.forgot.email.EmailVerificationForgotIdScreen
 import com.recipia.aos.ui.components.forgot.email.FindEmailScreen
+import com.recipia.aos.ui.components.forgot.password.PasswordFindSuccessScreen
 import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
 import com.recipia.aos.ui.components.home.CategorySelectRecipeScreen
 import com.recipia.aos.ui.components.home.HomeScreen
@@ -264,6 +265,10 @@ fun AppNavigation(
         // PASSWORD찾기 화면
         composable("findPassword") {
             PasswordResetScreen(navController, forgotViewModel)
+        }
+        // 비밀번호 찾기(재발급) 성공 화면
+        composable("passwordFindSuccess") {
+            PasswordFindSuccessScreen(navController)
         }
         // 회원가입 1단계: 전화번호 인증 및 회원가입 동의 form 화면
         composable("signUpFirstForm") {

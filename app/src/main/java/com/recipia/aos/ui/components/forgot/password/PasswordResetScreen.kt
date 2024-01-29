@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -33,7 +34,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.model.forgot.ForgotViewModel
@@ -44,17 +48,21 @@ fun PasswordResetScreen(
     navController: NavController,
     viewModel: ForgotViewModel
 ) {
+    var name by remember { mutableStateOf("") }
+    var telNo by remember { mutableStateOf("") }
     val foundEmail by viewModel.foundEmail.collectAsState()
     var email by remember { mutableStateOf(foundEmail ?: "") }
     var isPasswordSent by remember { mutableStateOf(false) }
     var isEmailReadOnly by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // 이메일 필드가 비어 있지 않을 경우 버튼을 활성화하기 위한 조건
-    val isButtonEnabled = email.isNotEmpty()
+    // 이름, 전화번호, 이메일 필드 모두에 입력이 있는 경우 버튼을 활성화하기 위한 조건
+    val isButtonEnabled = name.isNotEmpty() && telNo.isNotEmpty() && email.isNotEmpty()
 
     // 상태 초기화 함수
     fun resetAllStates() {
+        name = ""
+        telNo = ""
         email = foundEmail ?: ""
         isPasswordSent = false
         isEmailReadOnly = false
@@ -100,10 +108,38 @@ fun PasswordResetScreen(
                 fontWeight = FontWeight.Bold
             )
 
+            // 이름
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                label = { Text("이름") }
+            )
+
+            // 전화번호
+            OutlinedTextField(
+                value = telNo,
+                onValueChange = { input ->
+                    val filteredInput = input.filter { it.isDigit() }
+                    telNo = filteredInput
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
+                label = { Text("전화번호") },
+                placeholder = { Text("01012345678", style = TextStyle(color = Color.Gray)) },
+            )
+
+            // 이메일
             OutlinedTextField(
                 value = email,
-                onValueChange = { if (!isEmailReadOnly) email = it },
-                readOnly = isEmailReadOnly,
+                onValueChange = { email = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
@@ -114,7 +150,7 @@ fun PasswordResetScreen(
             if (!isPasswordSent && errorMessage == null) {
                 Button(
                     onClick = {
-                        viewModel.sendTempPassword(email, { isSuccess ->
+                        viewModel.sendTempPassword(name, telNo, email, { isSuccess ->
                             if (isSuccess) {
                                 isPasswordSent = true
                             }
@@ -124,14 +160,18 @@ fun PasswordResetScreen(
                     },
                     enabled = isButtonEnabled, // 버튼 활성화 조건
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isButtonEnabled) Color(27, 94, 32) else Color.LightGray,
+                        containerColor = if (isButtonEnabled) Color(
+                            27,
+                            94,
+                            32
+                        ) else Color.LightGray,
                         contentColor = Color.Black
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
-                        text = "발급하기",
+                        text = "임시 비밀번호 발급",
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
@@ -159,33 +199,11 @@ fun PasswordResetScreen(
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("발급 재시도")
+                    Text("비밀번호 찾기 재시도")
                 }
+            // 비밀번호 찾기에 성공하면 성공 페이지로 이동
             } else if (isPasswordSent) {
-                Text(
-                    text = "임시 비밀번호가 이메일로 전송되었습니다.",
-                    color = Color(0xFF006633), // 성공 메시지는 초록색으로 표시
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
-                )
-
-                isEmailReadOnly = true // 이메일 입력창을 읽기 전용으로 설정
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = { navController.navigate("login") },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(27, 94, 32), // 버튼 배경색
-                        contentColor = Color.Black // 버튼 내부 글자색
-                    ),
-                    shape = RoundedCornerShape(4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "로그인 하기",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                navController.navigate("passwordFindSuccess")
             }
 
             Spacer(modifier = Modifier.height(16.dp))

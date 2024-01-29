@@ -78,13 +78,15 @@ class ForgotViewModel : ViewModel() {
 
     // 임시 비밀번호 전송
     fun sendTempPassword(
+        name: String,
+        telNo: String,
         email: String,
         onResult: (Boolean) -> Unit,
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
             try {
-                val response = getFindPasswordResponse(email)
+                val response = getFindPasswordResponse(name, telNo, email)
                 if (response.isSuccessful) {
                     // 성공적으로 임시 비밀번호 전송
                     onResult(true)
@@ -111,10 +113,12 @@ class ForgotViewModel : ViewModel() {
 
     // 임시 비밀번호 재발급 호출(코루틴)
     private suspend fun getFindPasswordResponse(
+        name: String,
+        telNo: String,
         email: String
     ): Response<ResponseDto<Void>> {
         // Retrofit을 사용하여 API 호출
-        return signUpAndForgotService.sendTempPassword(TempPasswordRequestDto(email))
+        return signUpAndForgotService.sendTempPassword(TempPasswordRequestDto(name, telNo, email))
     }
 
     // 찾은 이메일 저장

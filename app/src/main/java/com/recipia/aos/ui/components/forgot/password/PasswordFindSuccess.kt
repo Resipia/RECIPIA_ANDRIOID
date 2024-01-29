@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.signup
+package com.recipia.aos.ui.components.forgot.password
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,15 +26,13 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.recipia.aos.R
 
-/**
- * 회원가입 성공 페이지 컴포저
- */
+
 @Composable
-fun SignUpSuccessScreen(
+fun PasswordFindSuccessScreen(
     navController: NavController
 ) {
     // Lottie 애니메이션 상태 관리
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.signup_success))
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.password_find_success))
 
     Column(
         modifier = Modifier
@@ -46,13 +44,20 @@ fun SignUpSuccessScreen(
 
         // 성공 메시지 표시 ,
         Text(
-            text = "회원가입에 성공하셨습니다.",
+            text = "임시 비밀번호 재발급에 성공했습니다.",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "이메일을 확인해 주세요. (조금 시간이 걸릴 수 있습니다.)",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Lottie 애니메이션 표시
         LottieAnimation(
