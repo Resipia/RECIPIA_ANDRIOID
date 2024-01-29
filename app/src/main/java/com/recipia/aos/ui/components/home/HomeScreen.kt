@@ -81,6 +81,7 @@ import com.recipia.aos.ui.model.recipe.bookmark.BookmarkUpdateState
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.function.BinaryOperator
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
 @OptIn(ExperimentalMaterialApi::class)
@@ -227,27 +228,37 @@ fun HomeScreen(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // 요리 아이콘
-                        Icon(
-                            imageVector = Icons.Filled.Cookie, // 요리 관련 아이콘으로 변경하세요
-                            contentDescription = "로고 아이콘",
-                            modifier = Modifier.size(24.dp) // 아이콘 크기 조절
-                        )
                         // 로고 텍스트
                         Text(
                             text = "Recipia",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(start = 8.dp)
+                            color = Color(27, 94, 32),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(top = 8.dp, start = 4.dp)
                         )
                     }
                 },
                 actions = {
-                    // 검색 아이콘 추가
-                    IconButton(onClick = { navController.navigate("search-Hashtag-Screen") }) {
+                    // 검색 아이콘
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    "레시피 통합검색 기능이 곧 추가됩니다."
+                                )
+                            }
+//                            navController.navigate("search-Hashtag-Screen")
+                        },
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
                         Icon(Icons.Filled.Search, contentDescription = "검색")
                     }
 
-                    IconButton(onClick = { menuExpanded = true }) {
+                    // 더보기 아이콘
+                    IconButton(
+                        onClick = { menuExpanded = true },
+                        modifier = Modifier.padding(top = 6.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
                             contentDescription = "더보기"
@@ -256,15 +267,21 @@ fun HomeScreen(
 
                     CustomDropdownMenu(
                         expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
+                        onDismissRequest = { menuExpanded = false },
+                        modifier = Modifier.background(Color.White)
                     ) {
                         // 드롭다운 메뉴 아이템들
                         DropdownMenuItem(
-                            text = { Text("신고하기") },
+                            text = { Text("신고하기", color = Color.Black) },
                             onClick = { /* 수정 처리 */ }
                         )
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth(),
+                            thickness = 0.5.dp,
+                            color = Color(222, 226, 230)
+                        )
                         DropdownMenuItem(
-                            text = { Text("피드백 보내기") },
+                            text = { Text("피드백 보내기", color = Color.Black) },
                             onClick = { /* 피드백 처리 */ }
                         )
                     }
