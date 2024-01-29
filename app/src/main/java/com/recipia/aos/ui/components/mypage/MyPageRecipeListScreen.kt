@@ -57,6 +57,9 @@ import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 
+/**
+ * 마이페이지에서 북마크/좋아요한 레시피 리스트를 보여주는 컴포저
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyPageRecipeListScreen(
@@ -163,30 +166,45 @@ fun MyPageRecipeListScreen(
                 if (isLoading) {
                     AnimatedPreloader(modifier = Modifier.size(100.dp))
                 } else {
-                    LazyColumn(
-                        contentPadding = PaddingValues(
-                            top = paddingValues.calculateTopPadding(),
-                            bottom = paddingValues.calculateBottomPadding(),
-                        ),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White), // 여기에 배경색을 하얀색으로 설정,,
-                        state = lazyListState
-                    ) {
-                        itemsIndexed(myRecipes) { index, recipe ->
-                            MyPageRecipeListItem(
-                                recipe,
-                                bookmarkViewModel,
-                                navController
-                            )
-
-                            // 마지막 아이템에 도달했을 때 추가 데이터 로드
-                            if (index == myPageViewModel.items.value.lastIndex && !myPageViewModel.isLastPage && !isLoading) {
-                                loadMoreRecipesBasedOnCurrentPageType(
-                                    myPageViewModel,
-                                    currentPageType,
-                                    targetId
+                    if (myRecipes.isNullOrEmpty()) {
+                        // 데이터가 없을 때의 메시지를 보여줌
+                        Text(
+                            text = when (currentPageType) {
+                                MyPageViewModel.PageType.BOOKMARK -> "북마크한 레시피가 없습니다."
+                                MyPageViewModel.PageType.LIKE -> "좋아요한 레시피가 없습니다."
+                                MyPageViewModel.PageType.TARGET_MEMBER -> "작성한 레시피가 없습니다."
+                                else -> "데이터가 없습니다."
+                            },
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
+                        )
+                    } else {
+                        LazyColumn(
+                            contentPadding = PaddingValues(
+                                top = paddingValues.calculateTopPadding(),
+                                bottom = paddingValues.calculateBottomPadding(),
+                            ),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White), // 여기에 배경색을 하얀색으로 설정,,
+                            state = lazyListState
+                        ) {
+                            itemsIndexed(myRecipes) { index, recipe ->
+                                MyPageRecipeListItem(
+                                    recipe,
+                                    bookmarkViewModel,
+                                    navController
                                 )
+
+                                // 마지막 아이템에 도달했을 때 추가 데이터 로드
+                                if (index == myPageViewModel.items.value.lastIndex && !myPageViewModel.isLastPage && !isLoading) {
+                                    loadMoreRecipesBasedOnCurrentPageType(
+                                        myPageViewModel,
+                                        currentPageType,
+                                        targetId
+                                    )
+                                }
                             }
                         }
                     }
