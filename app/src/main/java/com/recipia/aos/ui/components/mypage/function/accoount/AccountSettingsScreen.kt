@@ -2,6 +2,7 @@ package com.recipia.aos.ui.components.mypage.function.accoount
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
@@ -42,25 +43,27 @@ fun AccountSettingsScreen(
         },
         containerColor = Color.White
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(8.dp)
         ) {
-            MyPageFeatureItem(
-                title = "비밀번호 변경",
-                icon = Icons.Default.Lock,
-                onClick = {
-                    navController.navigate("password-change")
-                }
-            )
-            MyPageFeatureItem(
-                title = "전화번호 변경",
-                icon = Icons.Default.Phone,
-                onClick = {
-                    navController.navigate("phoneNumber-change")
-                }
-            )
+            item {
+                MyPageFeatureItem(
+                    title = "비밀번호 변경",
+                    icon = Icons.Default.Lock,
+                    onClick = {
+                        navController.navigate("password-change")
+                    }
+                )
+                MyPageFeatureItem(
+                    title = "전화번호 변경",
+                    icon = Icons.Default.Phone,
+                    onClick = {
+                        navController.navigate("phoneNumber-change")
+                    }
+                )
+            }
         }
     }
 }
