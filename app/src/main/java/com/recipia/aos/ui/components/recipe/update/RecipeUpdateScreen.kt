@@ -98,13 +98,26 @@ fun RecipeUpdateScreen(
 ) {
 
     // 상태 변수를 사용하여 각 필드에 데이터 바인딩
-    val recipeName = rememberSaveable { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.recipeName ?: "") }
-    val recipeDesc = rememberSaveable { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.recipeDesc ?: "") }
-    val timeTaken = rememberSaveable { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.timeTaken.toString()) }
+    val recipeName = rememberSaveable {
+        mutableStateOf(
+            recipeDetailViewModel?.recipeDetail?.value?.recipeName ?: ""
+        )
+    }
+    val recipeDesc = rememberSaveable {
+        mutableStateOf(
+            recipeDetailViewModel?.recipeDetail?.value?.recipeDesc ?: ""
+        )
+    }
+    val timeTaken =
+        rememberSaveable { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.timeTaken.toString()) }
 
     // 기존 이미지 URL들을 Uri 객체로 변환하여 저장할 리스트
     val selectedImageUris = remember { mutableStateListOf<Uri?>() }
-    val nutritionalInfo = remember { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.nutritionalInfoDto ?: NutritionalInfoDto()) } // 영양 정보 상태 변수
+    val nutritionalInfo = remember {
+        mutableStateOf(
+            recipeDetailViewModel?.recipeDetail?.value?.nutritionalInfoDto ?: NutritionalInfoDto()
+        )
+    } // 영양 정보 상태 변수
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
     val showNutritionalInfo = mutableStateOf(false)
     val selectedIngredients by mongoSearchViewModel.selectedIngredients.collectAsState()
@@ -126,13 +139,22 @@ fun RecipeUpdateScreen(
 
     // 초기 재료/해시태그 값 세팅
     LaunchedEffect(key1 = Unit) {
-        val initialIngredients = recipeDetailViewModel?.recipeDetail?.value?.ingredient?.toList() ?: emptyList()
-        val initialHashtags = recipeDetailViewModel?.recipeDetail?.value?.hashtag?.toList() ?: emptyList()
-        mongoSearchViewModel.initializeSelectedIngredientsAndHashtags(initialIngredients, initialHashtags)
+        val initialIngredients =
+            recipeDetailViewModel?.recipeDetail?.value?.ingredient?.toList() ?: emptyList()
+        val initialHashtags =
+            recipeDetailViewModel?.recipeDetail?.value?.hashtag?.toList() ?: emptyList()
+        mongoSearchViewModel.initializeSelectedIngredientsAndHashtags(
+            initialIngredients,
+            initialHashtags
+        )
     }
 
     // selectedCategoriesBefore 상태를 rememberSaveable을 사용하여 유지
-    val selectedCategoriesBefore = rememberSaveable { mutableStateOf(recipeDetailViewModel?.recipeDetail?.value?.subCategoryDtoList ?: emptyList()) }
+    val selectedCategoriesBefore = rememberSaveable {
+        mutableStateOf(
+            recipeDetailViewModel?.recipeDetail?.value?.subCategoryDtoList ?: emptyList()
+        )
+    }
 
     // 초기 카테고리 값 세팅에 대한 LaunchedEffect
     LaunchedEffect(key1 = true) { // key를 true로 고정하여 이 컴포저블이 처음 로드될 때만 실행되도록 함
@@ -154,7 +176,7 @@ fun RecipeUpdateScreen(
         contract = ActivityResultContracts.PickMultipleVisualMedia(
             maxItems = 10
         ),
-        onResult = {uris ->
+        onResult = { uris ->
 //            selectedImageUris.clear()
             // 기존 이미지를 유지하면서 새로운 이미지 추가
             selectedImageUris.addAll(uris)
@@ -212,7 +234,8 @@ fun RecipeUpdateScreen(
                     onClick = {
                         isRecipeNameValid.value = recipeName.value.isNotBlank()
                         isRecipeDescValid.value = recipeDesc.value.isNotBlank()
-                        isCategorySelected.value = categorySelectionViewModel.selectedCategories.value.isNotEmpty()
+                        isCategorySelected.value =
+                            categorySelectionViewModel.selectedCategories.value.isNotEmpty()
 
                         // 유효성 검증 실시
                         if (isRecipeNameValid.value && isRecipeDescValid.value && isCategorySelected.value) {
@@ -224,7 +247,8 @@ fun RecipeUpdateScreen(
                                 )
 
                             // 'selectedIngredients'와 'selectedHashtags'를 문자열로 변환
-                            val ingredientsString = selectedIngredients.joinToString(separator = ", ")
+                            val ingredientsString =
+                                selectedIngredients.joinToString(separator = ", ")
                             val hashtagsString = selectedHashtags.joinToString(separator = ", ")
 
                             val requestDto = RecipeCreateUpdateRequestDto(
@@ -251,7 +275,8 @@ fun RecipeUpdateScreen(
                                     recipeCreateModel.timeTaken.value = ""
                                     recipeCreateModel.ingredient.value = ""
                                     recipeCreateModel.hashtag.value = ""
-                                    nutritionalInfo.value = NutritionalInfoDto() // 새 NutritionalInfoDto 객체로 초기화
+                                    nutritionalInfo.value =
+                                        NutritionalInfoDto() // 새 NutritionalInfoDto 객체로 초기화
                                     recipeCreateModel.selectedImageUris = mutableStateListOf<Uri?>()
                                     categorySelectionViewModel.selectedCategories.value = emptySet()
                                     mongoSearchViewModel.resetSelectedIngredients()
@@ -384,7 +409,9 @@ fun RecipeUpdateScreen(
                             isRecipeNameValid.value = newValue.isNotBlank() // 유효성 검사
                         },
                         label = { Text("레시피 이름 (*)") },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                         shape = RoundedCornerShape(8.dp), // 모서리 둥글게
                         colors = OutlinedTextFieldDefaults.colors(
@@ -408,7 +435,8 @@ fun RecipeUpdateScreen(
                         label = { Text("레시피 설명 (*)") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp),
+                            .height(150.dp)
+                            .padding(top = 8.dp),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                         shape = RoundedCornerShape(8.dp), // 모서리 둥글게
                         colors = OutlinedTextFieldDefaults.colors(
@@ -429,7 +457,9 @@ fun RecipeUpdateScreen(
                             timeTaken.value = newValue
                         },
                         label = { Text("소요 시간 (분)") },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Next
