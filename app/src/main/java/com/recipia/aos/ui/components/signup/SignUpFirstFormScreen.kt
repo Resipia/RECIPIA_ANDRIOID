@@ -317,7 +317,7 @@ fun SignUpFirstFormScreen(
 
                 // 인증코드 입력 영역과 관련된 UI를 AnimatedVisibility로 감싸서 부드러운 표시/숨김 처리
                 AnimatedVisibility(
-                    visible = isTimerRunning && phoneNumberAuthViewModel.verificationMessage == "인증코드가 발송되었습니다."
+                    visible =  phoneNumberAuthViewModel.verificationMessage == "인증코드가 발송되었습니다."
 //                    visible = isVerificationCodeVisible && phoneNumberAuthViewModel.responseCode != 400,
 //                enter = fadeIn(initialAlpha = 0.3f),
 //                exit = fadeOut(targetAlpha = 0f)
