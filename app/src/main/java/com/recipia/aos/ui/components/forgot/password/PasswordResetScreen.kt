@@ -50,6 +50,9 @@ fun PasswordResetScreen(
     var isEmailReadOnly by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    // 이메일 필드가 비어 있지 않을 경우 버튼을 활성화하기 위한 조건
+    val isButtonEnabled = email.isNotEmpty()
+
     // 상태 초기화 함수
     fun resetAllStates() {
         email = foundEmail ?: ""
@@ -65,7 +68,7 @@ fun PasswordResetScreen(
                 modifier = Modifier.background(Color.White),
                 title = {
                     Text(
-                        text = "임시 비밀번호 발급",
+                        text = "비밀번호 찾기",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Black
                     )
@@ -91,7 +94,7 @@ fun PasswordResetScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "이메일로 임시 비밀번호가 발급됩니다.",
+                text = "가입 시 등록한 이메일을 입력해주세요.",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(start = 2.dp, bottom = 16.dp),
                 fontWeight = FontWeight.Bold
@@ -107,7 +110,7 @@ fun PasswordResetScreen(
                 label = { Text("이메일 주소") }
             )
 
-            // 비밀번호 찾기
+            // 비밀번호 발급하기 버튼
             if (!isPasswordSent && errorMessage == null) {
                 Button(
                     onClick = {
@@ -119,12 +122,13 @@ fun PasswordResetScreen(
                             errorMessage = error
                         })
                     },
+                    enabled = isButtonEnabled, // 버튼 활성화 조건
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(27, 94, 32), // 버튼 배경색
-                        contentColor = Color.Black // 버튼 내부 글자색
+                        containerColor = if (isButtonEnabled) Color(27, 94, 32) else Color.LightGray,
+                        contentColor = Color.Black
                     ),
-                    shape = RoundedCornerShape(4.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
                         text = "발급하기",

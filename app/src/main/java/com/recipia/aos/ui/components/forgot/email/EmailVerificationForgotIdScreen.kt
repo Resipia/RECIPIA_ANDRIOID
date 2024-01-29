@@ -160,9 +160,7 @@ fun EmailVerificationForgotIdScreen(
                     },
                     enabled = isButtonEnabled, // 버튼 활성화 조건
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isButtonEnabled) Color(
-                            27, 94, 32
-                        ) else Color.Gray, // 활성화 여부에 따른 배경색
+                        containerColor = if (isButtonEnabled) Color(27, 94, 32) else Color.LightGray,
                         contentColor = Color.Black
                     ),
                     shape = RoundedCornerShape(4.dp),
