@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -106,6 +107,7 @@ fun HomeScreen(
     val isScrolled = derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }.value
     val bookmarkUpdateState by bookmarkViewModel.bookmarkUpdateState.observeAsState()
     var menuExpanded by remember { mutableStateOf(false) }// 드롭다운 메뉴 상태
+    var chipMenuExpanded by remember { mutableStateOf(false) } // 메뉴 확장 상태
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
     var showFab by remember { mutableStateOf(true) }
 
@@ -265,6 +267,7 @@ fun HomeScreen(
                         )
                     }
 
+                    // 맨 우측 드롭다운 메뉴 설정
                     CustomDropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
@@ -355,13 +358,41 @@ fun HomeScreen(
                     ) {
                         item {
                             // 여기에 Box 또는 Column 추가
-                            Column(modifier = Modifier.padding(start = 16.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(start = 16.dp)
+                            ) {
+                                // 최상단 chip 전용 Row
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(top = 8.dp)
                                 ) {
-                                    // 최상단 카테고리 조회 아이콘
+                                    // 정렬 chip
+                                    AssistChip(
+                                        onClick = { chipMenuExpanded = true }, // 클릭 시 드롭다운 메뉴 표시
+                                        label = {
+                                            Text("정렬", fontSize = 12.sp)
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Sort,
+                                                contentDescription = "정렬 아이콘",
+                                                modifier = Modifier.size(18.dp),
+                                                tint = Color.Black
+                                            )
+                                        },
+                                        colors = AssistChipDefaults.assistChipColors(
+                                            containerColor = Color(238, 238, 238),
+                                            labelColor = Color.Black
+                                        ),
+                                        elevation = null,
+                                        border = null
+                                    )
+
+                                    Spacer(modifier = Modifier.width(8.dp)) // 칩 사이의 간격
+
+                                    // 카테고리 조회 chip
                                     AssistChip(
                                         onClick = {
                                             navController.navigate("category-recipe-search")
@@ -386,30 +417,30 @@ fun HomeScreen(
                                         border = null, // 테두리 제거
                                     )
 
-                                    Spacer(modifier = Modifier.width(8.dp)) // 칩 사이의 간격
-
-                                    // 최상단 정렬 아이콘
-                                    AssistChip(
-                                        onClick = { /* 두 번째 AssistChip 클릭 시 동작 */ },
-                                        label = {
-                                            Text("정렬", fontSize = 12.sp)
-                                        },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Sort,
-                                                contentDescription = "정렬 아이콘",
-                                                modifier = Modifier
-                                                    .size(18.dp), // 아이콘 크기 조절
-                                                tint = Color.Black // 아이콘 색상을 검은색으로 설정
-                                            )
-                                        },
-                                        colors = AssistChipDefaults.assistChipColors(
-                                            containerColor = Color(238, 238, 238),
-                                            labelColor = Color.Black // 내부 텍스트 및 아이콘 색상
-                                        ),
-                                        elevation = null, // 그림자 제거
-                                        border = null, // 테두리 제거
-                                    )
+                                    // 정렬조건 드롭다운 메뉴
+                                    CustomDropdownMenu(
+                                        expanded = chipMenuExpanded,
+                                        onDismissRequest = { chipMenuExpanded = false },
+                                        modifier = Modifier
+                                            .background(Color.White)
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text("최신순", color = Color.Black) },
+                                            onClick = {
+                                                chipMenuExpanded = false
+                                                recipeAllListViewModel.currentRequestSortType = "new"
+                                                recipeAllListViewModel.loadItemsWithSelectedSubCategories() // 정렬 조건에 따라 아이템 로드
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("오래된순", color = Color.Black) },
+                                            onClick = {
+                                                chipMenuExpanded = false
+                                                recipeAllListViewModel.currentRequestSortType = "old"
+                                                recipeAllListViewModel.loadItemsWithSelectedSubCategories() // 정렬 조건에 따라 아이템 로드
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
