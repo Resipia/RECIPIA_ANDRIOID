@@ -108,22 +108,38 @@ fun SignUpSecondFormScreen(
 
     if (showDialog) {
         AlertDialog(
+            containerColor = Color.White, // AlertDialog 배경색을 하얀색으로 설정
+            textContentColor = Color.Black, // 글자색을 검정색으로 설정
             onDismissRequest = { showDialog = false },
-            title = { Text("주의") },
-            text = { Text("뒤로 가시면 입력했던 모든 정보가 초기화 되며 다시 회원가입을 진행하셔야 합니다.") },
+            title = { Text("주의", color = Color.Black) },
+            text = { Text("뒤로 이동하시면 입력했던 모든 정보가 초기화 되며 다시 회원가입을 진행하셔야 합니다.", color = Color.Black) },
             confirmButton = {
-                Button(onClick = {
-                    signUpViewModel.clearData() // SignUpViewModel 초기화
-                    phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
-                    showDialog = false
-                    navController.navigate("login") // "login" 화면으로 이동
-                }) {
-                    Text("확인")
+                Button(
+                    onClick = {
+                        signUpViewModel.clearData() // SignUpViewModel 초기화
+                        phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
+                        showDialog = false
+                        navController.navigate("login") // "login" 화면으로 이동
+                    },
+                    shape = RoundedCornerShape(4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(27, 94, 32),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("확인", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                Button(onClick = { showDialog = false }) {
-                    Text("취소")
+                Button(
+                    onClick = { showDialog = false },
+                    shape = RoundedCornerShape(4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(27, 94, 32),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("취소", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         )
@@ -220,7 +236,7 @@ fun SignUpSecondFormScreen(
                     .imePadding() // 키보드가 활성화될 때 패딩 적용
                     .padding(innerPadding)
                     .padding(horizontal = 9.dp)
-                .fillMaxHeight(), // 화면 크기에 맞게 최대 높이로 설정
+                    .fillMaxHeight(), // 화면 크기에 맞게 최대 높이로 설정
                 verticalArrangement = Arrangement.Top
             ) {
 
@@ -493,7 +509,8 @@ fun SignUpSecondFormScreen(
                                 containerColor = if (emailError.isBlank() && passwordError.isBlank() &&
                                     emailDuplicateCheckResult == "사용 가능한 이메일입니다." &&
                                     nicknameDuplicateCheckResult == "사용 가능한 닉네임입니다." &&
-                                    isPasswordMatching == true) Color(
+                                    isPasswordMatching == true
+                                ) Color(
                                     27,
                                     94,
                                     32
