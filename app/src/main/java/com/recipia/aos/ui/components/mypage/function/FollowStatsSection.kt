@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,10 +31,8 @@ fun FollowStatsSection(
 
     val textColor = Color.Black
     val myPageData = myPageViewModel.myPageData.value
-
-    if (myPageData != null) {
-        myPageViewModel.getRecipeTotalCount(myPageData.memberId)
-    }
+    // 레시피 총 개수 관찰
+    val recipeCount by myPageViewModel.recipeCount.observeAsState()
 
     Row(
         modifier = Modifier
@@ -101,8 +101,7 @@ fun FollowStatsSection(
             Spacer(modifier = Modifier.height(5.dp)) // 간격 추가
 
             // 레시피 카운트 표시
-            val recipeCount = myPageViewModel.recipeCount.value ?: 0 // recipeCount가 null일 경우 0으로 대체
-            Text(text = "$recipeCount", color = textColor)
+            Text(text = "${recipeCount ?: 0}", color = textColor) // recipeCount가 null일 경우 0으로 대체
         }
 
         // 위글위글 영역
