@@ -196,7 +196,7 @@ fun AppNavigation(
         composable("password-change") {
             PasswordChangeScreen(
                 navController = navController,
-                tokenManager = tokenManager
+                myPageViewModel = myPageViewModel
             )
         }
         // 프로필 수정 화면
