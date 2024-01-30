@@ -6,7 +6,9 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,11 +42,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,7 +65,7 @@ import com.recipia.aos.ui.model.signup.PhoneNumberAuthViewModel
 import com.recipia.aos.ui.model.signup.SignUpViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SignUpThirdFormScreen(
     navController: NavController,
@@ -145,243 +150,257 @@ fun SignUpThirdFormScreen(
         )
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "회원가입 (3/3)",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Black
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { showDialog = true }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding) // Scaffold로부터 제공된 패딩 적용
-                .padding(horizontal = 16.dp)
-        ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-            item { Spacer(modifier = Modifier.height(10.dp)) }
-
-            item {
-                // 여기에 "프로필 설정 (선택)" 텍스트 추가
-                Text(
-                    text = "프로필 설정 (선택)",
-                    fontSize = 12.sp,
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), // 스타일 설정
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp), // 하단 패딩 추가
-                    color = MaterialTheme.colorScheme.onSurface // 텍스트 색상 설정
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                // 이벤트를 감지하여 키보드를 숨깁니다.
+                detectTapGestures(
+                    onPress = { /* 터치 감지 시 수행할 동작 */ },
+                    onTap = { keyboardController?.hide() }
                 )
             }
-
-            // 프로필 사진 입력 필드 사용하는 부분
-            item {
-                ProfilePictureInputField(
-                    profilePictureUri = profilePictureUri,
-                    onImageSelected = {
-                        // CropImageContractOptions 객체를 생성하여 이미지 선택 및 크롭 로직 호출
-                        val cropImageOptions = CropImageContractOptions(
-                            CropImage.CancelledResult.uriContent,
-                            CropImageOptions()
+    ) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "회원가입 (3/3)",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black
                         )
-                        imagePickerLauncher.launch(cropImageOptions)
                     },
-                    onImageRemoved = {
-                        // 이미지 제거 로직
-                        profilePictureUri = null
-                    }
-                )
-            }
-
-            // 문자 수를 계산하여 표시할 변수 추가
-            var charCount = oneLineIntroduction.length
-
-            // 한줄 소개 입력 필드
-            item {
-                Text(
-                    "한 줄 소개 (선택)",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    fontSize = 12.sp
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-
-                OutlinedTextField(
-                    value = oneLineIntroduction,
-                    onValueChange = { newValue ->
-                        val byteCount = newValue.toByteArray(Charsets.UTF_8).size
-                        if (byteCount <= 300) {
-                            oneLineIntroduction = newValue
-                            // 문자 수 업데이트
-                            charCount = newValue.length
+                    navigationIcon = {
+                        IconButton(onClick = { showDialog = true }) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                         }
                     },
-                    label = { Text("한 줄 소개") }, // 초기 문자 수 표시
-                    isError = oneLineIntroduction.toByteArray(Charsets.UTF_8).size > 300, // 300바이트를 초과하면 에러 처리
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(oneLineIntroFocusRequester) // focusRequester를 Modifier에 추가
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 )
-
-                Spacer(modifier = Modifier.height(12.dp))
             }
+        ) { innerPadding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding) // Scaffold로부터 제공된 패딩 적용
+                    .padding(horizontal = 16.dp)
+            ) {
 
-            // "생년월일" 레이블과 선택 필드
-            item {
-                Text(
-                    "생년월일 (선택)",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    fontSize = 12.sp
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+                item { Spacer(modifier = Modifier.height(10.dp)) }
 
-                // MyDatePickerDialog 호출
-                MyDatePickerDialog(onDateSelected = { date ->
-                    selectedDate = date
-                })
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+                item {
+                    // 여기에 "프로필 설정 (선택)" 텍스트 추가
+                    Text(
+                        text = "프로필 설정 (선택)",
+                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), // 스타일 설정
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp), // 하단 패딩 추가
+                        color = MaterialTheme.colorScheme.onSurface // 텍스트 색상 설정
+                    )
+                }
 
-            // 선택된 날짜를 보여주는 부분
-            item {
-                if (selectedDate.isNotEmpty()) {
+                // 프로필 사진 입력 필드 사용하는 부분
+                item {
+                    ProfilePictureInputField(
+                        profilePictureUri = profilePictureUri,
+                        onImageSelected = {
+                            // CropImageContractOptions 객체를 생성하여 이미지 선택 및 크롭 로직 호출
+                            val cropImageOptions = CropImageContractOptions(
+                                CropImage.CancelledResult.uriContent,
+                                CropImageOptions()
+                            )
+                            imagePickerLauncher.launch(cropImageOptions)
+                        },
+                        onImageRemoved = {
+                            // 이미지 제거 로직
+                            profilePictureUri = null
+                        }
+                    )
+                }
+
+                // 문자 수를 계산하여 표시할 변수 추가
+                var charCount = oneLineIntroduction.length
+
+                // 한줄 소개 입력 필드
+                item {
+                    Text(
+                        "한 줄 소개 (선택)",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        fontSize = 12.sp
+                    )
                     Spacer(modifier = Modifier.height(4.dp))
 
                     OutlinedTextField(
-                        value = "선택된 날짜: $selectedDate",
-                        onValueChange = {},
-                        readOnly = true,
-                        modifier = Modifier.fillMaxWidth()
+                        value = oneLineIntroduction,
+                        onValueChange = { newValue ->
+                            val byteCount = newValue.toByteArray(Charsets.UTF_8).size
+                            if (byteCount <= 300) {
+                                oneLineIntroduction = newValue
+                                // 문자 수 업데이트
+                                charCount = newValue.length
+                            }
+                        },
+                        label = { Text("한 줄 소개") }, // 초기 문자 수 표시
+                        isError = oneLineIntroduction.toByteArray(Charsets.UTF_8).size > 300, // 300바이트를 초과하면 에러 처리
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(oneLineIntroFocusRequester) // focusRequester를 Modifier에 추가
                     )
+
                     Spacer(modifier = Modifier.height(12.dp))
                 }
-            }
 
-            // "성별" 레이블과 성별 선택 필드
-            item {
-                Text(
-                    "성별 (선택)",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    fontSize = 12.sp
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                GenderSelector(selectedGender = gender, onGenderSelect = { gender = it })
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+                // "생년월일" 레이블과 선택 필드
+                item {
+                    Text(
+                        "생년월일 (선택)",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        fontSize = 12.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
 
-            // 하단 버튼 영역
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Button(
-                        onClick = {
-                            // 성별 데이터 변환 및 업데이트
-                            val genderCode = when (gender) {
-                                "남성" -> "M"
-                                "여성" -> "F"
-                                else -> ""
-                            }
-                            signUpViewModel.updateGender(genderCode)
+                    // MyDatePickerDialog 호출
+                    MyDatePickerDialog(onDateSelected = { date ->
+                        selectedDate = date
+                    })
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-                            // 기타 데이터 업데이트
-                            signUpViewModel.updateProfilePictureUri(profilePictureUri)
-                            signUpViewModel.updateOneLineIntroduction(oneLineIntroduction)
-                            signUpViewModel.updateSelectedDate(selectedDate)
+                // 선택된 날짜를 보여주는 부분
+                item {
+                    if (selectedDate.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                            // 회원가입 요청
-                            signUpViewModel.signUp(
-                                context,
-                                onSuccess = {
-                                    signUpViewModel.clearData() // 데이터 초기화
-                                    phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
-                                    navController.navigate("login-success-page")
-                                },
-                                onFailure = {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = "회원가입 실패",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                }
-                            )
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(27, 94, 32),
-                            contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .height(54.dp) // 높이 지정
-                            .weight(1f)
-                    ) {
-                        Text("건너뛰기", fontSize = 14.sp)
+                        OutlinedTextField(
+                            value = "선택된 날짜: $selectedDate",
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            // 성별 데이터 변환 및 업데이트
-                            val genderCode = when (gender) {
-                                "남성" -> "M"
-                                "여성" -> "F"
-                                else -> ""
-                            }
-                            signUpViewModel.updateGender(genderCode)
+                }
 
-                            // 기타 데이터 업데이트
-                            signUpViewModel.updateProfilePictureUri(profilePictureUri)
-                            signUpViewModel.updateOneLineIntroduction(oneLineIntroduction)
-                            signUpViewModel.updateSelectedDate(selectedDate)
+                // "성별" 레이블과 성별 선택 필드
+                item {
+                    Text(
+                        "성별 (선택)",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        fontSize = 12.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    GenderSelector(selectedGender = gender, onGenderSelect = { gender = it })
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
 
-                            // 회원가입 요청
-                            signUpViewModel.signUp(
-                                context,
-                                onSuccess = {
-                                    signUpViewModel.clearData() // 데이터 초기화
-                                    phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
-                                    navController.navigate("login-success-page")
-                                },
-                                onFailure = {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = "회원가입 실패",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                }
-                            )
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(27, 94, 32),
-                            contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
-                        ),
-                        shape = RoundedCornerShape(8.dp),
+                // 하단 버튼 영역
+                item {
+                    Row(
                         modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .height(54.dp) // 높이 지정
-                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("회원가입 완료", fontSize = 14.sp)
+                        Button(
+                            onClick = {
+                                // 성별 데이터 변환 및 업데이트
+                                val genderCode = when (gender) {
+                                    "남성" -> "M"
+                                    "여성" -> "F"
+                                    else -> ""
+                                }
+                                signUpViewModel.updateGender(genderCode)
+
+                                // 기타 데이터 업데이트
+                                signUpViewModel.updateProfilePictureUri(profilePictureUri)
+                                signUpViewModel.updateOneLineIntroduction(oneLineIntroduction)
+                                signUpViewModel.updateSelectedDate(selectedDate)
+
+                                // 회원가입 요청
+                                signUpViewModel.signUp(
+                                    context,
+                                    onSuccess = {
+                                        signUpViewModel.clearData() // 데이터 초기화
+                                        phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
+                                        navController.navigate("login-success-page")
+                                    },
+                                    onFailure = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "회원가입 실패",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    }
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(27, 94, 32),
+                                contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .height(54.dp) // 높이 지정
+                                .weight(1f)
+                        ) {
+                            Text("건너뛰기", fontSize = 14.sp)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                // 성별 데이터 변환 및 업데이트
+                                val genderCode = when (gender) {
+                                    "남성" -> "M"
+                                    "여성" -> "F"
+                                    else -> ""
+                                }
+                                signUpViewModel.updateGender(genderCode)
+
+                                // 기타 데이터 업데이트
+                                signUpViewModel.updateProfilePictureUri(profilePictureUri)
+                                signUpViewModel.updateOneLineIntroduction(oneLineIntroduction)
+                                signUpViewModel.updateSelectedDate(selectedDate)
+
+                                // 회원가입 요청
+                                signUpViewModel.signUp(
+                                    context,
+                                    onSuccess = {
+                                        signUpViewModel.clearData() // 데이터 초기화
+                                        phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
+                                        navController.navigate("login-success-page")
+                                    },
+                                    onFailure = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "회원가입 실패",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    }
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(27, 94, 32),
+                                contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .height(54.dp) // 높이 지정
+                                .weight(1f)
+                        ) {
+                            Text("회원가입 완료", fontSize = 14.sp)
+                        }
                     }
                 }
             }

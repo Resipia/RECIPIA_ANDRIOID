@@ -430,7 +430,7 @@ fun SignUpSecondFormScreen(
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 9.dp, bottom = 2.dp)
+                            .padding(start = 9.dp, bottom = 6.dp)
                     )
                 }
 
