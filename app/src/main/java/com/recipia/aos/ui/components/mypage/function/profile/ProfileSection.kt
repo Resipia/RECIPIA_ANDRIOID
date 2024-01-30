@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
@@ -90,10 +91,16 @@ fun ProfileSection(
 
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
+            // 한줄소개가 있으면 표시
             myPageData?.introduction?.let {
-                Text(text = it, color = Color.Black)
+                Text(
+                    text = it,
+                    fontSize = 11.sp,
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 2.dp)
+                )
             }
         }
     }
