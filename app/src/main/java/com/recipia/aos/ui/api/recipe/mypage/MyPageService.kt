@@ -6,6 +6,7 @@ import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.mypage.MyPageRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
 import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
+import com.recipia.aos.ui.dto.recipe.detail.MemberProfileRequestDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -73,6 +74,12 @@ interface MyPageService {
         @Query("sortType") sortType: String,
         @Query("targetMemberId") targetMemberId: Long
     ): Response<PagingResponseDto<RecipeListResponseDto>>
+
+    // 회원 프로필 사진 preUrl 받기 (요청 파라미터 없이도 jwt에 담긴 memberId로 요청)
+    @POST("/member/management/getProfile")
+    suspend fun getProfileImage(
+        @Body dto: MemberProfileRequestDto
+    ): Response<ResponseDto<String>>
 
     // 로그아웃
     @POST("/member/auth/logout")

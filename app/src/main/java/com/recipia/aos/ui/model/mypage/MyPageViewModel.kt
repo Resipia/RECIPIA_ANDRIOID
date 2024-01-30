@@ -19,6 +19,7 @@ import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.mypage.MyPageRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
 import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
+import com.recipia.aos.ui.dto.recipe.detail.MemberProfileRequestDto
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -174,8 +175,10 @@ class MyPageViewModel(
     ) {
         viewModelScope.launch {
             val nicknameRequestBody = nickname.toRequestBody("text/plain".toMediaTypeOrNull())
-            val introductionRequestBody = introduction?.toRequestBody("text/plain".toMediaTypeOrNull())
-            val deleteFileOrderRequestBody = deleteFileOrder?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val introductionRequestBody =
+                introduction?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val deleteFileOrderRequestBody =
+                deleteFileOrder?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
             val birthRequestBody = birth?.toRequestBody("text/plain".toMediaTypeOrNull())
             val genderRequestBody = gender?.toRequestBody("text/plain".toMediaTypeOrNull())
 
@@ -189,7 +192,8 @@ class MyPageViewModel(
                 }
                 val byteArrayOutputStream = ByteArrayOutputStream()
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-                val requestBody = byteArrayOutputStream.toByteArray().toRequestBody("image/jpeg".toMediaTypeOrNull())
+                val requestBody = byteArrayOutputStream.toByteArray()
+                    .toRequestBody("image/jpeg".toMediaTypeOrNull())
                 MultipartBody.Part.createFormData("profileImage", "file.jpg", requestBody)
             }
 
@@ -205,7 +209,10 @@ class MyPageViewModel(
                 if (response.isSuccessful) {
                     _updateResult.postValue(response.body())
                 } else {
-                    Log.e("MyPageViewModel", "Profile update failed: ${response.errorBody()?.string()}")
+                    Log.e(
+                        "MyPageViewModel",
+                        "Profile update failed: ${response.errorBody()?.string()}"
+                    )
                 }
             } catch (e: Exception) {
                 Log.e("MyPageViewModel", "Exception in profile update", e)
@@ -218,7 +225,10 @@ class MyPageViewModel(
 
         viewModelScope.launch {
             currentRequestPage = 0
-            val response = recipeMyPageService.getAllMyBookmarkRecipeList(currentRequestPage, currentRequestSize)
+            val response = recipeMyPageService.getAllMyBookmarkRecipeList(
+                currentRequestPage,
+                currentRequestSize
+            )
 
             // 성공적인 응답 처리 - items에 데이터 설정
             if (response.isSuccessful) {
@@ -228,7 +238,10 @@ class MyPageViewModel(
                 currentRequestPage++
             } else {
                 // 오류 처리
-                Log.e("MyPageViewModel", "Error in getAllMyBookmarkRecipeList: ${response.errorBody()}")
+                Log.e(
+                    "MyPageViewModel",
+                    "Error in getAllMyBookmarkRecipeList: ${response.errorBody()}"
+                )
             }
         }
     }
@@ -238,7 +251,8 @@ class MyPageViewModel(
 
         viewModelScope.launch {
             currentRequestPage = 0
-            val response = recipeMyPageService.getAllMyLikeRecipeList(currentRequestPage, currentRequestSize)
+            val response =
+                recipeMyPageService.getAllMyLikeRecipeList(currentRequestPage, currentRequestSize)
 
             if (response.isSuccessful) {
                 val newItems = response.body()?.content ?: emptyList()
@@ -257,7 +271,12 @@ class MyPageViewModel(
 
         viewModelScope.launch {
             currentRequestPage = 0
-            val response = recipeMyPageService.getAllTargetMemberRecipeList(currentRequestPage, currentRequestSize, currentRequestSortType, targetMemberId)
+            val response = recipeMyPageService.getAllTargetMemberRecipeList(
+                currentRequestPage,
+                currentRequestSize,
+                currentRequestSortType,
+                targetMemberId
+            )
 
             if (response.isSuccessful) {
                 val newItems = response.body()?.content ?: emptyList()
@@ -266,7 +285,10 @@ class MyPageViewModel(
                 currentRequestPage++
             } else {
                 // 오류 처리
-                Log.e("MyPageViewModel", "Error in loadMoreTargetMemberRecipes: ${response.errorBody()}")
+                Log.e(
+                    "MyPageViewModel",
+                    "Error in loadMoreTargetMemberRecipes: ${response.errorBody()}"
+                )
             }
             _isLoading.value = false
         }
@@ -278,7 +300,10 @@ class MyPageViewModel(
 
         _isLoading.value = true
         viewModelScope.launch {
-            val response = recipeMyPageService.getAllMyBookmarkRecipeList(currentRequestPage, currentRequestSize)
+            val response = recipeMyPageService.getAllMyBookmarkRecipeList(
+                currentRequestPage,
+                currentRequestSize
+            )
 
             if (response.isSuccessful) {
                 val newItems = response.body()?.content ?: emptyList()
@@ -287,7 +312,10 @@ class MyPageViewModel(
                 currentRequestPage++
             } else {
                 // 오류 처리
-                Log.e("MyPageViewModel", "Error in loadMoreMyBookmarkRecipes: ${response.errorBody()}")
+                Log.e(
+                    "MyPageViewModel",
+                    "Error in loadMoreMyBookmarkRecipes: ${response.errorBody()}"
+                )
             }
             _isLoading.value = false
         }
@@ -299,7 +327,8 @@ class MyPageViewModel(
 
         _isLoading.value = true
         viewModelScope.launch {
-            val response = recipeMyPageService.getAllMyLikeRecipeList(currentRequestPage, currentRequestSize)
+            val response =
+                recipeMyPageService.getAllMyLikeRecipeList(currentRequestPage, currentRequestSize)
 
             if (response.isSuccessful) {
                 val newItems = response.body()?.content ?: emptyList()
@@ -325,7 +354,10 @@ class MyPageViewModel(
                     _myPageData.value = response.body()?.result
                 } else {
                     // 실패한 응답 처리
-                    Log.e("MyPageViewModel", "Failed to load my page data: ${response.errorBody()?.string()}")
+                    Log.e(
+                        "MyPageViewModel",
+                        "Failed to load my page data: ${response.errorBody()?.string()}"
+                    )
                 }
             } catch (e: Exception) {
                 // 네트워크 오류 등의 예외 처리
@@ -369,6 +401,29 @@ class MyPageViewModel(
                     onError("회원탈퇴 실패")
                 }
             } catch (e: Exception) {
+                onError("네트워크 에러 발생")
+            }
+        }
+    }
+
+    // 마이페이지 작성한 유저 프로필 사진 가져오기
+    fun getMemberProfileImage(
+        memberId: Long,
+        onSuccess: (String?) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = myPageService.getProfileImage(MemberProfileRequestDto(memberId))
+                if (response.isSuccessful && response.body() != null) {
+                    // 성공적으로 URL을 받아왔을 경우 onSuccess 콜백 호출
+                    onSuccess(response.body()?.result)
+                } else {
+                    // 응답은 받았으나 실패했거나 바디가 null일 경우 onError 콜백 호출
+                    onError("프로필 이미지를 가져오는 데 실패했습니다.")
+                }
+            } catch (e: Exception) {
+                // 네트워크 오류 등의 예외 발생 시 onError 콜백 호출
                 onError("네트워크 에러 발생")
             }
         }

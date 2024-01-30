@@ -139,6 +139,7 @@ fun RecipeDetailScreen(
             }
         }
     ) { innerPadding ->
+        // 상세보기 콘텐츠
         RecipeDetailContent(
             recipeId = recipeId,
             recipeDetailViewModel = recipeDetailViewModel,
