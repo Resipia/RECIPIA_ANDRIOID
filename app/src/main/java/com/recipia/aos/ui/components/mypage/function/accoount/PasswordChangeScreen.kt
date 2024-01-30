@@ -37,9 +37,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
@@ -56,9 +60,10 @@ fun PasswordChangeScreen(
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordMatchError by remember { mutableStateOf("") }
-    val jwtMemberId = tokenManager.loadMemberId()
-    val isPasswordValid = newPassword.isNotEmpty() && newPassword == confirmPassword
-    val enableButton = newPassword.isNotEmpty() && currentPassword.isNotEmpty() && isPasswordValid
+    val passwordRegex = Regex("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@\$!%*#?&])[A-Za-z\\d@\$!%*#?&]{8,20}$")
+    var passwordValid by remember { mutableStateOf(false) }
+    var passwordErrorMessage by remember { mutableStateOf("") }
+    val enableButton = newPassword.isNotEmpty() && currentPassword.isNotEmpty() && passwordValid && newPassword == confirmPassword && confirmPassword.isNotEmpty()
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -117,17 +122,49 @@ fun PasswordChangeScreen(
                 // 새 비밀번호 입력 필드
                 OutlinedTextField(
                     value = newPassword,
-                    onValueChange = { newPassword = it },
+                    onValueChange = {
+                        newPassword = it
+                        // 비밀번호 유효성 검사
+                        passwordValid = passwordRegex.matches(newPassword)
+                        passwordErrorMessage = if (passwordValid) "" else "잘못된 형식입니다."
+                        confirmPassword = "" // 새 비밀번호 변경 시, 비밀번호 확인 필드 초기화
+                    },
                     label = { Text("새 비밀번호") },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Next
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Password
                     ),
                     keyboardActions = KeyboardActions(
                         onNext = { keyboardController?.hide() }
                     ),
+                    isError = !passwordValid && newPassword.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth()
+                )
+
+                // 비밀번호 유효성 검사 오류 메시지 표시
+                if (!passwordValid && newPassword.isNotEmpty()) {
+                    Text(
+                        text = passwordErrorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
+            item {
+                val text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("* 영문 대,소문자, 숫자, 특수문자 포함 8-20자")
+                    }
+                }
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 9.dp, bottom = 2.dp)
                 )
             }
 
@@ -153,8 +190,9 @@ fun PasswordChangeScreen(
                 )
             }
 
-            // 비밀번호가 일치하지 않으면 에러메시지
+            // 비밀번호 일치 여부 메시지
             item {
+                // 비밀번호가 일치하지 않으면 에러 메시지 출력
                 if (passwordMatchError.isNotEmpty()) {
                     Text(
                         text = passwordMatchError,
@@ -162,9 +200,8 @@ fun PasswordChangeScreen(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-
-                // 비밀번호가 일치하다면
-                if (isPasswordValid) {
+                // 비밀번호가 일치하고, confirmPassword가 비어있지 않을 경우에만 메시지 출력
+                else if (newPassword == confirmPassword && confirmPassword.isNotEmpty()) {
                     Text(
                         text = "비밀번호가 일치합니다.",
                         color = Color(27, 94, 32),
@@ -179,6 +216,7 @@ fun PasswordChangeScreen(
                 // 변경하기 버튼
                 Button(
                     onClick = {
+
                         // 비밀번호 변경 로직 구현
                     },
                     modifier = Modifier

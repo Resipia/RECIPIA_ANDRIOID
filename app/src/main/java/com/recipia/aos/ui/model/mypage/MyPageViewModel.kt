@@ -16,6 +16,7 @@ import androidx.lifecycle.viewModelScope
 import com.recipia.aos.ui.api.recipe.mypage.MyPageService
 import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.dto.ResponseDto
+import com.recipia.aos.ui.dto.mypage.ChangePasswordRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
 import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
@@ -26,6 +27,7 @@ import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.ByteArrayOutputStream
@@ -414,18 +416,65 @@ class MyPageViewModel(
     ) {
         viewModelScope.launch {
             try {
+                // 이미지 가져오는 요청 전송
                 val response = myPageService.getProfileImage(MemberProfileRequestDto(memberId))
                 if (response.isSuccessful && response.body() != null) {
                     // 성공적으로 URL을 받아왔을 경우 onSuccess 콜백 호출
                     onSuccess(response.body()?.result)
                 } else {
                     // 응답은 받았으나 실패했거나 바디가 null일 경우 onError 콜백 호출
-                    onError("프로필 이미지를 가져오는 데 실패했습니다.")
+                    onError("프로필 이미지를 가져오는 요청이 실패했습니다.")
                 }
             } catch (e: Exception) {
                 // 네트워크 오류 등의 예외 발생 시 onError 콜백 호출
                 onError("네트워크 에러 발생")
             }
+        }
+    }
+
+    // 비밀번호 변경 요청
+    fun changePassword(
+        originPassword: String,
+        newPassword: String,
+        onSuccess: (Long?) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = myPageService.changePassword(
+                    ChangePasswordRequestDto(
+                        originPassword,
+                        newPassword
+                    )
+                )
+                if (response.isSuccessful && response.body() != null) {
+                    onSuccess(response.body()?.result)
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    val errorCode = parseErrorCode(errorBody)
+
+                    when (errorCode) {
+                        1001 -> onError("유저를 찾을 수 없습니다.")
+                        9002 -> onError("잘못된 요청입니다.")
+                        else -> onError("알 수 없는 오류가 발생했습니다.")
+                    }
+                }
+            } catch (e: Exception) {
+                onError("네트워크 에러 발생")
+            }
+        }
+    }
+
+    // 에러 바디에서 에러 코드를 파싱하는 함수
+    fun parseErrorCode(errorBody: String?): Int {
+        return try {
+            errorBody?.let {
+                val jsonObj = JSONObject(it)
+                val resultObj = jsonObj.optJSONObject("result")
+                resultObj?.optInt("code", 0) ?: 0 // "code"가 없으면 0을 반환
+            } ?: 0 // errorBody가 null이면 0을 반환
+        } catch (e: Exception) {
+            0 // JSON 파싱 중 예외가 발생하면 0을 반환
         }
     }
 

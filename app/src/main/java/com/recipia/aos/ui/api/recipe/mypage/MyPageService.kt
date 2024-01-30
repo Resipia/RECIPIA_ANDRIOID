@@ -3,6 +3,7 @@ package com.recipia.aos.ui.api.recipe.mypage
 import com.recipia.aos.ui.dto.PagingResponseDto
 import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.dto.ResponseDto
+import com.recipia.aos.ui.dto.mypage.ChangePasswordRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
 import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
@@ -80,6 +81,12 @@ interface MyPageService {
     suspend fun getProfileImage(
         @Body dto: MemberProfileRequestDto
     ): Response<ResponseDto<String>>
+
+    // 회원 프로필 사진 preUrl 받기 (요청 파라미터 없이도 jwt에 담긴 memberId로 요청)
+    @POST("/member/management/updatePassword")
+    suspend fun changePassword(
+        @Body dto: ChangePasswordRequestDto
+    ): Response<ResponseDto<Long>>
 
     // 로그아웃
     @POST("/member/auth/logout")
