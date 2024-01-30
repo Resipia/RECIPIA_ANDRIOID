@@ -191,13 +191,17 @@ fun AskItemView(
             .clickable { /* 문의사항 상세 화면으로 이동 로직 */ }
             .fillMaxWidth()
             .heightIn(min = 52.dp) // 최소 높이 설정
-            .padding(vertical = 8.dp), // 내부 상하 패딩 추가
+            .padding(vertical = 8.dp) // 내부 상하 패딩 추가
+            .clickable {
+                navController.navigate("askDetail/${askItem.id}")
+            }
     ) {
         // 답변 여부
         Text(
             text = if (askItem.answerYn) "[답변 완료]" else "[답변 대기]",
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
                 .padding(end = 8.dp) // 답변 여부와 제목 사이의 간격 추가
         )
 

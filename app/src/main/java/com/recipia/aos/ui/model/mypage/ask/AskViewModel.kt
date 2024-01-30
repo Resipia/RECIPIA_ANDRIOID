@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.recipia.aos.ui.api.recipe.mypage.ask.AskService
 import com.recipia.aos.ui.dto.mypage.ask.AskListResponseDto
 import com.recipia.aos.ui.dto.mypage.ask.AskRequestDto
+import com.recipia.aos.ui.dto.mypage.ask.AskViewResponseDto
+import com.recipia.aos.ui.dto.mypage.ask.ViewAskRequestDto
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -25,6 +27,8 @@ class AskViewModel(
     var isLastPage = false
     private var currentPage = 0
     private val pageSize = 10
+
+    val askDetail = MutableLiveData<AskViewResponseDto?>()
 
     // 북마크 요청 refrofit 설정 (로깅 인터셉터 추가)
     private val askService: AskService by lazy {
@@ -112,5 +116,22 @@ class AskViewModel(
         }
     }
 
+    // 문의/피드백 상세보기
+    fun getAskDetail(askId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = askService.getDetailAsk(ViewAskRequestDto(askId))
+                if (response.isSuccessful && response.body()?.result != null) {
+                    askDetail.postValue(response.body()?.result)
+                } else {
+                    // 오류 처리 또는 askDetail에 null이 아닌 기본값 설정
+                    askDetail.postValue(null)
+                }
+            } catch (e: Exception) {
+                // 네트워크 오류 처리
+                askDetail.postValue(null)
+            }
+        }
+    }
 
 }

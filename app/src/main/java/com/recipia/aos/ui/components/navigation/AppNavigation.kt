@@ -23,6 +23,7 @@ import com.recipia.aos.ui.components.mypage.function.PasswordChangeSuccessScreen
 import com.recipia.aos.ui.components.mypage.function.accoount.AccountSettingsScreen
 import com.recipia.aos.ui.components.mypage.function.accoount.PasswordChangeScreen
 import com.recipia.aos.ui.components.mypage.function.ask.AskCreateScreen
+import com.recipia.aos.ui.components.mypage.function.ask.AskDetailScreen
 import com.recipia.aos.ui.components.mypage.function.ask.AskListPageScreen
 import com.recipia.aos.ui.components.mypage.function.profile.ProfileEditScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
@@ -229,6 +230,14 @@ fun AppNavigation(
         // 문의하기 작성 페이지
         composable("ask-create") {
             AskCreateScreen(
+                navController = navController,
+                askViewModel = askViewModel
+            )
+        }
+        // 문의하기 상세보기 페이지
+        composable("askDetail/{askId}") { backStackEntry ->
+            AskDetailScreen(
+                askId = backStackEntry.arguments?.getString("askId")?.toLong() ?: 0,
                 navController = navController,
                 askViewModel = askViewModel
             )
