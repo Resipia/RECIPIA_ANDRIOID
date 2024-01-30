@@ -104,6 +104,7 @@ fun MyPageScreen(
 
 
     Scaffold(
+        modifier = Modifier.padding(8.dp),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {
