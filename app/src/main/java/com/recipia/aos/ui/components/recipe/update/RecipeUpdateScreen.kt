@@ -293,6 +293,7 @@ fun RecipeUpdateScreen(
                                         )
                                     }
 
+                                    recipeDetailViewModel?.triggerUpdate()
                                     // 레시피 상세보기 화면으로 네비게이션
                                     navController.navigate("recipeDetail/${recipeId}")
                                 }

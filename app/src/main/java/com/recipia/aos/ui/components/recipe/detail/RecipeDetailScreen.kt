@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -49,11 +50,17 @@ fun RecipeDetailScreen(
     navController: NavController,
     tokenManager: TokenManager
 ) {
-    var recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
+    val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
     val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
     val coroutineScope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    val updateTrigger by recipeDetailViewModel.updateTrigger.observeAsState()
+
+    // updateTrigger 타임스탬프 변경 시 데이터 재로드
+    LaunchedEffect(updateTrigger) {
+        recipeDetailViewModel.loadRecipeDetail(recipeId)
+    }
 
     // BottomSheet(댓글창) 호출
     if (showSheet) {

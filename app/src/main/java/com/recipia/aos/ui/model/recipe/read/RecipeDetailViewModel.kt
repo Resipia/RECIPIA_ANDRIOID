@@ -23,6 +23,10 @@ class RecipeDetailViewModel(
     private val _recipeDetail = MutableLiveData<RecipeDetailViewResponseDto?>()
     val recipeDetail: MutableLiveData<RecipeDetailViewResponseDto?> = _recipeDetail
 
+    // 타임스탬프를 사용하여 업데이트 이벤트를 트리거
+    private val _updateTrigger = MutableLiveData(System.currentTimeMillis())
+    val updateTrigger: LiveData<Long> = _updateTrigger
+
     // 레시피 상세 정보 로딩 상태
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -68,6 +72,12 @@ class RecipeDetailViewModel(
                 _isLoading.value = false
             }
         }
+    }
+
+    // 업데이트 트리거 상태를 변경하는 함수
+    fun triggerUpdate() {
+        // 현재 시간의 타임스탬프로 업데이트
+        _updateTrigger.value = System.currentTimeMillis()
     }
 
     // 서버로부터 레시피 상세 정보를 가져오는 함수 (Retrofit 사용)
