@@ -493,8 +493,7 @@ fun HomeScreen(
                                 ListItem(
                                     item,
                                     bookmarkViewModel,
-                                    navController,
-                                    recipeAllListViewModel
+                                    navController
                                 )
 
                                 // 마지막 아이템에 도달했을 때 추가 데이터 로드
@@ -522,8 +521,7 @@ fun HomeScreen(
 fun ListItem(
     item: RecipeListResponseDto,
     bookmarkViewModel: BookMarkViewModel,
-    navController: NavController,
-    recipeAllListViewModel: RecipeAllListViewModel
+    navController: NavController
 ) {
     var isBookmarked by remember { mutableStateOf(item.bookmarkId != null) }
     val imagePainter = rememberAsyncImagePainter(

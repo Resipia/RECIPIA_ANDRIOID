@@ -292,15 +292,11 @@ fun MyPageScreen(
 
                     item {
                         MyPageFeatureItem(
-                            title = "문의하기",
+                            title = "고객 문의/피드백",
                             icon = Icons.Default.QuestionAnswer,
                             onClick = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = "준비중인 서비스입니다.",
-                                        duration = SnackbarDuration.Short
-                                    )
-                                }
+                                // 문의하기 목록 페이지로 이동
+                                navController.navigate("ask-list")
                             }
                         )
                     }

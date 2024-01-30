@@ -22,6 +22,8 @@ import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
 import com.recipia.aos.ui.components.mypage.function.PasswordChangeSuccessScreen
 import com.recipia.aos.ui.components.mypage.function.accoount.AccountSettingsScreen
 import com.recipia.aos.ui.components.mypage.function.accoount.PasswordChangeScreen
+import com.recipia.aos.ui.components.mypage.function.ask.AskCreateScreen
+import com.recipia.aos.ui.components.mypage.function.ask.AskListPageScreen
 import com.recipia.aos.ui.components.mypage.function.profile.ProfileEditScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.RecipeCreateScreen
@@ -36,6 +38,7 @@ import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
 import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.comment.CommentViewModel
+import com.recipia.aos.ui.model.factory.AskViewModelFactory
 import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
 import com.recipia.aos.ui.model.factory.CommentViewModelFactory
@@ -50,6 +53,7 @@ import com.recipia.aos.ui.model.factory.RecipeDetailViewModelFactory
 import com.recipia.aos.ui.model.forgot.ForgotViewModel
 import com.recipia.aos.ui.model.login.LoginViewModel
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
+import com.recipia.aos.ui.model.mypage.ask.AskViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
@@ -103,6 +107,9 @@ fun AppNavigation(
     )
     val likeViewModel: LikeViewModel = viewModel(
         factory = LikeViewModelFactory(tokenManager)
+    )
+    val askViewModel: AskViewModel = viewModel(
+        factory = AskViewModelFactory(tokenManager)
     )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
@@ -210,6 +217,20 @@ fun AppNavigation(
                 navController = navController,
                 myPageViewModel = myPageViewModel,
                 signUpViewModel = signUpViewModel
+            )
+        }
+        // 문의하기 목록 페이지
+        composable("ask-list") {
+            AskListPageScreen(
+                navController = navController,
+                askViewModel = askViewModel
+            )
+        }
+        // 문의하기 작성 페이지
+        composable("ask-create") {
+            AskCreateScreen(
+                navController = navController,
+                askViewModel = askViewModel
             )
         }
         // 팔로잉/팔로워 페이지
