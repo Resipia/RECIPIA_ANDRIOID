@@ -166,7 +166,7 @@ fun MyPageScreen(
                             color = Color(222, 226, 230)
                         )
                         DropdownMenuItem(
-                            text = { Text("문의하기", color = Color.Black) },
+                            text = { Text("회원 신고", color = Color.Black) },
                             onClick = { /* 피드백 처리 */ }
                         )
                     }
@@ -205,7 +205,7 @@ fun MyPageScreen(
 
                 // 팔로잉, 팔로워, 레시피, 위글위글 영역
                 item {
-                    FollowStatsSection(myPageViewModel, navController)
+                    FollowStatsSection(myPageViewModel, navController, snackbarHostState)
                     Spacer(modifier = Modifier.height(8.dp)) // 여기에 추가 공간
                 }
 
