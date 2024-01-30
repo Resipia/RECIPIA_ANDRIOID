@@ -44,14 +44,14 @@ fun PasswordFindSuccessScreen(
 
         // 성공 메시지 표시 ,
         Text(
-            text = "임시 비밀번호 재발급에 성공했습니다.",
+            text = "이메일을 확인해 주세요",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "이메일을 확인해 주세요. (조금 시간이 걸릴 수 있습니다.)",
+            text = "조금 시간이 걸릴 수 있습니다.",
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black

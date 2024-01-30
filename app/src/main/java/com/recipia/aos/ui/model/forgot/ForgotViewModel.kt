@@ -32,6 +32,11 @@ class ForgotViewModel : ViewModel() {
     private val _foundEmail = MutableStateFlow<String?>(null)
     val foundEmail: StateFlow<String?> = _foundEmail
 
+    // 찾은 이메일 초기화 함수
+    fun resetEmail() {
+        _foundEmail.value = null
+    }
+
     // RecipeApiService를 초기화
     val signUpAndForgotService: SignUpAndForgotService by lazy {
         val logging = HttpLoggingInterceptor().apply {
@@ -93,7 +98,7 @@ class ForgotViewModel : ViewModel() {
                 } else {
                     // 서버에서 오류 응답
                     Log.d("ListItem", "서버 오류: ${response.code()}")
-                    onError("회원가입되지 않은 이메일입니다.")
+                    onError("회원 정보를 찾을 수 없습니다.")
                 }
             } catch (e: Exception) {
                 // 네트워크 오류 처리

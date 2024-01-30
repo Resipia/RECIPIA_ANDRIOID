@@ -82,7 +82,13 @@ fun PasswordResetScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(
+                        onClick = {
+                            // 찾은 이메일 초기화
+                            viewModel.resetEmail()
+                            navController.popBackStack()
+                        }
+                    ) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                     }
                 },
@@ -102,7 +108,7 @@ fun PasswordResetScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "가입 시 등록한 이메일을 입력해주세요.",
+                text = "가입 시 등록한 이름, 전화번호, 이메일을 모두 입력해주세요.",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(start = 2.dp, bottom = 16.dp),
                 fontWeight = FontWeight.Bold
@@ -153,6 +159,8 @@ fun PasswordResetScreen(
                         viewModel.sendTempPassword(name, telNo, email, { isSuccess ->
                             if (isSuccess) {
                                 isPasswordSent = true
+                                // 찾은 이메일 초기화
+                                viewModel.resetEmail()
                             }
                         }, { error ->
                             errorMessage = error
@@ -201,7 +209,7 @@ fun PasswordResetScreen(
                 ) {
                     Text("비밀번호 찾기 재시도")
                 }
-            // 비밀번호 찾기에 성공하면 성공 페이지로 이동
+                // 비밀번호 찾기에 성공하면 성공 페이지로 이동
             } else if (isPasswordSent) {
                 navController.navigate("passwordFindSuccess")
             }
