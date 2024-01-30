@@ -66,6 +66,7 @@ fun AskListPageScreen(
     }
 
     Scaffold(
+        modifier = Modifier.padding(12.dp),
         containerColor = Color.White,
         topBar = { TopBar(navController) },
         bottomBar = {
@@ -185,12 +186,13 @@ fun AskItemView(
             .padding(8.dp)
             .clickable { /* 문의사항 상세 화면으로 이동 로직 */ }
             .fillMaxWidth()
-            .heightIn(min = 60.dp) // 최소 높이 설정
+            .heightIn(min = 52.dp) // 최소 높이 설정
             .padding(vertical = 8.dp), // 내부 상하 패딩 추가
     ) {
         // 답변 여부
         Text(
             text = if (askItem.answerYn) "[답변 완료]" else "[답변 대기]",
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.CenterVertically)
                 .padding(end = 8.dp) // 답변 여부와 제목 사이의 간격 추가
         )
@@ -200,7 +202,6 @@ fun AskItemView(
         // 제목
         Text(
             text = askItem.title,
-            fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterVertically)
