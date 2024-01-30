@@ -70,7 +70,13 @@ fun AskCreateScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {  },
+                title = {
+                    Text(
+                        text = "문의/피드백 작성",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
+                },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -168,7 +174,7 @@ fun AskCreateScreen(
                     shape = RoundedCornerShape(8.dp),
                 ) {
                     Text(
-                        text = "문의하기",
+                        text = "작성완료",
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )

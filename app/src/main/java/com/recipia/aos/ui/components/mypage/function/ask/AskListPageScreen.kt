@@ -3,21 +3,25 @@ package com.recipia.aos.ui.components.mypage.function.ask
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,6 +60,7 @@ fun AskListPageScreen(
     val askItems by askViewModel.askItems.observeAsState(emptyList())
     val lazyListState = rememberLazyListState()
 
+    // 초기 데이터 로딩
     LaunchedEffect(Unit) {
         askViewModel.loadFirstInitItems()
     }
@@ -63,7 +68,15 @@ fun AskListPageScreen(
     Scaffold(
         containerColor = Color.White,
         topBar = { TopBar(navController) },
-        bottomBar = { BottomBar(navController) }
+        bottomBar = {
+            Column {
+                Divider(
+                    color = Color(222, 226, 230),
+                    thickness = 1.dp,  // 구분선 두께 설정
+                )
+                BottomBar(navController)
+            }
+        }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             if (askItems.isEmpty()) {
@@ -75,6 +88,15 @@ fun AskListPageScreen(
                 ) {
                     itemsIndexed(askItems) { index, askItem ->
                         AskItemView(askItem, navController)
+
+                        // 각 항목 아래에 구분선 추가
+                        Divider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp),
+                            thickness = 0.5.dp,
+                            color = Color(222, 226, 230)
+                        )
 
                         if (index == askItems.lastIndex && !askViewModel.isLastPage) {
                             askViewModel.loadMoreItems()
@@ -121,10 +143,11 @@ fun BottomBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
+        shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Color(27, 94, 32))
     ) {
         Text(
-            "문의 작성",
+            "문의/피드백 작성",
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
             color = Color.White
@@ -162,11 +185,14 @@ fun AskItemView(
             .padding(8.dp)
             .clickable { /* 문의사항 상세 화면으로 이동 로직 */ }
             .fillMaxWidth()
+            .heightIn(min = 60.dp) // 최소 높이 설정
+            .padding(vertical = 8.dp), // 내부 상하 패딩 추가
     ) {
         // 답변 여부
         Text(
-            text = if (askItem.answerYn) "답변 완료" else "답변 대기",
+            text = if (askItem.answerYn) "[답변 완료]" else "[답변 대기]",
             modifier = Modifier.align(Alignment.CenterVertically)
+                .padding(end = 8.dp) // 답변 여부와 제목 사이의 간격 추가
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -183,7 +209,9 @@ fun AskItemView(
         // 생성일자
         Text(
             text = askItem.createDate,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(start = 8.dp) // 제목과 생성일자 사이의 간격 추가
         )
     }
 }
