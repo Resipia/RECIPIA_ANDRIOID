@@ -66,7 +66,6 @@ fun AskListPageScreen(
     }
 
     Scaffold(
-        modifier = Modifier.padding(12.dp),
         containerColor = Color.White,
         topBar = { TopBar(navController) },
         bottomBar = {
@@ -79,12 +78,17 @@ fun AskListPageScreen(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(start = 8.dp, end = 8.dp)
+        ) {
             if (askItems.isEmpty()) {
                 EmptyAskItemsMessage()
             } else {
                 LazyColumn(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier
+                        .padding(start = 8.dp, end = 8.dp),
                     state = lazyListState
                 ) {
                     itemsIndexed(askItems) { index, askItem ->

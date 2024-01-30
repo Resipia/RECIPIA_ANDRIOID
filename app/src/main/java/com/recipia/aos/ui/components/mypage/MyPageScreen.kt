@@ -104,7 +104,6 @@ fun MyPageScreen(
 
 
     Scaffold(
-        modifier = Modifier.padding(8.dp),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.White, // Scaffold의 배경색을 하얀색으로 설정
         topBar = {
@@ -189,9 +188,12 @@ fun MyPageScreen(
     ) { innerPadding ->
 
         myPageData?.let { data ->
-
             // 무한 스크롤
-            LazyColumn(modifier = Modifier.padding(innerPadding)) {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(8.dp),
+            ) {
 
                 // 프로필 이미지, 닉네임, 팔로우 버튼, 한줄소개
                 item {
