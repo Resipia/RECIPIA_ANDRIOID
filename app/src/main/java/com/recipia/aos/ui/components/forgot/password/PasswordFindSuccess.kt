@@ -32,7 +32,7 @@ fun PasswordFindSuccessScreen(
     navController: NavController
 ) {
     // Lottie 애니메이션 상태 관리
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.password_find_success))
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.signup_success))
 
     Column(
         modifier = Modifier

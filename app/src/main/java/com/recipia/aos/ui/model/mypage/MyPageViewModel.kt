@@ -450,31 +450,22 @@ class MyPageViewModel(
                 if (response.isSuccessful && response.body() != null) {
                     onSuccess(response.body()?.result)
                 } else {
-                    val errorBody = response.errorBody()?.string()
-                    val errorCode = parseErrorCode(errorBody)
+                    val errorResponseBody = response.errorBody()?.string()
+                    val errorJson = errorResponseBody?.let { JSONObject(it) }
 
-                    when (errorCode) {
-                        1001 -> onError("유저를 찾을 수 없습니다.")
-                        9002 -> onError("잘못된 요청입니다.")
-                        else -> onError("알 수 없는 오류가 발생했습니다.")
+                    if (errorJson != null) {
+                        val errorCode = errorJson.optInt("code")
+
+                        when (errorCode) {
+                            1001 -> onError("기존 비밀번호가 잘못되었습니다.")
+                            9002 -> onError("잘못된 요청입니다.")
+                            else -> onError("알 수 없는 오류가 발생했습니다.")
+                        }
                     }
                 }
             } catch (e: Exception) {
                 onError("네트워크 에러 발생")
             }
-        }
-    }
-
-    // 에러 바디에서 에러 코드를 파싱하는 함수
-    fun parseErrorCode(errorBody: String?): Int {
-        return try {
-            errorBody?.let {
-                val jsonObj = JSONObject(it)
-                val resultObj = jsonObj.optJSONObject("result")
-                resultObj?.optInt("code", 0) ?: 0 // "code"가 없으면 0을 반환
-            } ?: 0 // errorBody가 null이면 0을 반환
-        } catch (e: Exception) {
-            0 // JSON 파싱 중 예외가 발생하면 0을 반환
         }
     }
 

@@ -79,15 +79,20 @@ fun PasswordChangeScreen(
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // 성공하거나 뒤로 가기 버튼을 눌렀을 때 필드를 초기화하는 함수
+    fun resetFields() {
+        currentPassword = ""
+        newPassword = ""
+        confirmPassword = ""
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(Unit) {
-                // 이벤트를 감지하여 키보드를 숨깁니다.
-                detectTapGestures(
-                    onPress = { /* 터치 감지 시 수행할 동작 */ },
-                    onTap = { keyboardController?.hide() }
-                )
+                detectTapGestures(onTap = {
+                    keyboardController?.hide()
+                })
             }
     ) {
         Scaffold(
@@ -101,7 +106,10 @@ fun PasswordChangeScreen(
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
+                        IconButton(onClick = {
+                            resetFields() // 뒤로 가기 버튼을 누르면 필드 초기화
+                            navController.popBackStack()
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "뒤로 가기"
@@ -119,13 +127,9 @@ fun PasswordChangeScreen(
         ) { innerPadding ->
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .fillMaxWidth()
-                    .padding(16.dp)
                     .padding(innerPadding)
-                    .clickable(
-                        onClick = { keyboardController?.hide() }
-                    ),
+                    .padding(16.dp)
+                    .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 item {
@@ -250,9 +254,8 @@ fun PasswordChangeScreen(
                                 originPassword = currentPassword,
                                 newPassword = newPassword,
                                 onSuccess = { result ->
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("비밀번호 변경에 성공했습니다.")
-                                    }
+                                    resetFields() // 성공 후 필드 초기화
+                                    navController.navigate("password-change-success") // 성공 페이지로 이동
                                 },
                                 onError = { errorMessage ->
                                     coroutineScope.launch {

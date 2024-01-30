@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.signup
+package com.recipia.aos.ui.components.mypage.function
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,14 +27,14 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.recipia.aos.R
 
 /**
- * 회원가입 성공 페이지 컴포저
+ * 비밀번호 변경 성공 화면 컴포저
  */
 @Composable
-fun SignUpSuccessScreen(
+fun PasswordChangeSuccessScreen(
     navController: NavController
 ) {
     // Lottie 애니메이션 상태 관리
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.signup_hello))
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.signup_success))
 
     Column(
         modifier = Modifier
@@ -46,7 +46,7 @@ fun SignUpSuccessScreen(
 
         // 성공 메시지 표시 ,
         Text(
-            text = "회원가입에 성공하셨습니다.",
+            text = "비밀번호 변경이 완료되었습니다.",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
@@ -70,7 +70,7 @@ fun SignUpSuccessScreen(
         // "로그인 하기" 버튼
         Button(
             onClick = {
-                navController.navigate("login")
+                navController.navigate("my-page")
             },
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults.buttonColors(
@@ -80,7 +80,7 @@ fun SignUpSuccessScreen(
             modifier = Modifier
                 .height(56.dp) // 높이 지정
         ) {
-            Text("로그인 하기", fontWeight = FontWeight.Bold)
+            Text("마이페이지로 이동하기", fontWeight = FontWeight.Bold)
         }
     }
 }

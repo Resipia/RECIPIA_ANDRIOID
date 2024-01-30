@@ -19,6 +19,7 @@ import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageRecipeListScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
+import com.recipia.aos.ui.components.mypage.function.PasswordChangeSuccessScreen
 import com.recipia.aos.ui.components.mypage.function.accoount.AccountSettingsScreen
 import com.recipia.aos.ui.components.mypage.function.accoount.PasswordChangeScreen
 import com.recipia.aos.ui.components.mypage.function.profile.ProfileEditScreen
@@ -192,12 +193,16 @@ fun AppNavigation(
                 navController = navController
             )
         }
-        // 계정 정보 수정(비밀번호)
+        // 비밀번호 변경 페이지
         composable("password-change") {
             PasswordChangeScreen(
                 navController = navController,
                 myPageViewModel = myPageViewModel
             )
+        }
+        // 비밀번호 변경 성공 페이지
+        composable("password-change-success") {
+            PasswordChangeSuccessScreen(navController)
         }
         // 프로필 수정 화면
         composable("profile-edit") {
