@@ -2,6 +2,7 @@ package com.recipia.aos.ui.model.jwt
 
 import TokenManager
 import android.util.Log
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.jwt.JwtRepublishService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.login.jwt.JwtRepublishRequestDto
@@ -32,7 +33,7 @@ class TokenRepublishManager(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8081/") // 주소 확인 필요
+            .baseUrl(BuildConfig.MEMBER_SERVER_URL) // 멤버 서버 요청
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

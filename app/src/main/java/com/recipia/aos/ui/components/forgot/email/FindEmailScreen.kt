@@ -38,6 +38,7 @@ import androidx.navigation.compose.rememberNavController
 
 /**
  * 이메일 찾기 화면
+ * 추후 sns 로그인이 생기면 이 화면을 사용할 예정
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,10 +89,6 @@ fun FindEmailScreen(
             // 내부 컨텐츠
             RadioOption("이름,전화번호로 찾기", "email", selectedOption) {
                 selectedOption = "email"
-            }
-
-            RadioOption("SNS 계정 휴대폰 번호 인증", "sns", selectedOption) {
-                selectedOption = "sns"
             }
 
             Button(

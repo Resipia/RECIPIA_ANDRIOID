@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.recipia.aos.ui.components.forgot.email.EmailVerificationForgotIdScreen
 import com.recipia.aos.ui.components.forgot.email.FindEmailScreen
+import com.recipia.aos.ui.components.forgot.password.PasswordFindSuccessScreen
 import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
 import com.recipia.aos.ui.components.home.CategorySelectRecipeScreen
 import com.recipia.aos.ui.components.home.HomeScreen
@@ -18,6 +19,12 @@ import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageRecipeListScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
 import com.recipia.aos.ui.components.mypage.follow.FollowPageScreen
+import com.recipia.aos.ui.components.mypage.function.PasswordChangeSuccessScreen
+import com.recipia.aos.ui.components.mypage.function.accoount.AccountSettingsScreen
+import com.recipia.aos.ui.components.mypage.function.accoount.PasswordChangeScreen
+import com.recipia.aos.ui.components.mypage.function.ask.AskCreateScreen
+import com.recipia.aos.ui.components.mypage.function.ask.AskDetailScreen
+import com.recipia.aos.ui.components.mypage.function.ask.AskListPageScreen
 import com.recipia.aos.ui.components.mypage.function.profile.ProfileEditScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.RecipeCreateScreen
@@ -32,6 +39,7 @@ import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
 import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.comment.CommentViewModel
+import com.recipia.aos.ui.model.factory.AskViewModelFactory
 import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
 import com.recipia.aos.ui.model.factory.CommentViewModelFactory
@@ -46,6 +54,7 @@ import com.recipia.aos.ui.model.factory.RecipeDetailViewModelFactory
 import com.recipia.aos.ui.model.forgot.ForgotViewModel
 import com.recipia.aos.ui.model.login.LoginViewModel
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
+import com.recipia.aos.ui.model.mypage.ask.AskViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
@@ -99,6 +108,9 @@ fun AppNavigation(
     )
     val likeViewModel: LikeViewModel = viewModel(
         factory = LikeViewModelFactory(tokenManager)
+    )
+    val askViewModel: AskViewModel = viewModel(
+        factory = AskViewModelFactory(tokenManager)
     )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
@@ -183,12 +195,51 @@ fun AppNavigation(
                 tokenManager = tokenManager
             )
         }
+        // 계정 정보 수정 목록 페이지
+        composable("account-settings") {
+            AccountSettingsScreen(
+                navController = navController
+            )
+        }
+        // 비밀번호 변경 페이지
+        composable("password-change") {
+            PasswordChangeScreen(
+                navController = navController,
+                myPageViewModel = myPageViewModel
+            )
+        }
+        // 비밀번호 변경 성공 페이지
+        composable("password-change-success") {
+            PasswordChangeSuccessScreen(navController)
+        }
         // 프로필 수정 화면
         composable("profile-edit") {
             ProfileEditScreen(
                 navController = navController,
                 myPageViewModel = myPageViewModel,
                 signUpViewModel = signUpViewModel
+            )
+        }
+        // 문의하기 목록 페이지
+        composable("ask-list") {
+            AskListPageScreen(
+                navController = navController,
+                askViewModel = askViewModel
+            )
+        }
+        // 문의하기 작성 페이지
+        composable("ask-create") {
+            AskCreateScreen(
+                navController = navController,
+                askViewModel = askViewModel
+            )
+        }
+        // 문의하기 상세보기 페이지
+        composable("askDetail/{askId}") { backStackEntry ->
+            AskDetailScreen(
+                askId = backStackEntry.arguments?.getString("askId")?.toLong() ?: 0,
+                navController = navController,
+                askViewModel = askViewModel
             )
         }
         // 팔로잉/팔로워 페이지
@@ -264,6 +315,10 @@ fun AppNavigation(
         // PASSWORD찾기 화면
         composable("findPassword") {
             PasswordResetScreen(navController, forgotViewModel)
+        }
+        // 비밀번호 찾기(재발급) 성공 화면
+        composable("passwordFindSuccess") {
+            PasswordFindSuccessScreen(navController)
         }
         // 회원가입 1단계: 전화번호 인증 및 회원가입 동의 form 화면
         composable("signUpFirstForm") {

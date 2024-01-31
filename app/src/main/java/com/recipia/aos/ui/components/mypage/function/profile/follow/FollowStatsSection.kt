@@ -1,4 +1,4 @@
-package com.recipia.aos.ui.components.mypage.function
+package com.recipia.aos.ui.components.mypage.function.profile.follow
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,14 +9,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
+import kotlinx.coroutines.launch
 
 /**
  * 팔로잉, 팔로워, 레시피, 위글위글 목록 컴포저
@@ -24,15 +30,15 @@ import com.recipia.aos.ui.model.mypage.MyPageViewModel
 @Composable
 fun FollowStatsSection(
     myPageViewModel: MyPageViewModel,
-    navController: NavController
+    navController: NavController,
+    snackbarHostState: SnackbarHostState
 ) {
 
     val textColor = Color.Black
     val myPageData = myPageViewModel.myPageData.value
-
-    if (myPageData != null) {
-        myPageViewModel.getRecipeTotalCount(myPageData.memberId)
-    }
+    // 레시피 총 개수 관찰
+    val recipeCount by myPageViewModel.recipeCount.observeAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     Row(
         modifier = Modifier
@@ -101,15 +107,20 @@ fun FollowStatsSection(
             Spacer(modifier = Modifier.height(5.dp)) // 간격 추가
 
             // 레시피 카운트 표시
-            val recipeCount = myPageViewModel.recipeCount.value ?: 0 // recipeCount가 null일 경우 0으로 대체
-            Text(text = "$recipeCount", color = textColor)
+            Text(text = "${recipeCount ?: 0}", color = textColor) // recipeCount가 null일 경우 0으로 대체
         }
 
         // 위글위글 영역
         Column(
             modifier = Modifier
                 .weight(1f)
-                .clickable { /* 위글위글 페이지 이동 로직 */ },
+                .clickable {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            "준비중인 서비스입니다."
+                        )
+                    }
+                },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "위글위글", color = textColor)

@@ -21,16 +21,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.recipia.aos.R
-import com.recipia.aos.ui.components.mypage.function.FollowAndShareButtons
+import com.recipia.aos.ui.components.mypage.function.profile.follow.FollowAndShareButtons
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.mypage.follow.FollowViewModel
 
 /**
- * 프로필 이미지, 닉네임, 한줄소개
+ * 프로필 이미지, 닉네임, 한줄소개, 팔로우 버튼
  */
 @Composable
 fun ProfileSection(
@@ -45,7 +46,7 @@ fun ProfileSection(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -81,6 +82,7 @@ fun ProfileSection(
                     modifier = Modifier.padding(start = 2.dp)
                 )
 
+                // 팔로우 버튼
                 FollowAndShareButtons(
                     myPageViewModel = myPageViewModel,
                     followViewModel = followViewModel,
@@ -89,10 +91,16 @@ fun ProfileSection(
 
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
+            // 한줄소개가 있으면 표시
             myPageData?.introduction?.let {
-                Text(text = it, color = Color.Black)
+                Text(
+                    text = it,
+                    fontSize = 11.sp,
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 2.dp)
+                )
             }
         }
     }

@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.RecipeDetailAndDeleteService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.recipe.detail.RecipeDetailViewResponseDto
@@ -22,6 +23,10 @@ class RecipeDetailViewModel(
     // 서버로부터 받은 레시피 상세 정보를 저장하는 LiveData
     private val _recipeDetail = MutableLiveData<RecipeDetailViewResponseDto?>()
     val recipeDetail: MutableLiveData<RecipeDetailViewResponseDto?> = _recipeDetail
+
+    // 타임스탬프를 사용하여 업데이트 이벤트를 트리거
+    private val _updateTrigger = MutableLiveData(System.currentTimeMillis())
+    val updateTrigger: LiveData<Long> = _updateTrigger
 
     // 레시피 상세 정보 로딩 상태
     private val _isLoading = MutableLiveData<Boolean>()
@@ -44,7 +49,7 @@ class RecipeDetailViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/") // 여기서는 서버의 Base URL을 설정합니다.
+            .baseUrl(BuildConfig.RECIPE_SERVER_URL) // 여기서는 서버의 Base URL을 설정합니다.
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -68,6 +73,12 @@ class RecipeDetailViewModel(
                 _isLoading.value = false
             }
         }
+    }
+
+    // 업데이트 트리거 상태를 변경하는 함수
+    fun triggerUpdate() {
+        // 현재 시간의 타임스탬프로 업데이트
+        _updateTrigger.value = System.currentTimeMillis()
     }
 
     // 서버로부터 레시피 상세 정보를 가져오는 함수 (Retrofit 사용)

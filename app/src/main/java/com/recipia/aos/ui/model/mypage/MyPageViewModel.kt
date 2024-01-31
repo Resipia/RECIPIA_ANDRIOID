@@ -13,18 +13,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.mypage.MyPageService
 import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.dto.ResponseDto
+import com.recipia.aos.ui.dto.mypage.ChangePasswordRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
 import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
+import com.recipia.aos.ui.dto.recipe.detail.MemberProfileRequestDto
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.ByteArrayOutputStream
@@ -99,7 +103,7 @@ class MyPageViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8081/") // 멤버 서버 요청
+            .baseUrl(BuildConfig.MEMBER_SERVER_URL) // 멤버 서버 요청 // 멤버 서버 요청
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
@@ -121,7 +125,7 @@ class MyPageViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/") // 레시피 서버 요청
+            .baseUrl(BuildConfig.RECIPE_SERVER_URL) // 레시피 서버 요청
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
@@ -174,8 +178,10 @@ class MyPageViewModel(
     ) {
         viewModelScope.launch {
             val nicknameRequestBody = nickname.toRequestBody("text/plain".toMediaTypeOrNull())
-            val introductionRequestBody = introduction?.toRequestBody("text/plain".toMediaTypeOrNull())
-            val deleteFileOrderRequestBody = deleteFileOrder?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val introductionRequestBody =
+                introduction?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val deleteFileOrderRequestBody =
+                deleteFileOrder?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
             val birthRequestBody = birth?.toRequestBody("text/plain".toMediaTypeOrNull())
             val genderRequestBody = gender?.toRequestBody("text/plain".toMediaTypeOrNull())
 
@@ -189,7 +195,8 @@ class MyPageViewModel(
                 }
                 val byteArrayOutputStream = ByteArrayOutputStream()
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-                val requestBody = byteArrayOutputStream.toByteArray().toRequestBody("image/jpeg".toMediaTypeOrNull())
+                val requestBody = byteArrayOutputStream.toByteArray()
+                    .toRequestBody("image/jpeg".toMediaTypeOrNull())
                 MultipartBody.Part.createFormData("profileImage", "file.jpg", requestBody)
             }
 
@@ -205,7 +212,10 @@ class MyPageViewModel(
                 if (response.isSuccessful) {
                     _updateResult.postValue(response.body())
                 } else {
-                    Log.e("MyPageViewModel", "Profile update failed: ${response.errorBody()?.string()}")
+                    Log.e(
+                        "MyPageViewModel",
+                        "Profile update failed: ${response.errorBody()?.string()}"
+                    )
                 }
             } catch (e: Exception) {
                 Log.e("MyPageViewModel", "Exception in profile update", e)
@@ -218,7 +228,10 @@ class MyPageViewModel(
 
         viewModelScope.launch {
             currentRequestPage = 0
-            val response = recipeMyPageService.getAllMyBookmarkRecipeList(currentRequestPage, currentRequestSize)
+            val response = recipeMyPageService.getAllMyBookmarkRecipeList(
+                currentRequestPage,
+                currentRequestSize
+            )
 
             // 성공적인 응답 처리 - items에 데이터 설정
             if (response.isSuccessful) {
@@ -228,7 +241,10 @@ class MyPageViewModel(
                 currentRequestPage++
             } else {
                 // 오류 처리
-                Log.e("MyPageViewModel", "Error in getAllMyBookmarkRecipeList: ${response.errorBody()}")
+                Log.e(
+                    "MyPageViewModel",
+                    "Error in getAllMyBookmarkRecipeList: ${response.errorBody()}"
+                )
             }
         }
     }
@@ -238,7 +254,8 @@ class MyPageViewModel(
 
         viewModelScope.launch {
             currentRequestPage = 0
-            val response = recipeMyPageService.getAllMyLikeRecipeList(currentRequestPage, currentRequestSize)
+            val response =
+                recipeMyPageService.getAllMyLikeRecipeList(currentRequestPage, currentRequestSize)
 
             if (response.isSuccessful) {
                 val newItems = response.body()?.content ?: emptyList()
@@ -257,7 +274,12 @@ class MyPageViewModel(
 
         viewModelScope.launch {
             currentRequestPage = 0
-            val response = recipeMyPageService.getAllTargetMemberRecipeList(currentRequestPage, currentRequestSize, currentRequestSortType, targetMemberId)
+            val response = recipeMyPageService.getAllTargetMemberRecipeList(
+                currentRequestPage,
+                currentRequestSize,
+                currentRequestSortType,
+                targetMemberId
+            )
 
             if (response.isSuccessful) {
                 val newItems = response.body()?.content ?: emptyList()
@@ -266,7 +288,10 @@ class MyPageViewModel(
                 currentRequestPage++
             } else {
                 // 오류 처리
-                Log.e("MyPageViewModel", "Error in loadMoreTargetMemberRecipes: ${response.errorBody()}")
+                Log.e(
+                    "MyPageViewModel",
+                    "Error in loadMoreTargetMemberRecipes: ${response.errorBody()}"
+                )
             }
             _isLoading.value = false
         }
@@ -278,7 +303,10 @@ class MyPageViewModel(
 
         _isLoading.value = true
         viewModelScope.launch {
-            val response = recipeMyPageService.getAllMyBookmarkRecipeList(currentRequestPage, currentRequestSize)
+            val response = recipeMyPageService.getAllMyBookmarkRecipeList(
+                currentRequestPage,
+                currentRequestSize
+            )
 
             if (response.isSuccessful) {
                 val newItems = response.body()?.content ?: emptyList()
@@ -287,7 +315,10 @@ class MyPageViewModel(
                 currentRequestPage++
             } else {
                 // 오류 처리
-                Log.e("MyPageViewModel", "Error in loadMoreMyBookmarkRecipes: ${response.errorBody()}")
+                Log.e(
+                    "MyPageViewModel",
+                    "Error in loadMoreMyBookmarkRecipes: ${response.errorBody()}"
+                )
             }
             _isLoading.value = false
         }
@@ -299,7 +330,8 @@ class MyPageViewModel(
 
         _isLoading.value = true
         viewModelScope.launch {
-            val response = recipeMyPageService.getAllMyLikeRecipeList(currentRequestPage, currentRequestSize)
+            val response =
+                recipeMyPageService.getAllMyLikeRecipeList(currentRequestPage, currentRequestSize)
 
             if (response.isSuccessful) {
                 val newItems = response.body()?.content ?: emptyList()
@@ -325,7 +357,10 @@ class MyPageViewModel(
                     _myPageData.value = response.body()?.result
                 } else {
                     // 실패한 응답 처리
-                    Log.e("MyPageViewModel", "Failed to load my page data: ${response.errorBody()?.string()}")
+                    Log.e(
+                        "MyPageViewModel",
+                        "Failed to load my page data: ${response.errorBody()?.string()}"
+                    )
                 }
             } catch (e: Exception) {
                 // 네트워크 오류 등의 예외 처리
@@ -367,6 +402,67 @@ class MyPageViewModel(
                     onSuccess()
                 } else {
                     onError("회원탈퇴 실패")
+                }
+            } catch (e: Exception) {
+                onError("네트워크 에러 발생")
+            }
+        }
+    }
+
+    // 마이페이지 작성한 유저 프로필 사진 가져오기
+    fun getMemberProfileImage(
+        memberId: Long,
+        onSuccess: (String?) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                // 이미지 가져오는 요청 전송
+                val response = myPageService.getProfileImage(MemberProfileRequestDto(memberId))
+                if (response.isSuccessful && response.body() != null) {
+                    // 성공적으로 URL을 받아왔을 경우 onSuccess 콜백 호출
+                    onSuccess(response.body()?.result)
+                } else {
+                    // 응답은 받았으나 실패했거나 바디가 null일 경우 onError 콜백 호출
+                    onError("프로필 이미지를 가져오는 요청이 실패했습니다.")
+                }
+            } catch (e: Exception) {
+                // 네트워크 오류 등의 예외 발생 시 onError 콜백 호출
+                onError("네트워크 에러 발생")
+            }
+        }
+    }
+
+    // 비밀번호 변경 요청
+    fun changePassword(
+        originPassword: String,
+        newPassword: String,
+        onSuccess: (Long?) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = myPageService.changePassword(
+                    ChangePasswordRequestDto(
+                        originPassword,
+                        newPassword
+                    )
+                )
+                if (response.isSuccessful && response.body() != null) {
+                    onSuccess(response.body()?.result)
+                } else {
+                    val errorResponseBody = response.errorBody()?.string()
+                    val errorJson = errorResponseBody?.let { JSONObject(it) }
+
+                    if (errorJson != null) {
+                        val errorCode = errorJson.optInt("code")
+
+                        when (errorCode) {
+                            1001 -> onError("기존 비밀번호가 잘못되었습니다.")
+                            9002 -> onError("잘못된 요청입니다.")
+                            else -> onError("알 수 없는 오류가 발생했습니다.")
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 onError("네트워크 에러 발생")

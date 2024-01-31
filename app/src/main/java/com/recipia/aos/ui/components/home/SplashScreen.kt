@@ -17,7 +17,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -45,16 +48,17 @@ fun SplashScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
 
-        // 성공 메시지 표시
-//        Text("레시피 유토피아 Recipia.")
-//
-//        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "레시피 유토피아",
+            color = Color(27, 94, 32),
+            fontWeight = FontWeight.Bold,
+            fontSize = 28.sp,
+        )
 
         LottieAnimation(
             composition = composition,
@@ -62,7 +66,7 @@ fun SplashScreen(
             isPlaying = true, // 애니메이션 재생
             iterations = LottieConstants.IterateForever, // 무한 반복
             // 애니메이션 상태 추적
-            speed = 2f,
+            speed = 2.4f,
             restartOnPlay = false
         )
 

@@ -4,6 +4,7 @@ import TokenManager
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.search.MongoSearchService
 import com.recipia.aos.ui.dto.search.SearchType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -70,7 +71,7 @@ class MongoSearchViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/") // 레시피 서버에 요청
+            .baseUrl(BuildConfig.RECIPE_SERVER_URL) // 레시피 서버에 요청
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

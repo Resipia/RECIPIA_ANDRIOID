@@ -3,6 +3,7 @@ package com.recipia.aos.ui.model.forgot
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.signup.SignUpAndForgotService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.forgot.FindEmailRequestDto
@@ -32,6 +33,11 @@ class ForgotViewModel : ViewModel() {
     private val _foundEmail = MutableStateFlow<String?>(null)
     val foundEmail: StateFlow<String?> = _foundEmail
 
+    // 찾은 이메일 초기화 함수
+    fun resetEmail() {
+        _foundEmail.value = null
+    }
+
     // RecipeApiService를 초기화
     val signUpAndForgotService: SignUpAndForgotService by lazy {
         val logging = HttpLoggingInterceptor().apply {
@@ -43,7 +49,7 @@ class ForgotViewModel : ViewModel() {
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8081/") // 멤버 서버 호출
+            .baseUrl(BuildConfig.MEMBER_SERVER_URL) // 멤버 서버 요청
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -78,20 +84,22 @@ class ForgotViewModel : ViewModel() {
 
     // 임시 비밀번호 전송
     fun sendTempPassword(
+        name: String,
+        telNo: String,
         email: String,
         onResult: (Boolean) -> Unit,
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
             try {
-                val response = getFindPasswordResponse(email)
+                val response = getFindPasswordResponse(name, telNo, email)
                 if (response.isSuccessful) {
                     // 성공적으로 임시 비밀번호 전송
                     onResult(true)
                 } else {
                     // 서버에서 오류 응답
                     Log.d("ListItem", "서버 오류: ${response.code()}")
-                    onError("회원가입되지 않은 이메일입니다.")
+                    onError("회원 정보를 찾을 수 없습니다.")
                 }
             } catch (e: Exception) {
                 // 네트워크 오류 처리
@@ -111,10 +119,12 @@ class ForgotViewModel : ViewModel() {
 
     // 임시 비밀번호 재발급 호출(코루틴)
     private suspend fun getFindPasswordResponse(
+        name: String,
+        telNo: String,
         email: String
     ): Response<ResponseDto<Void>> {
         // Retrofit을 사용하여 API 호출
-        return signUpAndForgotService.sendTempPassword(TempPasswordRequestDto(email))
+        return signUpAndForgotService.sendTempPassword(TempPasswordRequestDto(name, telNo, email))
     }
 
     // 찾은 이메일 저장

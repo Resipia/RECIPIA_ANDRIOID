@@ -83,18 +83,40 @@ fun RecipeDetailContent(
     tokenManager: TokenManager
 ) {
 
-    var recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
+    val recipeDetailState = recipeDetailViewModel.recipeDetail.observeAsState()
     val isLoading = recipeDetailViewModel.isLoading.observeAsState()
     var menuExpanded by remember { mutableStateOf(false) }
     val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
     var showDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+    var profileImageUrl by remember { mutableStateOf<String?>(null) } // 프로필 이미지 URL 상태
 
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
         recipeDetailViewModel.loadRecipeDetail(recipeId)
-        commentViewModel.loadInitialComments(recipeId) // 수정된 함수 호출
+        commentViewModel.loadInitialComments(recipeId)
+    }
+
+    // 레시피 상세 정보가 로드된 후에 이미지를 가져오는 로직 수행
+    LaunchedEffect(key1 = recipeDetailState.value) {
+        recipeDetailState.value?.memberId?.let { memberId ->
+            if (memberId > 0) {
+                myPageViewModel.getMemberProfileImage(
+                    memberId = memberId,
+                    onSuccess = { url ->
+                        profileImageUrl = url // 성공적으로 URL을 받아오면 상태 업데이트
+                    },
+                    onError = {
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(
+                                "이미지 조회 에러 발생"
+                            )
+                        }
+                    }
+                )
+            }
+        }
     }
 
     // dialog(알림창) 호출
@@ -139,7 +161,7 @@ fun RecipeDetailContent(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("확인",  color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("확인", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -198,6 +220,7 @@ fun RecipeDetailContent(
                             contentDescription = "더보기"
                         )
                     }
+                    // 드롭다운 메뉴
                     CustomDropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
@@ -329,23 +352,19 @@ fun RecipeDetailContent(
                             // 프로필 이미지
                             Image(
                                 painter = rememberAsyncImagePainter(
-                                    ImageRequest.Builder(LocalContext.current).data(
-                                        data = recipeDetail.recipeFileUrlList.firstOrNull()
-                                            ?: "https://example.com/default_profile.jpg"
-                                    ).apply {
-                                        // 이미지 로드 중 및 에러 발생 시 대체 이미지 지정
-                                        placeholder(R.drawable.ic_launcher_foreground)
-                                        error(R.drawable.ic_launcher_foreground)
-                                        // 이미지를 원형으로 자르기
-                                        transformations(CircleCropTransformation())
-                                    }.build()
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data(profileImageUrl ?: R.drawable.ic_launcher_foreground)
+                                        .apply {
+                                            placeholder(R.drawable.ic_launcher_foreground)
+                                            error(R.drawable.ic_launcher_foreground)
+                                            transformations(CircleCropTransformation())
+                                        }.build()
                                 ),
                                 contentDescription = "작성자 프로필",
                                 modifier = Modifier
-                                    .size(50.dp) // 이미지 크기
-                                    .clip(CircleShape) // 원형 클리핑
-                                    .border(0.5.dp, Color.Gray, CircleShape) // 회색 테두리 추가
-                                    .padding(horizontal = 4.dp)
+                                    .size(50.dp)
+                                    .clip(CircleShape)
+                                    .border(0.5.dp, Color.Gray, CircleShape)
                             )
 
                             Spacer(modifier = Modifier.width(12.dp))

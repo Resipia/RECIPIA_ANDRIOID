@@ -3,6 +3,7 @@ package com.recipia.aos.ui.model.recipe.like
 import TokenManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.BookmarkService
 import com.recipia.aos.ui.api.recipe.like.RecipeLikeService
 import com.recipia.aos.ui.dto.like.RecipeLikeRequestDto
@@ -31,7 +32,7 @@ class LikeViewModel(
             chain.proceed(request)
         }.build()
 
-        Retrofit.Builder().baseUrl("http://10.0.2.2:8082/") // 레시피 서버
+        Retrofit.Builder().baseUrl(BuildConfig.RECIPE_SERVER_URL) // 레시피 서버
             .addConverterFactory(GsonConverterFactory.create()).client(client).build()
             .create(RecipeLikeService::class.java)
     }

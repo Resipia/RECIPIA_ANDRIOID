@@ -45,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,7 +52,7 @@ import androidx.navigation.NavController
 import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
-import com.recipia.aos.ui.components.mypage.function.FollowStatsSection
+import com.recipia.aos.ui.components.mypage.function.profile.follow.FollowStatsSection
 import com.recipia.aos.ui.components.mypage.function.MyPageFeatureItem
 import com.recipia.aos.ui.components.mypage.function.PersonalInfoSection
 import com.recipia.aos.ui.components.mypage.function.profile.ProfileSection
@@ -80,22 +79,22 @@ fun MyPageScreen(
     val myPageData by myPageViewModel.myPageData.observeAsState()
 
     // 색상 정의
-    val context = LocalContext.current // 현재 컨텍스트를 가져옴
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
     val targetId = targetMemberId ?: tokenManager.loadMemberId() // memberId 결정
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope() // 코루틴 스코프 생성
 
-    LaunchedEffect(Unit) {
-        myPageViewModel.loadMyPageData(targetId) // 데이터를 불러오는 함수 호출
-    }
-
     // targetMemberId가 존재하면 해당 멤버의 레시피를 가져오고, 그렇지 않으면 기본 마이페이지 기능을 표시
     LaunchedEffect(key1 = targetMemberId) {
         targetMemberId?.let {
             myPageViewModel.getHighRecipe(it)
         }
+    }
+
+    // 레시피 총 개수 가져오기 (한 번만 호출)
+    LaunchedEffect(key1 = Unit) {
+        myPageViewModel.getRecipeTotalCount(targetId)
     }
 
     // 화면이 렌더링될 때 데이터 로딩 시작
@@ -132,18 +131,22 @@ fun MyPageScreen(
                         modifier = Modifier.background(Color.White)
                     ) {
                         // 드롭다운 메뉴 아이템들
-                        DropdownMenuItem(
-                            text = { Text("프로필 수정", color = Color.Black) },
-                            onClick = {
-                                // "profile-edit" 라우트로 이동
-                                navController.navigate("profile-edit")
-                            }
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.fillMaxWidth(),
-                            thickness = 0.5.dp,
-                            color = Color(222, 226, 230)
-                        )
+                        if (myPageData?.memberId?.equals(tokenManager.loadMemberId()) == true) {
+                            DropdownMenuItem(
+                                text = { Text("프로필 수정", color = Color.Black) },
+                                onClick = {
+                                    // "profile-edit" 라우트로 이동
+                                    navController.navigate("profile-edit")
+                                }
+                            )
+
+                            HorizontalDivider(
+                                modifier = Modifier.fillMaxWidth(),
+                                thickness = 0.5.dp,
+                                color = Color(222, 226, 230)
+                            )
+                        }
+
                         DropdownMenuItem(
                             text = { Text("설정", color = Color.Black) },
                             onClick = { /* 설정 처리 */ }
@@ -163,7 +166,7 @@ fun MyPageScreen(
                             color = Color(222, 226, 230)
                         )
                         DropdownMenuItem(
-                            text = { Text("문의하기", color = Color.Black) },
+                            text = { Text("회원 신고", color = Color.Black) },
                             onClick = { /* 피드백 처리 */ }
                         )
                     }
@@ -185,9 +188,12 @@ fun MyPageScreen(
     ) { innerPadding ->
 
         myPageData?.let { data ->
-
             // 무한 스크롤
-            LazyColumn(modifier = Modifier.padding(innerPadding)) {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(8.dp),
+            ) {
 
                 // 프로필 이미지, 닉네임, 팔로우 버튼, 한줄소개
                 item {
@@ -202,7 +208,7 @@ fun MyPageScreen(
 
                 // 팔로잉, 팔로워, 레시피, 위글위글 영역
                 item {
-                    FollowStatsSection(myPageViewModel, navController)
+                    FollowStatsSection(myPageViewModel, navController, snackbarHostState)
                     Spacer(modifier = Modifier.height(8.dp)) // 여기에 추가 공간
                 }
 
@@ -276,14 +282,6 @@ fun MyPageScreen(
                         MyPageFeatureItem(
                             title = "작성한 댓글/대댓글 보기",
                             icon = Icons.Default.Comment,
-                            onClick = { /* 페이지 이동 로직 */ }
-                        )
-                    }
-
-                    item {
-                        MyPageFeatureItem(
-                            title = "문의하기",
-                            icon = Icons.Default.QuestionAnswer,
                             onClick = {
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
@@ -297,9 +295,22 @@ fun MyPageScreen(
 
                     item {
                         MyPageFeatureItem(
+                            title = "고객 문의/피드백",
+                            icon = Icons.Default.QuestionAnswer,
+                            onClick = {
+                                // 문의하기 목록 페이지로 이동
+                                navController.navigate("ask-list")
+                            }
+                        )
+                    }
+
+                    item {
+                        MyPageFeatureItem(
                             title = "계정 정보 수정",
                             icon = Icons.Default.ManageAccounts,
-                            onClick = { /* 페이지 이동 로직 */ }
+                            onClick = {
+                                navController.navigate("account-settings")
+                            }
                         )
                     }
 

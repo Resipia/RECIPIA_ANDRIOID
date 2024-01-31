@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.signup.PhoneNumberValidService
 import com.recipia.aos.ui.dto.singup.CheckVerifyCodeRequestDto
 import com.recipia.aos.ui.dto.singup.PhoneNumberRequestDto
@@ -38,7 +39,7 @@ class PhoneNumberAuthViewModel() : ViewModel() {
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8081/")
+            .baseUrl(BuildConfig.MEMBER_SERVER_URL) // 멤버 서버 요청
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
