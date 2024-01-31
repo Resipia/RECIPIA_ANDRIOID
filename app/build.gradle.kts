@@ -7,6 +7,10 @@ android {
     namespace = "com.recipia.aos"
     compileSdk = 34
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.recipia.aos"
         minSdk = 24
@@ -19,9 +23,9 @@ android {
             useSupportLibrary = true
         }
 
-//        // BuildConfig 필드 추가
-//        buildConfigField("String", "MEMBER_SERVER_URL", "\"${property("MemberServerUrl")}\"")
-//        buildConfigField("String", "RECIPE_SERVER_URL", "\"${property("RecipeServerUrl")}\"")
+        // BuildConfig 필드 추가
+        buildConfigField("String", "MEMBER_SERVER_URL", "\"${property("MemberServerUrl")}\"")
+        buildConfigField("String", "RECIPE_SERVER_URL", "\"${property("RecipeServerUrl")}\"")
     }
 
     buildTypes {

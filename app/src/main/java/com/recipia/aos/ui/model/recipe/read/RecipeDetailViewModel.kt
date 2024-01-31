@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.RecipeDetailAndDeleteService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.recipe.detail.RecipeDetailViewResponseDto
@@ -48,7 +49,7 @@ class RecipeDetailViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/") // 여기서는 서버의 Base URL을 설정합니다.
+            .baseUrl(BuildConfig.RECIPE_SERVER_URL) // 여기서는 서버의 Base URL을 설정합니다.
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

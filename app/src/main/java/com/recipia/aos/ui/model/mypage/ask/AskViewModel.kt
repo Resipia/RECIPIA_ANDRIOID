@@ -4,6 +4,7 @@ import TokenManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.mypage.ask.AskService
 import com.recipia.aos.ui.dto.mypage.ask.AskListResponseDto
 import com.recipia.aos.ui.dto.mypage.ask.AskRequestDto
@@ -45,7 +46,7 @@ class AskViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8081/") // 멤버 서버 요청
+            .baseUrl(BuildConfig.MEMBER_SERVER_URL) // 멤버 서버 요청
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

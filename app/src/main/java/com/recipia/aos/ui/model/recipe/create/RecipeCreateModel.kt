@@ -10,6 +10,7 @@ import android.provider.DocumentsContract
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.RecipeCreateAndUpdateService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
@@ -59,7 +60,7 @@ class RecipeCreateModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/") // 서버 주소 확인 필요
+            .baseUrl(BuildConfig.RECIPE_SERVER_URL) // 서버 주소 확인 필요
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

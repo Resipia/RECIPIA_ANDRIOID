@@ -3,6 +3,7 @@ package com.recipia.aos.ui.model.comment
 import TokenManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.CommentService
 import com.recipia.aos.ui.dto.PagingResponseDto
 import com.recipia.aos.ui.dto.comment.CommentDeleteRequestDto
@@ -57,7 +58,7 @@ class CommentViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/") // 레시피 서버
+            .baseUrl(BuildConfig.RECIPE_SERVER_URL) // 레시피 서버
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

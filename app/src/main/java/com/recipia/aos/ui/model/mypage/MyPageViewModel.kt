@@ -13,6 +13,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.mypage.MyPageService
 import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.dto.ResponseDto
@@ -102,7 +103,7 @@ class MyPageViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8081/") // 멤버 서버 요청
+            .baseUrl(BuildConfig.MEMBER_SERVER_URL) // 멤버 서버 요청 // 멤버 서버 요청
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
@@ -124,7 +125,7 @@ class MyPageViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/") // 레시피 서버 요청
+            .baseUrl(BuildConfig.RECIPE_SERVER_URL) // 레시피 서버 요청
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

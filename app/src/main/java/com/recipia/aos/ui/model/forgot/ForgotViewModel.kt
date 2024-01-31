@@ -3,6 +3,7 @@ package com.recipia.aos.ui.model.forgot
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.signup.SignUpAndForgotService
 import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.forgot.FindEmailRequestDto
@@ -48,7 +49,7 @@ class ForgotViewModel : ViewModel() {
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8081/") // 멤버 서버 호출
+            .baseUrl(BuildConfig.MEMBER_SERVER_URL) // 멤버 서버 요청
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

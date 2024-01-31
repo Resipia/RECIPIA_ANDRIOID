@@ -3,6 +3,7 @@ package com.recipia.aos.ui.model.recipe.bookmark
 import TokenManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.BookmarkService
 import com.recipia.aos.ui.dto.RecipeListResponseDto
 import com.recipia.aos.ui.dto.ResponseDto
@@ -43,7 +44,7 @@ class BookMarkViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/") // 주소 확인 필요
+            .baseUrl(BuildConfig.RECIPE_SERVER_URL) // 주소 확인 필요
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

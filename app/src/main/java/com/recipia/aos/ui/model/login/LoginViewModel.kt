@@ -3,6 +3,7 @@ package com.recipia.aos.ui.model.login
 import TokenManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.login.LoginService
 import com.recipia.aos.ui.dto.login.TokenMemberInfoDto
 import kotlinx.coroutines.launch
@@ -27,7 +28,7 @@ class LoginViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8081/") // 멤버 서버 호출
+            .baseUrl(BuildConfig.MEMBER_SERVER_URL) // 멤버 서버 요청
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

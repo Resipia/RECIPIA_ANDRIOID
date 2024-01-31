@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.RecipeListService
 import com.recipia.aos.ui.dto.PagingResponseDto
 import com.recipia.aos.ui.dto.RecipeListResponseDto
@@ -58,7 +59,7 @@ class RecipeAllListViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8082/")
+            .baseUrl(BuildConfig.RECIPE_SERVER_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

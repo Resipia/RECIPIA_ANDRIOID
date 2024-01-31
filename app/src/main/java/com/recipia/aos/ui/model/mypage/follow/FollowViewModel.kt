@@ -4,6 +4,7 @@ import TokenManager
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.mypage.FollowService
 import com.recipia.aos.ui.dto.mypage.follow.FollowListResponseDto
 import com.recipia.aos.ui.dto.mypage.follow.FollowRequestDto
@@ -42,7 +43,7 @@ class FollowViewModel(
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8081/") // 멤버 서버 요청
+            .baseUrl(BuildConfig.MEMBER_SERVER_URL) // 멤버 서버 요청
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
