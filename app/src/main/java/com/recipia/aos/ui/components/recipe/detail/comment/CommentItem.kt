@@ -78,11 +78,9 @@ fun CommentItem(
         Text(
             text = commentDto.commentValue,
             style = MaterialTheme.typography.bodyLarge,
-            fontSize = 16.sp,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            fontSize = 14.sp,
+            modifier = Modifier.padding(start = 18.dp, end = 18.dp, top = 4.dp)
         )
-
-        Spacer(modifier = Modifier.height(12.dp))
     }
 
     Row {
@@ -119,6 +117,7 @@ fun CommentItem(
 
         // 만약 본인 댓글이면 수정 및 삭제 버튼 추가
         if (commentDto.memberId == loadMemberId) {
+
             // 댓글 수정버튼
             Button(
                 onClick = {
@@ -129,8 +128,8 @@ fun CommentItem(
                     .padding(
 //                        start = 4.dp, // todo: 위에 대댓글 살리면 이걸로 복구
                         start = 16.dp,
-                        top = 4.dp,
-                        bottom = 8.dp
+                        top = 12.dp,
+                        bottom = 4.dp
                     )
                     .width(48.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -156,7 +155,12 @@ fun CommentItem(
                 onClick = { showDialog = true },
                 modifier = Modifier
                     .height(40.dp)
-                    .padding(start = 4.dp, top = 4.dp, end = 16.dp, bottom = 8.dp)
+                    .padding(
+                        start = 4.dp,
+                        top = 12.dp,
+                        end = 16.dp,
+                        bottom = 4.dp
+                    )
                     .width(48.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
