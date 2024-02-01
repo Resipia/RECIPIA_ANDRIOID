@@ -274,18 +274,18 @@ fun HomeScreen(
                         modifier = Modifier.background(Color.White)
                     ) {
                         // 드롭다운 메뉴 아이템들
+//                        DropdownMenuItem(
+//                            text = { Text("신고하기", color = Color.Black) },
+//                            onClick = { /* 수정 처리 */ }
+//                        )
+//                        HorizontalDivider(
+//                            modifier = Modifier.fillMaxWidth(),
+//                            thickness = 0.5.dp,
+//                            color = Color(222, 226, 230)
+//                        )
                         DropdownMenuItem(
-                            text = { Text("신고하기", color = Color.Black) },
-                            onClick = { /* 수정 처리 */ }
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.fillMaxWidth(),
-                            thickness = 0.5.dp,
-                            color = Color(222, 226, 230)
-                        )
-                        DropdownMenuItem(
-                            text = { Text("피드백 보내기", color = Color.Black) },
-                            onClick = { /* 피드백 처리 */ }
+                            text = { Text("문의/피드백 보내기", color = Color.Black) },
+                            onClick = { navController.navigate("ask-create") }
                         )
                     }
                 },

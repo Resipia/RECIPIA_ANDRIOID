@@ -25,6 +25,7 @@ import com.recipia.aos.ui.components.mypage.function.accoount.PasswordChangeScre
 import com.recipia.aos.ui.components.mypage.function.ask.AskCreateScreen
 import com.recipia.aos.ui.components.mypage.function.ask.AskDetailScreen
 import com.recipia.aos.ui.components.mypage.function.ask.AskListPageScreen
+import com.recipia.aos.ui.components.mypage.function.ask.AskSuccessScreen
 import com.recipia.aos.ui.components.mypage.function.profile.ProfileEditScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.RecipeCreateScreen
@@ -241,6 +242,10 @@ fun AppNavigation(
                 navController = navController,
                 askViewModel = askViewModel
             )
+        }
+        // 문의하기 성공 페이지
+        composable("ask-success") {
+            AskSuccessScreen(navController = navController)
         }
         // 팔로잉/팔로워 페이지
         composable(
