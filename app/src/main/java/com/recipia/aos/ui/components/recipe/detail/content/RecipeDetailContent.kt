@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -52,10 +53,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -90,9 +94,11 @@ fun RecipeDetailContent(
     var menuExpanded by remember { mutableStateOf(false) }
     val currentUserMemberId = tokenManager.loadMemberId() // 현재 사용자의 memberId 불러오기
     var showDialog by remember { mutableStateOf(false) }
+    var showImageDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
     var profileImageUrl by remember { mutableStateOf<String?>(null) } // 프로필 이미지 URL 상태
+    var selectedImageUrl by remember { mutableStateOf("") } // 확대할 이미지의 URL
 
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
@@ -182,6 +188,44 @@ fun RecipeDetailContent(
             containerColor = Color.White, // AlertDialog 배경색을 하얀색으로 설정
             textContentColor = Color.Black // 글자색을 검정색으로 설정
         )
+    }
+
+    // 이미지 전체보기 다이얼로그
+    if (showImageDialog) {
+        Dialog(
+            onDismissRequest = { showImageDialog = false },
+            // 다이얼로그가 화면 전체 크기를 차지하도록 Modifier 적용
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize() // 다이얼로그 내용이 화면 전체 크기를 차지하도록 설정
+                    .background(Color.Black) // 배경색을 검정색으로 설정
+            ) {
+                // 확대된 이미지를 화면 전체에 표시
+                Image(
+                    painter = rememberAsyncImagePainter(model = selectedImageUrl),
+                    contentDescription = "확대 이미지",
+                    modifier = Modifier
+                        .fillMaxSize(), // 이미지가 화면 전체 크기를 차지하도록 설정
+                    contentScale = ContentScale.Fit // 이미지 비율을 유지하면서 화면에 맞춤
+                )
+
+                // 'X' 닫기 버튼
+                IconButton(
+                    onClick = { showImageDialog = false },
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 4.dp, top = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "닫기",
+                        tint = Color.White
+                    )
+                }
+            }
+        }
     }
 
     // 로딩중이면 인디케이터 표시
@@ -313,6 +357,11 @@ fun RecipeDetailContent(
                                     modifier = Modifier
                                         .fillMaxWidth() // 전체 너비를 채우도록 설정
                                         .aspectRatio(1.0f / 2.0f) // 이미지의 세로 길이를 가로 길이의 절반으로 설정
+                                        .clickable { // 여기에 클릭 이벤트 추가
+                                            selectedImageUrl =
+                                                recipeDetail.recipeFileUrlList[page].preUrl
+                                            showImageDialog = true // 이미지 전체화면 다이얼로그를 표시하도록 상태 업데이트
+                                        }
                                 )
                             }
                         }
