@@ -249,7 +249,7 @@ fun HomeScreen(
                                     "레시피 통합검색 기능이 곧 추가됩니다."
                                 )
                             }
-//                            navController.navigate("search-Hashtag-Screen")
+                            navController.navigate("recipe-search")
                         },
                         modifier = Modifier.padding(top = 8.dp)
                     ) {
