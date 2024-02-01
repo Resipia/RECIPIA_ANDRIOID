@@ -78,49 +78,47 @@ fun CommentItem(
         Text(
             text = commentDto.commentValue,
             style = MaterialTheme.typography.bodyLarge,
-            fontSize = 16.sp,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            fontSize = 14.sp,
+            modifier = Modifier.padding(start = 18.dp, end = 18.dp, top = 4.dp)
         )
-
-        Spacer(modifier = Modifier.height(12.dp))
     }
 
     Row {
-        // 댓글 내용
-        Button(
-            onClick = {
-                // 대댓글 보기
-            },
-            modifier = Modifier
-                .height(40.dp)
-                .padding(
-                    start = 16.dp,
-                    top = 4.dp,
-                    bottom = 8.dp
-                )
-                .width(48.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color.Black
-            ),
-            shape = RectangleShape,
-            border = BorderStroke(1.dp, Color(222, 226, 230)),
-            contentPadding = PaddingValues(0.dp) // This removes padding around the text inside
-        ) {
-            Text(
-                "대댓글",
-                style = MaterialTheme.typography.labelLarge,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                fontSize = 8.sp,
-                modifier = Modifier.padding(0.dp) // 텍스트의 padding을 제거하여 경계에 딱 붙어 있게 만듭니다.
-            )
-        }
+        // todo: 대댓글은 주석 (기능 완성후 해제하기)
+//        Button(
+//            onClick = {
+//                // 대댓글 보기
+//            },
+//            modifier = Modifier
+//                .height(40.dp)
+//                .padding(
+//                    start = 16.dp,
+//                    top = 4.dp,
+//                    bottom = 8.dp
+//                )
+//                .width(48.dp),
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = Color.White,
+//                contentColor = Color.Black
+//            ),
+//            shape = RectangleShape,
+//            border = BorderStroke(1.dp, Color(222, 226, 230)),
+//            contentPadding = PaddingValues(0.dp) // This removes padding around the text inside
+//        ) {
+//            Text(
+//                "대댓글",
+//                style = MaterialTheme.typography.labelLarge,
+//                color = Color.Black,
+//                fontWeight = FontWeight.Bold,
+//                fontSize = 8.sp,
+//                modifier = Modifier.padding(0.dp) // 텍스트의 padding을 제거하여 경계에 딱 붙어 있게 만듭니다.
+//            )
+//        }
 
         // 만약 본인 댓글이면 수정 및 삭제 버튼 추가
         if (commentDto.memberId == loadMemberId) {
 
-            // todo: 수정
+            // 댓글 수정버튼
             Button(
                 onClick = {
                     commentViewModel.startEditingComment(commentDto.id, commentDto.commentValue)
@@ -128,9 +126,10 @@ fun CommentItem(
                 modifier = Modifier
                     .height(40.dp)
                     .padding(
-                        start = 4.dp,
-                        top = 4.dp,
-                        bottom = 8.dp
+//                        start = 4.dp, // todo: 위에 대댓글 살리면 이걸로 복구
+                        start = 16.dp,
+                        top = 12.dp,
+                        bottom = 4.dp
                     )
                     .width(48.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -156,7 +155,12 @@ fun CommentItem(
                 onClick = { showDialog = true },
                 modifier = Modifier
                     .height(40.dp)
-                    .padding(start = 4.dp, top = 4.dp, end = 16.dp, bottom = 8.dp)
+                    .padding(
+                        start = 4.dp,
+                        top = 12.dp,
+                        end = 16.dp,
+                        bottom = 4.dp
+                    )
                     .width(48.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,

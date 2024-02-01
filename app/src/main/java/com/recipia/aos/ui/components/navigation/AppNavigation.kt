@@ -25,14 +25,15 @@ import com.recipia.aos.ui.components.mypage.function.accoount.PasswordChangeScre
 import com.recipia.aos.ui.components.mypage.function.ask.AskCreateScreen
 import com.recipia.aos.ui.components.mypage.function.ask.AskDetailScreen
 import com.recipia.aos.ui.components.mypage.function.ask.AskListPageScreen
+import com.recipia.aos.ui.components.mypage.function.ask.AskSuccessScreen
 import com.recipia.aos.ui.components.mypage.function.profile.ProfileEditScreen
 import com.recipia.aos.ui.components.recipe.create.CategorySelectScreen
 import com.recipia.aos.ui.components.recipe.create.RecipeCreateScreen
-import com.recipia.aos.ui.components.recipe.update.RecipeUpdateScreen
 import com.recipia.aos.ui.components.recipe.detail.RecipeDetailScreen
 import com.recipia.aos.ui.components.recipe.detail.comment.CommentPageScreen
 import com.recipia.aos.ui.components.recipe.search.MongoIngredientAndHashTagSearchScreen
-import com.recipia.aos.ui.components.signup.SignUpFirstFormScreen
+import com.recipia.aos.ui.components.recipe.update.RecipeUpdateScreen
+import com.recipia.aos.ui.components.signup.SignUpFirstPhoneValidScreen
 import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSuccessScreen
 import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
@@ -242,6 +243,10 @@ fun AppNavigation(
                 askViewModel = askViewModel
             )
         }
+        // 문의하기 성공 페이지
+        composable("ask-success") {
+            AskSuccessScreen(navController = navController)
+        }
         // 팔로잉/팔로워 페이지
         composable(
             route = "followList/{type}/{memberId}",
@@ -322,7 +327,7 @@ fun AppNavigation(
         }
         // 회원가입 1단계: 전화번호 인증 및 회원가입 동의 form 화면
         composable("signUpFirstForm") {
-            SignUpFirstFormScreen(navController, phoneNumberAuthViewModel, signUpViewModel)
+            SignUpFirstPhoneValidScreen(navController, phoneNumberAuthViewModel, signUpViewModel)
         }
         // 회원가입 2단계: 이메일, 비밀번호 form 화면
         composable("signUpSecondForm") {

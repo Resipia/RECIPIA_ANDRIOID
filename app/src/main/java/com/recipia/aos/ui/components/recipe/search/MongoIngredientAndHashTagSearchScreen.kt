@@ -1,8 +1,3 @@
-@file:OptIn(
-    ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class,
-    ExperimentalLayoutApi::class
-)
-
 package com.recipia.aos.ui.components.recipe.search
 
 import androidx.compose.foundation.clickable
@@ -48,7 +43,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -57,6 +51,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,9 +65,7 @@ import kotlinx.coroutines.launch
 /**
  * 재료, 해시태그 검색 및 추가 컴포저
  */
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class,
-    ExperimentalComposeUiApi::class
-)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MongoIngredientAndHashTagSearchScreen(
     navController: NavController,
@@ -159,6 +152,16 @@ fun MongoIngredientAndHashTagSearchScreen(
             modifier = Modifier.padding(innerPadding)
         ) {
             Column {
+                // 검색방법 설명 필드
+                Text(
+                    text = "* 추가할 단어를 입력하신 후 연관단어 선택 또는 엔터 버튼을 눌러주세요.",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+
+
+                // 검색어 입력창
                 TextField(
                     value = searchText,
                     onValueChange = {
@@ -217,9 +220,15 @@ fun MongoIngredientAndHashTagSearchScreen(
 
                                 } else {
                                     // 기존 로직
-                                    if (type == SearchType.INGREDIENT && !selectedIngredients.contains(searchText)) {
+                                    if (type == SearchType.INGREDIENT && !selectedIngredients.contains(
+                                            searchText
+                                        )
+                                    ) {
                                         selectedIngredients.add(searchText) // 재료 리스트에 추가
-                                    } else if (type == SearchType.HASHTAG && !selectedHashtags.contains(searchText)) {
+                                    } else if (type == SearchType.HASHTAG && !selectedHashtags.contains(
+                                            searchText
+                                        )
+                                    ) {
                                         selectedHashtags.add(searchText) // 해시태그 리스트에 추가
                                     }
                                     mongoViewModel.onSearchTextChange("") // 입력 필드 초기화

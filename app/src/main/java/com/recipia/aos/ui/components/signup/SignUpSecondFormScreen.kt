@@ -327,7 +327,7 @@ fun SignUpSecondFormScreen(
                             ) else Color.Red,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 9.dp, bottom = 8.dp),
+                                .padding(start = 9.dp, bottom = 12.dp),
                             textAlign = TextAlign.Start
                         )
                     }
@@ -398,7 +398,7 @@ fun SignUpSecondFormScreen(
                             ) else Color.Red,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 9.dp, bottom = 8.dp),
+                                .padding(start = 9.dp, bottom = 12.dp),
                             textAlign = TextAlign.Start
                         )
                     }
@@ -430,7 +430,7 @@ fun SignUpSecondFormScreen(
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 9.dp, bottom = 6.dp)
+                            .padding(start = 9.dp, bottom = 12.dp)
                     )
                 }
 
