@@ -62,6 +62,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -319,6 +320,14 @@ fun RecipeCreateScreen(
                 }
 
                 item {
+                    // 이미지 드래그 설명
+                    Text(
+                        text = "* 등록된 이미지는 드래그해서 순서 변경이 가능합니다.",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 8.dp, start = 4.dp, bottom = 4.dp)
+                    )
+
                     // 이미지 썸네일 목록
                     ImageThumbnails(
                         selectedImageUris = selectedImageUris,

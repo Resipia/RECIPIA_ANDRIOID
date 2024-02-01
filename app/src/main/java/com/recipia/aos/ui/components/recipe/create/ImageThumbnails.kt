@@ -51,8 +51,8 @@ fun ImageThumbnails(
             ReorderableItem(state, key = uri) { isDragging ->
                 Box(
                     modifier = Modifier
-                        .size(80.dp) // 정사각형 크기 설정
-                        .padding(top = 8.dp, end = 4.dp)
+                        .size(72.dp) // 정사각형 크기 설정
+                        .padding(top = 20.dp, end = 4.dp, bottom = 16.dp)
                         .then(if (isDragging) Modifier.shadow(4.dp) else Modifier)
                         .detectReorder(state)
                 ) {
