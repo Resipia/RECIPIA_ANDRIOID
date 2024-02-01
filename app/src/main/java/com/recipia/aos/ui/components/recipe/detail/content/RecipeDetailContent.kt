@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -184,9 +186,14 @@ fun RecipeDetailContent(
 
     // 로딩중이면 인디케이터 표시
     if (isLoading.value == true) {
-        AnimatedPreloader(modifier = Modifier.size(100.dp)) // 로딩 바의 크기 조절 가능
+        Box(
+            modifier = Modifier
+                .fillMaxSize() // 부모 컨테이너를 꽉 채움
+                .wrapContentSize(Alignment.Center) // 내용을 중앙에 배치
+        ) {
+            AnimatedPreloader(modifier = Modifier.size(100.dp)) // 로딩 인디케이터의 크기 설정
+        }
     } else {
-
         Box {
             // TopAppBar 고정
             TopAppBar(
