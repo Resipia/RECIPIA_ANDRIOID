@@ -154,7 +154,8 @@ class SignUpViewModel : ViewModel() {
                         onError("응답 데이터가 없습니다.")
                     }
                 } else {
-                    onError("서버 오류: ${response.code()}")
+//                    onError("서버 오류: ${response.code()}")
+                    onError("사용 불가능한 이메일입니다.")
                 }
             } catch (e: Exception) {
                 onError("네트워크 오류가 발생했습니다: ${e.localizedMessage}")
@@ -185,7 +186,8 @@ class SignUpViewModel : ViewModel() {
                     }
 
                 } else {
-                    onError("서버 오류: ${response.code()}")
+//                    onError("서버 오류: ${response.code()}")
+                    onError("중복된 이메일입니다.")
                 }
             } catch (e: Exception) {
                 onError("네트워크 오류가 발생했습니다: ${e.localizedMessage}")

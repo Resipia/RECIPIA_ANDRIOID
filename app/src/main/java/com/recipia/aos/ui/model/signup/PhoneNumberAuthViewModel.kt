@@ -9,6 +9,7 @@ import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.signup.PhoneNumberValidService
 import com.recipia.aos.ui.dto.singup.CheckVerifyCodeRequestDto
 import com.recipia.aos.ui.dto.singup.PhoneNumberRequestDto
+import com.recipia.aos.ui.dto.singup.TelNoAvailableRequestDto
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -46,6 +47,28 @@ class PhoneNumberAuthViewModel() : ViewModel() {
             .create(PhoneNumberValidService::class.java)
     }
 
+    // 전화번호 중복 체크
+    fun checkPhoneNumberDuplication(
+        phone: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = phoneNumberValidService.checkDupTelNo(TelNoAvailableRequestDto(phone))
+                if (response.isSuccessful && response.body()?.result == true) {
+                    // 중복되지 않은 경우
+                    onSuccess()
+                } else {
+                    // 중복된 경우 또는 오류 발생
+                    onFailure(response.body()?.resultCode ?: "Error")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onFailure(e.message ?: "Network error")
+            }
+        }
+    }
 
     // 휴대폰 번호로 인증코드 전송
     fun sendVerificationCode(phone: String) {
@@ -86,7 +109,8 @@ class PhoneNumberAuthViewModel() : ViewModel() {
     // 인증코드 검증
     fun checkVerificationCode(code: String) {
         viewModelScope.launch {
-            val response = phoneNumberValidService.checkVerifyCode(CheckVerifyCodeRequestDto(phone, code))
+            val response =
+                phoneNumberValidService.checkVerifyCode(CheckVerifyCodeRequestDto(phone, code))
 
             if (response.isSuccessful && response.body()?.result == true) {
                 verificationSuccessMessage = "인증에 성공했습니다."

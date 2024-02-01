@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -63,7 +64,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * 회원가입 동의여부 페이지
+ * 회원가입 동의여부 페이지 (임시 주석처리: 이 페이지는 전화번호 인증이 불가능하여 그냥 놔둠)
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -182,7 +183,7 @@ fun SignUpFirstFormScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = { showDialog = true }) {
-                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(

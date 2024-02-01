@@ -4,6 +4,7 @@ import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.singup.CheckVerifyCodeRequestDto
 import com.recipia.aos.ui.dto.singup.PhoneNumberRequestDto
 import com.recipia.aos.ui.dto.singup.ServerResponse
+import com.recipia.aos.ui.dto.singup.TelNoAvailableRequestDto
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.Response
@@ -13,6 +14,12 @@ import retrofit2.Response
  * 이 함수를 호출하면 비동기 작업이 완료될 때까지 기다리지 않고 다른 작업을 수행할 수 있다.
  */
 interface PhoneNumberValidService {
+
+    // 전화번호 중복 체크 요청
+    @POST("/member/management/checkDupTelNo")
+    suspend fun checkDupTelNo(
+        @Body requestDto: TelNoAvailableRequestDto
+    ): Response<ResponseDto<Boolean>>
 
     // 핸드폰 번호 인증 요청
     @POST("/member/auth/phone")
