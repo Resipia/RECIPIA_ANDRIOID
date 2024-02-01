@@ -2,9 +2,7 @@ package com.recipia.aos.ui.components.forgot.email
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,12 +31,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 
 /**
  * 이메일 찾기 화면
@@ -50,82 +44,69 @@ fun FindEmailScreen(
     navController: NavController
 ) {
     var selectedOption by remember { mutableStateOf<String?>(null) }
-    val keyboardController = LocalSoftwareKeyboardController.current
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                // 이벤트를 감지하여 키보드를 숨깁니다.
-                detectTapGestures(
-                    onPress = { /* 터치 감지 시 수행할 동작 */ },
-                    onTap = { keyboardController?.hide() }
-                )
-            }
-    ) {
-        Scaffold(
-            containerColor = Color.White,
-            topBar = {
-                TopAppBar(
-                    modifier = Modifier.background(Color.White),
-                    title = {
-                        Text(
-                            text = "이메일 찾기",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                // 뒤로가기 버튼 동작
-                                navController.popBackStack()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    Scaffold(
+        containerColor = Color.White,
+        topBar = {
+            TopAppBar(
+                modifier = Modifier.background(Color.White),
+                title = {
+                    Text(
+                        text = "이메일 찾기",
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                )
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding) // 여기에 innerPadding 적용
-                    .padding(16.dp), // 추가적인 외부 패딩
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
-            ) {
-                // 내부 컨텐츠
-                RadioOption("이름,전화번호로 찾기", "email", selectedOption) {
-                    selectedOption = "email"
-                }
-
-                Button(
-                    onClick = {
-                        // 선택된 옵션에 따라 다른 화면으로 이동
-                        when (selectedOption) {
-                            "email" -> navController.navigate("emailVerificationScreen")
-                            "sns" -> navController.navigate("snsVerificationScreen")
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            // 뒤로가기 버튼 동작
+                            navController.popBackStack()
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(206, 212, 218), // 버튼 배경색
-                        contentColor = Color.Black // 버튼 내부 글자색
-                    ),
-                    shape = RoundedCornerShape(4.dp),
-                    modifier = Modifier
-                        .fillMaxWidth() // 최대 너비 설정
-                        .padding(vertical = 25.dp, horizontal = 16.dp) // 버튼에 좌우 패딩 추가
-                ) {
-                    Text(text = "다음")
-                }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent, // TopAppBar 배경을 투명하게 설정
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            // 내부 컨텐츠
+            RadioOption("이름,전화번호로 찾기", "email", selectedOption) {
+                selectedOption = "email"
+            }
+
+            Button(
+                onClick = {
+                    // 선택된 옵션에 따라 다른 화면으로 이동
+                    when (selectedOption) {
+                        "email" -> navController.navigate("emailVerificationScreen")
+                        "sns" -> navController.navigate("snsVerificationScreen")
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(206, 212, 218), // 버튼 배경색
+                    contentColor = Color.Black // 버튼 내부 글자색
+                ),
+                shape = RoundedCornerShape(4.dp),
+                modifier = Modifier
+                    .fillMaxWidth() // 최대 너비 설정
+                    .padding(vertical = 25.dp, horizontal = 16.dp) // 버튼에 좌우 패딩 추가
+            ) {
+                Text(text = "다음")
             }
         }
     }
@@ -175,11 +156,4 @@ fun RadioOption(
                 }
         )
     }
-}
-
-@Preview
-@Composable
-fun FindIdScreenPreview() {
-    val navController = rememberNavController() // 네비게이션 컨트롤러를 위한 임시 객체
-    FindEmailScreen(navController)
 }

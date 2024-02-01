@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -102,6 +103,14 @@ fun SignUpSecondFormScreen(
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
     val listState = rememberLazyListState()
 
+    // "중복 체크" 버튼의 폰트 크기 조절
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val fontSize = when {
+        screenWidth < 320.dp -> 12.sp // 작은 화면
+        screenWidth < 480.dp -> 14.sp // 중간 크기 화면
+        else -> 16.sp // 큰 화면
+    }
 
     // AlertDialog를 표시할지 여부를 관리하는 상태
     var showDialog by remember { mutableStateOf(false) }
@@ -311,7 +320,12 @@ fun SignUpSecondFormScreen(
                                 .height(54.dp) // 높이 지정
                                 .padding(start = 8.dp, end = 8.dp) // 오른쪽 여백 추가
                         ) {
-                            Text("중복체크")
+                            Text(
+                                text = "중복체크",
+                                fontSize = fontSize, // 조건부 폰트 크기 사용
+                                fontWeight = FontWeight.Bold,
+                                color = Color(27, 94, 32)
+                            )
                         }
                     }
                 }
@@ -382,7 +396,12 @@ fun SignUpSecondFormScreen(
                                 .height(54.dp) // 높이 지정
                                 .padding(start = 8.dp, end = 8.dp) // 오른쪽 여백 추가
                         ) {
-                            Text("중복체크")
+                            Text(
+                                text = "중복체크",
+                                fontSize = fontSize, // 조건부 폰트 크기 사용
+                                fontWeight = FontWeight.Bold,
+                                color = Color(27, 94, 32)
+                            )
                         }
                     }
                 }

@@ -137,7 +137,10 @@ fun PasswordResetScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
-                    label = { Text("이름") }
+                    label = { Text("이름") },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    )
                 )
 
                 // 전화번호
@@ -165,7 +168,10 @@ fun PasswordResetScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
-                    label = { Text("이메일 주소") }
+                    label = { Text("이메일 주소") },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    )
                 )
 
                 // 비밀번호 발급하기 버튼
