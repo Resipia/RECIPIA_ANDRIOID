@@ -324,7 +324,7 @@ fun SignUpSecondFormScreen(
                                 text = "중복체크",
                                 fontSize = fontSize, // 조건부 폰트 크기 사용
                                 fontWeight = FontWeight.Bold,
-                                color = Color(27, 94, 32)
+                                color = Color.White
                             )
                         }
                     }
@@ -400,7 +400,7 @@ fun SignUpSecondFormScreen(
                                 text = "중복체크",
                                 fontSize = fontSize, // 조건부 폰트 크기 사용
                                 fontWeight = FontWeight.Bold,
-                                color = Color(27, 94, 32)
+                                color = Color.White
                             )
                         }
                     }
