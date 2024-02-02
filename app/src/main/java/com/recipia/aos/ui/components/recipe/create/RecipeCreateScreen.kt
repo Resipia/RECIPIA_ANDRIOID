@@ -192,14 +192,16 @@ fun RecipeCreateScreen(
                         if (isRecipeNameValid.value && isRecipeDescValid.value && isCategorySelected.value) {
 
                             // 데이터 전송 로직
-                            val lastNutritionalInfo = nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
+                            val lastNutritionalInfo =
+                                nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
                             val subCategoryDtoList =
                                 categorySelectionViewModel.createSubCategoryDtoList(
                                     categorySelectionViewModel.selectedCategories.value
                                 )
 
                             // 'selectedIngredients'와 'selectedHashtags'를 문자열로 변환
-                            val ingredientsString = selectedIngredients.joinToString(separator = ", ")
+                            val ingredientsString =
+                                selectedIngredients.joinToString(separator = ", ")
                             val hashtagsString = selectedHashtags.joinToString(separator = ", ")
 
                             val requestDto = RecipeCreateUpdateRequestDto(
@@ -250,6 +252,8 @@ fun RecipeCreateScreen(
                                     )
                                 }
                             }
+                        } else {
+                            keyboardController?.hide()
                         }
                     },
                     modifier = Modifier
