@@ -103,15 +103,6 @@ fun SignUpSecondFormScreen(
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
     val listState = rememberLazyListState()
 
-    // "중복 체크" 버튼의 폰트 크기 조절
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val fontSize = when {
-        screenWidth < 320.dp -> 12.sp // 작은 화면
-        screenWidth < 480.dp -> 14.sp // 중간 크기 화면
-        else -> 16.sp // 큰 화면
-    }
-
     // AlertDialog를 표시할지 여부를 관리하는 상태
     var showDialog by remember { mutableStateOf(false) }
 
@@ -322,7 +313,7 @@ fun SignUpSecondFormScreen(
                         ) {
                             Text(
                                 text = "중복체크",
-                                fontSize = fontSize, // 조건부 폰트 크기 사용
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
@@ -398,7 +389,7 @@ fun SignUpSecondFormScreen(
                         ) {
                             Text(
                                 text = "중복체크",
-                                fontSize = fontSize, // 조건부 폰트 크기 사용
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
