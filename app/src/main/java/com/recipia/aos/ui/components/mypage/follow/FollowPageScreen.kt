@@ -59,6 +59,25 @@ fun FollowPageScreen(
         viewModel.loadFollowList(targetMemberId, initialType)
     }
 
+    LaunchedEffect(key1 = viewModel.followResult) {
+        viewModel.followResult.collect { result ->
+            result?.let { (isSuccess, followId) ->
+
+                val memberIdToUpdate = viewModel.lastRequestedMemberId // 저장된 memberId 사용
+                if (isSuccess && memberIdToUpdate != null) {
+                    viewModel.followList.forEachIndexed { index, followData ->
+                        if (followData.memberId == memberIdToUpdate) { // memberId 비교
+                            val updatedItem = followData.copy(followId = followId)
+                            viewModel.updateFollowListItem(index, updatedItem)
+                        }
+                    }
+                } else {
+                    // 실패 처리 로직
+                }
+            }
+        }
+    }
+
     // 스낵바 설정
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -128,21 +147,8 @@ fun FollowPageScreen(
                     FollowListItem(
                         followData = followData,
                         onFollowClick = { data ->
-                            // 팔로우/언팔로우 버튼 클릭 시 실행되는 로직
-                            viewModel.followOrUnfollow(data.memberId) { isSuccess, followId ->
-                                // 요청이 성공적이면 (isSuccess == true)
-                                if (isSuccess) {
-                                    // 현재 리스트에서 클릭된 아이템의 인덱스를 찾음
-                                    val index = viewModel.followList.indexOf(data)
-                                    if (index != -1) {
-                                        // 클릭된 아이템의 팔로우 상태를 업데이트
-                                        val updatedData = data.copy(followId = followId)
-                                        viewModel.followList[index] = updatedData
-                                    }
-                                } else {
-                                    // 요청 실패 시, 에러 메시지 처리 등을 할 수 있음
-                                }
-                            }
+                            // 팔로우/언팔로우 요청만 하고 결과 처리는 LaunchedEffect 내에서 함
+                            viewModel.followOrUnfollow(data.memberId)
                         }
                     )
                 }
