@@ -3,6 +3,7 @@ package com.recipia.aos.ui.model.mypage
 import TokenManager
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -28,12 +29,16 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 /**
  * 마이페이지 전용 Model
@@ -199,19 +204,9 @@ class MyPageViewModel(
             val birthRequestBody = birth?.toRequestBody("text/plain".toMediaTypeOrNull())
             val genderRequestBody = gender?.toRequestBody("text/plain".toMediaTypeOrNull())
 
-            // 여기서 context를 사용하여 Bitmap을 로드
+            // 이미지 Uri를 MultipartBody.Part로 변환하는 함수를 사용하여 압축된 이미지 처리
             val profileImagePart = profileImageUri?.let { uri ->
-                val bitmap = if (Build.VERSION.SDK_INT < 28) {
-                    MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-                } else {
-                    val source = ImageDecoder.createSource(context.contentResolver, uri)
-                    ImageDecoder.decodeBitmap(source)
-                }
-                val byteArrayOutputStream = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-                val requestBody = byteArrayOutputStream.toByteArray()
-                    .toRequestBody("image/jpeg".toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("profileImage", "file.jpg", requestBody)
+                uriToMultipartBodyPart(uri, context)
             }
 
             try {
@@ -227,26 +222,60 @@ class MyPageViewModel(
                     _updateResult.postValue(response.body())
                 } else if (response.code() == 401) {
                     handleUnauthorizedError {
-                        updateProfile(
-                            context,
-                            nickname,
-                            introduction,
-                            deleteFileOrder,
-                            profileImageUri,
-                            birth,
-                            gender
-                        ) // 토큰 재발급 후 재시도
+                        // 토큰 재발급 후 재시도
+                        updateProfile(context, nickname, introduction, deleteFileOrder, profileImageUri, birth, gender)
                     }
                 } else {
-                    Log.e(
-                        "MyPageViewModel",
-                        "Profile update failed: ${response.errorBody()?.string()}"
-                    )
+                    Log.e("MyPageViewModel", "Profile update failed: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
                 Log.e("MyPageViewModel", "Exception in profile update", e)
             }
         }
+    }
+
+    // 이미지를 압축하여 파일로 저장하는 함수
+    @Throws(IOException::class)
+    private fun compressImageFile(
+        context: Context,
+        uri: Uri,
+        targetSizeBytes: Long = 1024 * 1024 // 기본값으로 1MB 설정
+    ): File {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val originalBitmap = BitmapFactory.decodeStream(inputStream)
+
+        var quality = 100
+        val byteArrayOutputStream = ByteArrayOutputStream()
+
+        do {
+            byteArrayOutputStream.reset()
+            originalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+            quality -= 5
+        } while (byteArrayOutputStream.size() > targetSizeBytes && quality > 0)
+
+        val compressedFileName = "compressed_${System.currentTimeMillis()}.jpg"
+        val compressedFile = File(context.cacheDir, compressedFileName).apply {
+            FileOutputStream(this).use { fileOutputStream ->
+                fileOutputStream.write(byteArrayOutputStream.toByteArray())
+            }
+        }
+
+        return compressedFile
+    }
+
+    // Uri를 MultipartBody.Part로 변환하는 함수
+    private fun uriToMultipartBodyPart(uri: Uri, context: Context): MultipartBody.Part? {
+        val compressedFile: File = try {
+            compressImageFile(context, uri)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
+        }
+
+        val mimeType = context.contentResolver.getType(uri) ?: "image/*"
+        val requestFile = compressedFile.asRequestBody(mimeType.toMediaTypeOrNull())
+
+        return MultipartBody.Part.createFormData("profileImage", compressedFile.name, requestFile)
     }
 
     // 내가 북마크한 레시피 조회
