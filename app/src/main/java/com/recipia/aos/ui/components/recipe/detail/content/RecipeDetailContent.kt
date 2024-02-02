@@ -113,7 +113,6 @@ fun RecipeDetailContent(
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
         recipeDetailViewModel.loadRecipeDetail(recipeId)
-        commentViewModel.loadInitialComments(recipeId)
     }
 
     // 레시피 상세 정보가 로드된 후에 이미지를 가져오는 로직 수행

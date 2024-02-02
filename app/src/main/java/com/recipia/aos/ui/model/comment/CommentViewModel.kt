@@ -80,6 +80,7 @@ class CommentViewModel(
                 if (response.isSuccessful) {
                     if (currentPage == 0) {
                         _comments.value = response.body()
+                        currentPage++ // 첫 페이지 로드 후 페이지 번호 증가
                     }
                 } else if (response.code() == 401) {
                     handleUnauthorizedError {
@@ -138,16 +139,17 @@ class CommentViewModel(
     }
 
     // 댓글 등록
-    suspend fun addComment(recipeId: Long, commentText: String) {
+    suspend fun addComment(
+        recipeId: Long,
+        commentText: String
+    ) {
         viewModelScope.launch {
-            val response =
-                commentService.registComment(CommentRegistRequestDto(recipeId, commentText))
+            val response = commentService.registComment(CommentRegistRequestDto(recipeId, commentText))
             if (response.isSuccessful) {
                 // 상태를 강제로 초기화하여 변경을 감지하게 만듦
                 _comments.value = null
                 // 현재 페이지를 0으로 리셋하고 초기 댓글 목록을 다시 불러옴
                 currentPage = 0
-                isLastPage = false
                 initialLoadDone = false
                 loadInitialComments(recipeId) // 댓글 목록을 다시 불러오기
             } else if (response.code() == 401) {
