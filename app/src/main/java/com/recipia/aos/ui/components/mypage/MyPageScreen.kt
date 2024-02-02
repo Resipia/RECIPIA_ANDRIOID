@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
@@ -21,6 +22,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.QuestionAnswer
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +36,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -84,6 +89,56 @@ fun MyPageScreen(
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope() // 코루틴 스코프 생성
+    val logoutSuccess by myPageViewModel.logoutSuccess.observeAsState()
+    val deActiveAccount by myPageViewModel.deActiveAccount.observeAsState()
+    val logoutError by myPageViewModel.logoutError.observeAsState()
+    val deactivateAccountError by myPageViewModel.deactivateAccountError.observeAsState()
+
+    // 로그아웃 성공시 로그인 화면으로 이동
+    if (logoutSuccess == true) {
+        LaunchedEffect(logoutSuccess) {
+            navController.navigate("login") {
+                popUpTo("mypage") { inclusive = true }
+            }
+            myPageViewModel.logoutSuccess.value = false // 로그아웃 성공 플래그를 다시 false로 설정
+        }
+    }
+
+    // 회원탈퇴 성공시 로그인 화면으로 이동
+    if (deActiveAccount == true) {
+        LaunchedEffect(logoutSuccess) {
+            navController.navigate("login") {
+                popUpTo("mypage") { inclusive = true }
+            }
+            myPageViewModel.deActiveAccount.value = false // 로그아웃 성공 플래그를 다시 false로 설정
+        }
+    }
+
+    // 로그아웃 실패시 스낵바 표시
+    logoutError?.let { errorMessage ->
+        LaunchedEffect(errorMessage) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    duration = SnackbarDuration.Short
+                )
+                myPageViewModel.logoutError.value = null // 메시지 표시 후 에러 메시지 초기화
+            }
+        }
+    }
+
+    // 회원탈퇴 실패시 스낵바 표시
+    deactivateAccountError?.let { errorMessage ->
+        LaunchedEffect(errorMessage) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    duration = SnackbarDuration.Short
+                )
+                myPageViewModel.deactivateAccountError.value = null // 메시지 표시 후 에러 메시지 초기화
+            }
+        }
+    }
 
     // targetMemberId가 존재하면 해당 멤버의 레시피를 가져오고, 그렇지 않으면 기본 마이페이지 기능을 표시
     LaunchedEffect(key1 = targetMemberId) {
@@ -100,6 +155,46 @@ fun MyPageScreen(
     // 화면이 렌더링될 때 데이터 로딩 시작
     LaunchedEffect(key1 = targetId) { // memberId를 기반으로 데이터 로딩
         myPageViewModel.loadMyPageData(targetId)
+    }
+
+    // 탈퇴 기능을 위한 다이얼로그 표시 상태
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            containerColor = Color.White, // AlertDialog 배경색을 하얀색으로 설정
+            textContentColor = Color.Black, // 글자색을 검정색으로 설정
+            onDismissRequest = { showDialog = false },
+            title = { Text("탈퇴 확인", color = Color.Black) },
+            text = { Text("정말로 탈퇴하시겠습니까?", color = Color.Black) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        myPageViewModel.deactivateAccount() // 탈퇴 처리
+                        showDialog = false
+                    },
+                    shape = RoundedCornerShape(4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(27, 94, 32),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("확인", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog = false },
+                    shape = RoundedCornerShape(4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(27, 94, 32),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("취소", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+        )
     }
 
 
@@ -319,46 +414,17 @@ fun MyPageScreen(
                             title = "로그아웃",
                             icon = Icons.Default.ExitToApp,
                             onClick = {
-                                myPageViewModel.logout(
-                                    onSuccess = {
-                                        // 성공시 로그인 화면으로 이동
-                                        navController.navigate("login")
-                                    },
-                                    onError = {
-                                        // 실패시 에러 메시지 표시
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = "로그아웃 실패.",
-                                                duration = SnackbarDuration.Short
-                                            )
-                                        }
-                                    }
-                                )
+                                myPageViewModel.logout()
                             }
                         )
                     }
 
                     item {
+                        // 탈퇴 버튼
                         MyPageFeatureItem(
                             title = "탈퇴",
                             icon = Icons.Default.Delete,
-                            onClick = {
-                                myPageViewModel.deactivateAccount(
-                                    onSuccess = {
-                                        // 성공시 로그인 화면으로 이동
-                                        navController.navigate("login")
-                                    },
-                                    onError = {
-                                        // 실패시 에러 메시지 표시
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = "탈퇴 실패.",
-                                                duration = SnackbarDuration.Short
-                                            )
-                                        }
-                                    }
-                                )
-                            }
+                            onClick = { showDialog = true } // 다이얼로그 표시
                         )
                     }
                 }

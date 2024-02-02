@@ -31,7 +31,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -76,14 +78,32 @@ fun PasswordChangeScreen(
         newPassword.isNotEmpty() && currentPassword.isNotEmpty() && passwordValid && newPassword == confirmPassword && confirmPassword.isNotEmpty()
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
-
     val keyboardController = LocalSoftwareKeyboardController.current
+    val passwordChangeSuccess by myPageViewModel.passwordChangeSuccess.observeAsState()
+    val passwordChangeError by myPageViewModel.passwordChangeError.observeAsState()
 
     // 성공하거나 뒤로 가기 버튼을 눌렀을 때 필드를 초기화하는 함수
     fun resetFields() {
         currentPassword = ""
         newPassword = ""
         confirmPassword = ""
+    }
+
+    // 비밀번호 변경 성공 시 로직
+    if (passwordChangeSuccess == true) {
+        LaunchedEffect(Unit) {
+            resetFields()
+            navController.navigate("password-change-success")
+            myPageViewModel.passwordChangeSuccess.value = null // 상태 초기화
+        }
+    }
+
+    // 비밀번호 변경 오류 시 스낵바 표시
+    passwordChangeError?.let { errorMessage ->
+        LaunchedEffect(errorMessage) {
+            snackbarHostState.showSnackbar(errorMessage)
+            myPageViewModel.passwordChangeError.value = null // 상태 초기화
+        }
     }
 
     Box(
@@ -249,20 +269,7 @@ fun PasswordChangeScreen(
                     // 변경하기 버튼
                     Button(
                         onClick = {
-                            // 비밀번호 변경 로직 구현
-                            myPageViewModel.changePassword(
-                                originPassword = currentPassword,
-                                newPassword = newPassword,
-                                onSuccess = { result ->
-                                    resetFields() // 성공 후 필드 초기화
-                                    navController.navigate("password-change-success") // 성공 페이지로 이동
-                                },
-                                onError = { errorMessage ->
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(errorMessage)
-                                    }
-                                }
-                            )
+                            myPageViewModel.changePassword(currentPassword, newPassword)
                         },
                         modifier = Modifier
                             .fillMaxWidth()

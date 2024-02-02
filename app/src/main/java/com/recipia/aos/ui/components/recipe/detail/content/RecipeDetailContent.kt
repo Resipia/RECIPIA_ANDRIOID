@@ -97,8 +97,9 @@ fun RecipeDetailContent(
     var showImageDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
-    var profileImageUrl by remember { mutableStateOf<String?>(null) } // 프로필 이미지 URL 상태
+//    var profileImageUrl by remember { mutableStateOf<String?>(null) } // 프로필 이미지 URL 상태
     var selectedImageUrl by remember { mutableStateOf("") } // 확대할 이미지의 URL
+    val profileImageUrl by myPageViewModel.profileImageUrl.observeAsState() // 프로필 이미지 URL 관찰
 
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
@@ -110,19 +111,7 @@ fun RecipeDetailContent(
     LaunchedEffect(key1 = recipeDetailState.value) {
         recipeDetailState.value?.memberId?.let { memberId ->
             if (memberId > 0) {
-                myPageViewModel.getMemberProfileImage(
-                    memberId = memberId,
-                    onSuccess = { url ->
-                        profileImageUrl = url // 성공적으로 URL을 받아오면 상태 업데이트
-                    },
-                    onError = {
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar(
-                                "이미지 조회 에러 발생"
-                            )
-                        }
-                    }
-                )
+                myPageViewModel.getMemberProfileImage(memberId)
             }
         }
     }
