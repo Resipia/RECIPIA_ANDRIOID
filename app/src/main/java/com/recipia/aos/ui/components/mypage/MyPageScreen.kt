@@ -156,15 +156,14 @@ fun MyPageScreen(
         }
     }
 
-    // 레시피 총 개수 가져오기 (한 번만 호출)
-    LaunchedEffect(key1 = Unit) {
-        myPageViewModel.getRecipeTotalCount(targetId)
+    // MyPageScreen에서
+    LaunchedEffect(key1 = myPageViewModel.updateComplete.value) {
+        if (myPageViewModel.updateComplete.value == true) {
+            myPageViewModel.loadMyPageData(targetId)
+            myPageViewModel.updateComplete.value = false  // 데이터 로딩 후 상태를 다시 false로 설정
+        }
     }
 
-    // 화면이 렌더링될 때 데이터 로딩 시작
-    LaunchedEffect(key1 = targetId) { // memberId를 기반으로 데이터 로딩
-        myPageViewModel.loadMyPageData(targetId)
-    }
 
     // 탈퇴 기능을 위한 다이얼로그 표시 상태
     var showDialog by remember { mutableStateOf(false) }

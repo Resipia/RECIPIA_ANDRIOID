@@ -93,6 +93,9 @@ class MyPageViewModel(
     val logoutError = MutableLiveData<String?>()
     val deactivateAccountError = MutableLiveData<String?>()
 
+    // 프로필 변경시 마이페이지에서 로딩 안하도록 하는 플래그
+    val updateComplete = MutableLiveData<Boolean>(true)
+
     // items와 highCountRecipe를 초기화하는 함수
     fun resetItemsAndHighCountRecipe() {
         items.value = listOf()
@@ -209,6 +212,7 @@ class MyPageViewModel(
                 uriToMultipartBodyPart(uri, context)
             }
 
+            // 프로필 업데이트 api 호출
             try {
                 val response = myPageService.updateProfile(
                     nicknameRequestBody,
@@ -218,8 +222,11 @@ class MyPageViewModel(
                     birthRequestBody,
                     genderRequestBody
                 )
+                // api응답 성공
                 if (response.isSuccessful) {
                     _updateResult.postValue(response.body())
+                    updateComplete.value = false
+                    loadMyPageData(tokenManager.loadMemberId()) // 이미지를 불러오기 위해 성공 응답을 받고 업데이트 진행
                 } else if (response.code() == 401) {
                     handleUnauthorizedError {
                         // 토큰 재발급 후 재시도
