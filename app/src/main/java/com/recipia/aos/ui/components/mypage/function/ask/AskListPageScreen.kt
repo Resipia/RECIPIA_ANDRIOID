@@ -59,6 +59,14 @@ fun AskListPageScreen(
 ) {
     val askItems by askViewModel.askItems.observeAsState(emptyList())
     val lazyListState = rememberLazyListState()
+    val navigateToLogin by askViewModel.navigateToLogin.observeAsState(initial = false)
+
+    // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
+    if (navigateToLogin) {
+        LaunchedEffect(key1 = Unit) {
+            navController.navigate("login")
+        }
+    }
 
     // 초기 데이터 로딩
     LaunchedEffect(Unit) {

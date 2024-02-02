@@ -4,14 +4,11 @@ import TokenManager
 import android.util.Log
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.jwt.JwtRepublishService
-import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.login.jwt.JwtRepublishRequestDto
-import com.recipia.aos.ui.dto.login.jwt.JwtRepublishResponseDto
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -41,28 +38,38 @@ class TokenRepublishManager(
             .create(JwtRepublishService::class.java)
     }
 
-    // 토큰 재발급 요청 실시
-    suspend fun renewTokenIfNeeded(): Boolean {
+    /**
+     * 토큰 재발급 요청 실시
+     * Dispatchers.IO: 입출력, 네트워크 작업과 같은 블로킹 작업에 최적화된 스레드 풀이다.
+     */
+    suspend fun renewTokenIfNeeded(): Boolean = withContext(Dispatchers.IO) {
         val memberId = tokenManager.loadMemberId()
         val refreshToken = tokenManager.loadRefreshToken()
 
+        // memberId가 존재하고 refreshToken도 존재하면 재발급 요청 실시
         if (memberId != null && refreshToken != null) {
             try {
-                val response = jwtRepublishService.republishAccessToken(JwtRepublishRequestDto(memberId, refreshToken))
-
+                val response = jwtRepublishService.republishAccessToken(
+                    JwtRepublishRequestDto(
+                        memberId,
+                        refreshToken
+                    )
+                )
+                // 재발급 요청에 성공한다면
                 if (response.isSuccessful) {
                     val newAccessToken = response.body()?.result?.accessToken
                     newAccessToken?.let {
                         tokenManager.saveAccessToken(it)
-                        return true
+                        return@withContext true
                     }
                 }
-                return false
+                // 실패했다면
+                return@withContext false
             } catch (e: Exception) {
                 Log.e("TokenManager", "Error on renewing token: ${e.message}")
-                return false
+                return@withContext false
             }
         }
-        return false
+        return@withContext false
     }
 }
