@@ -93,6 +93,15 @@ fun MyPageScreen(
     val deActiveAccount by myPageViewModel.deActiveAccount.observeAsState()
     val logoutError by myPageViewModel.logoutError.observeAsState()
     val deactivateAccountError by myPageViewModel.deactivateAccountError.observeAsState()
+    val navigateToLogin by myPageViewModel.navigateToLogin.observeAsState(initial = false)
+
+    // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
+    if (navigateToLogin) {
+        LaunchedEffect(key1 = Unit) {
+            navController.navigate("login")
+            myPageViewModel.resetNavigateToLogin() // 로그인 화면으로 이동 후 `_navigateToLogin`을 리셋하는 함수 호출
+        }
+    }
 
     // 로그아웃 성공시 로그인 화면으로 이동
     if (logoutSuccess == true) {

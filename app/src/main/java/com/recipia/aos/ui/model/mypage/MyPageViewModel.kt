@@ -550,4 +550,9 @@ class MyPageViewModel(
         }
     }
 
+    // 홈 화면 이동 초기화
+    fun resetNavigateToLogin() {
+        _navigateToLogin.value = false
+    }
+
 }

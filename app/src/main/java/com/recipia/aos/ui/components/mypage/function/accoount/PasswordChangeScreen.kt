@@ -81,6 +81,15 @@ fun PasswordChangeScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val passwordChangeSuccess by myPageViewModel.passwordChangeSuccess.observeAsState()
     val passwordChangeError by myPageViewModel.passwordChangeError.observeAsState()
+    val navigateToLogin by myPageViewModel.navigateToLogin.observeAsState(initial = false)
+
+    // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
+    if (navigateToLogin) {
+        LaunchedEffect(key1 = Unit) {
+            navController.navigate("login")
+            myPageViewModel.resetNavigateToLogin() // 로그인 화면으로 이동 후 `_navigateToLogin`을 리셋하는 함수 호출
+        }
+    }
 
     // 성공하거나 뒤로 가기 버튼을 눌렀을 때 필드를 초기화하는 함수
     fun resetFields() {

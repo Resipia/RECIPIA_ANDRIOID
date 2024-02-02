@@ -100,6 +100,15 @@ fun RecipeDetailContent(
 //    var profileImageUrl by remember { mutableStateOf<String?>(null) } // 프로필 이미지 URL 상태
     var selectedImageUrl by remember { mutableStateOf("") } // 확대할 이미지의 URL
     val profileImageUrl by myPageViewModel.profileImageUrl.observeAsState() // 프로필 이미지 URL 관찰
+    val navigateToLogin by myPageViewModel.navigateToLogin.observeAsState(initial = false)
+
+    // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
+    if (navigateToLogin) {
+        LaunchedEffect(key1 = Unit) {
+            navController.navigate("login")
+            myPageViewModel.resetNavigateToLogin() // 로그인 화면으로 이동 후 `_navigateToLogin`을 리셋하는 함수 호출
+        }
+    }
 
     // 레시피 상세 정보 로드
     LaunchedEffect(key1 = recipeId) {
