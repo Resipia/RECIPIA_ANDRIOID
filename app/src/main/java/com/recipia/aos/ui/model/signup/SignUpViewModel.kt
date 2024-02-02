@@ -1,6 +1,8 @@
 package com.recipia.aos.ui.model.signup
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -24,8 +27,10 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 
 class SignUpViewModel : ViewModel() {
 
@@ -317,11 +322,54 @@ class SignUpViewModel : ViewModel() {
         }
     }
 
-    // Uri를 MultipartBody.Part로 변환하는 함수
+    // 이미지를 압축하여 파일로 저장하는 함수
+    @Throws(IOException::class)
+    private fun compressImageFile(
+        context: Context,
+        uri: Uri,
+        targetSizeBytes: Long = 1024 * 1024 // 기본값으로 1MB 설정
+    ): File {
+        // URI에서 비트맵 이미지 로드
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val originalBitmap = BitmapFactory.decodeStream(inputStream)
+
+        var quality = 100 // 초기 압축 품질
+        val byteArrayOutputStream = ByteArrayOutputStream()
+
+        // 압축된 이미지의 바이트 배열 크기가 목표 크기보다 작거나, 품질이 0보다 클 때까지 압축 반복
+        do {
+            byteArrayOutputStream.reset() // 스트림 리셋
+            originalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+            quality -= 5 // 품질 5%씩 감소
+        } while (byteArrayOutputStream.size() > targetSizeBytes && quality > 0)
+
+        // 압축된 이미지를 임시 파일로 저장
+        val compressedFileName = "compressed_${System.currentTimeMillis()}.jpg"
+        val compressedFile = File(context.cacheDir, compressedFileName).apply {
+            FileOutputStream(this).use { fileOutputStream ->
+                fileOutputStream.write(byteArrayOutputStream.toByteArray())
+            }
+        }
+
+        return compressedFile // 압축된 파일 반환
+    }
+
+    // 이미지 Uri를 MultipartBody.Part로 변환하는 함수에 압축 코드 적용
     private fun uriToMultipartBodyPart(uri: Uri, context: Context): MultipartBody.Part? {
-        val file = uriToFile(uri, context) ?: return null
-        val requestBody = file.asRequestBody("image/jpeg".toMediaType())
-        return MultipartBody.Part.createFormData("profileImage", file.name, requestBody)
+        val compressedFile: File = try {
+            // 이미지 파일 압축
+            compressImageFile(context, uri)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null // 압축 실패 시 null 반환
+        }
+
+        // MIME 타입 설정 (예: "image/jpeg")
+        val mimeType = context.contentResolver.getType(uri) ?: "image/*"
+        val requestFile = compressedFile.asRequestBody(mimeType.toMediaTypeOrNull())
+
+        // MultipartBody.Part 생성 및 반환
+        return MultipartBody.Part.createFormData("profileImage", compressedFile.name, requestFile)
     }
 
     // Uri를 파일로 변환하는 함수
