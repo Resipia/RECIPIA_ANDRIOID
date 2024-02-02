@@ -301,18 +301,18 @@ fun RecipeDetailContent(
                                 color = Color(222, 226, 230)
                             )
                         }
+//                        DropdownMenuItem(
+//                            text = { Text(text = "설정", color = Color.Black) },
+//                            onClick = { /* 설정 처리 */ }
+//                        )
+//                        HorizontalDivider(
+//                            modifier = Modifier.fillMaxWidth(),
+//                            thickness = 0.5.dp,
+//                            color = Color(222, 226, 230)
+//                        )
                         DropdownMenuItem(
-                            text = { Text(text = "설정", color = Color.Black) },
-                            onClick = { /* 설정 처리 */ }
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.fillMaxWidth(),
-                            thickness = 0.5.dp,
-                            color = Color(222, 226, 230)
-                        )
-                        DropdownMenuItem(
-                            text = { Text(text = "피드백 보내기", color = Color.Black) },
-                            onClick = { /* 피드백 처리 */ }
+                            text = { Text("문의/피드백 보내기", color = Color.Black) },
+                            onClick = { navController.navigate("ask-create") }
                         )
                     }
                 },
