@@ -322,7 +322,7 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.width(2.dp))
                             Text(
                                 "작성",
-                                fontSize = 16.sp,
+                                fontSize = 12.sp,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
                             )
