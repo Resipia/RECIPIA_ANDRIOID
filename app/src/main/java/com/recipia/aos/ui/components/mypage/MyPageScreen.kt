@@ -107,7 +107,7 @@ fun MyPageScreen(
     if (logoutSuccess == true) {
         LaunchedEffect(logoutSuccess) {
             navController.navigate("login") {
-                popUpTo("mypage") { inclusive = true }
+                popUpTo("login") { inclusive = true }
             }
             myPageViewModel.logoutSuccess.value = false // 로그아웃 성공 플래그를 다시 false로 설정
         }
@@ -117,7 +117,7 @@ fun MyPageScreen(
     if (deActiveAccount == true) {
         LaunchedEffect(logoutSuccess) {
             navController.navigate("login") {
-                popUpTo("mypage") { inclusive = true }
+                popUpTo("login") { inclusive = true }
             }
             myPageViewModel.deActiveAccount.value = false // 로그아웃 성공 플래그를 다시 false로 설정
         }

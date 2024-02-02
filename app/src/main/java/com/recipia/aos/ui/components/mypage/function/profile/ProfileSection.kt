@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.recipia.aos.R
@@ -52,7 +53,7 @@ fun ProfileSection(
 
         // 프로필 이미지
         val painter = rememberAsyncImagePainter(
-            ImageRequest.Builder(context)
+            model = ImageRequest.Builder(context)
                 .data(myPageData?.profileImageUrl ?: R.drawable.ic_launcher_foreground)
                 .placeholder(R.drawable.ic_launcher_foreground)
                 .error(R.drawable.ic_launcher_foreground)
