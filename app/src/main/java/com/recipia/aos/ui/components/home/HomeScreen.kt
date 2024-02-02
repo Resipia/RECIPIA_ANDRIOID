@@ -170,6 +170,7 @@ fun HomeScreen(
     if (navigateToLogin) {
         LaunchedEffect(key1 = Unit) {
             navController.navigate("login")
+            recipeAllListViewModel.resetNavigateToLogin() // 로그인 화면으로 이동 후 `_navigateToLogin`을 리셋하는 함수 호출
         }
     }
 

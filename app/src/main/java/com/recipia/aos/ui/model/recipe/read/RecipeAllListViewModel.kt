@@ -268,7 +268,6 @@ class RecipeAllListViewModel(
         }
     }
 
-
     // RecipeAllListViewModel 내에 아이템 업데이트 메서드
     fun updateItemBookmarkId(recipeId: Long, bookmarkId: Long?) {
         items.value = items.value.map { item ->
@@ -280,5 +279,9 @@ class RecipeAllListViewModel(
         }
     }
 
+    // 홈 화면 이동 초기화
+    fun resetNavigateToLogin() {
+        _navigateToLogin.value = false
+    }
 
 }

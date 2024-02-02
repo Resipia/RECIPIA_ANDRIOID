@@ -65,8 +65,10 @@ fun AskListPageScreen(
     if (navigateToLogin) {
         LaunchedEffect(key1 = Unit) {
             navController.navigate("login")
+            askViewModel.resetNavigateToLogin() // 로그인 화면으로 이동 후 `_navigateToLogin`을 리셋하는 함수 호출
         }
     }
+
 
     // 초기 데이터 로딩
     LaunchedEffect(Unit) {

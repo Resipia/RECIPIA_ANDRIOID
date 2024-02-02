@@ -146,6 +146,11 @@ class AskViewModel(
         }
     }
 
+    // 홈 화면 이동 초기화
+    fun resetNavigateToLogin() {
+        _navigateToLogin.value = false
+    }
+
     /**
      * 401 Unauthorized 에러 처리 및 토큰 재발급 로직
      */

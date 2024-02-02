@@ -32,11 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -55,7 +55,7 @@ import kotlinx.coroutines.launch
 /**
  * 댓글 화면을 보여주는 컴포저
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommentPageScreen(
     commentViewModel: CommentViewModel,
@@ -71,6 +71,16 @@ fun CommentPageScreen(
     val focusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
+
+    val navigateToLogin by commentViewModel.navigateToLogin.observeAsState(initial = false)
+
+    // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
+    if (navigateToLogin) {
+        LaunchedEffect(key1 = Unit) {
+            navController.navigate("login")
+            commentViewModel.resetNavigateToLogin() // 로그인 화면으로 이동 후 `_navigateToLogin`을 리셋하는 함수 호출
+        }
+    }
 
     // 에러 메시지가 있을 경우 토스트 메시지로 표시
     LaunchedEffect(errorMessage) {
