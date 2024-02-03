@@ -17,6 +17,9 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,6 +49,40 @@ fun FollowAndShareButtons(
     // MyPageViewResponseDto에서 followId의 존재 여부로 팔로우 상태 결정
     val isFollowing = (myPageData?.followId != null)
 
+    // FollowViewModel의 followResult StateFlow를 관찰
+    val followResult by followViewModel.followResult.collectAsState(initial = null)
+
+    // 팔로우/언팔로우 결과 처리
+    LaunchedEffect(followResult) {
+        followResult?.let { (isSuccess, followId) ->
+            if (isSuccess) {
+                // 팔로우 상태 업데이트
+                myPageViewModel.updateFollowingStatus(followId != null)
+
+                // 데이터 재로딩 전에 상태 업데이트
+                myPageData?.followId = followId ?: 0L
+
+                // 데이터 리로드
+                myPageViewModel.loadMyPageData(targetId)
+
+                // 성공 메시지 표시
+                snackbarHostState.showSnackbar(
+                    message = "팔로우 상태가 업데이트 되었습니다.",
+                    duration = SnackbarDuration.Short
+                )
+            } else {
+                // 실패 메시지 표시
+                snackbarHostState.showSnackbar(
+                    message = "작업 실패",
+                    duration = SnackbarDuration.Short
+                )
+            }
+
+            // 결과 처리 후 StateFlow 초기화
+            followViewModel.resetFollowResult()
+        }
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -65,35 +102,7 @@ fun FollowAndShareButtons(
                 onClick = {
                     // 팔로우/언팔로우 처리 로직
                     coroutineScope.launch {
-                        followViewModel.followOrUnfollow(
-                            targetMemberId = myPageData.memberId,
-                            onResult = { success, newFollowId ->
-                                if (success) {
-                                    // 팔로우 상태 업데이트
-                                    val isNowFollowing = newFollowId != null
-                                    myPageViewModel.updateFollowingStatus(isNowFollowing)
-
-                                    // 데이터 재로딩 전에 상태 업데이트
-                                    if (isNowFollowing) {
-                                        if (newFollowId != null) {
-                                            myPageData.followId = newFollowId
-                                        }
-                                    } else {
-                                        myPageData.followId = 0L
-                                    }
-
-                                    // 데이터 리로드
-                                    myPageViewModel.loadMyPageData(targetId)
-                                } else {
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = "작업 실패",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                }
-                            }
-                        )
+                        followViewModel.followOrUnfollow(targetMemberId = myPageData?.memberId ?: 0L)
                     }
                 },
                 modifier = Modifier

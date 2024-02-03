@@ -4,6 +4,8 @@ import TokenManager
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
@@ -27,7 +29,11 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 
 /**
  * 레시피 생성할 때 사용하는 모델 객체
@@ -83,15 +89,22 @@ class RecipeCreateModel(
 
         val recipeName = requestDto.recipeName.toRequestBody("text/plain".toMediaTypeOrNull())
         val recipeDesc = requestDto.recipeDesc.toRequestBody("text/plain".toMediaTypeOrNull())
-        val timeTaken = requestDto.timeTaken.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val timeTaken =
+            requestDto.timeTaken.toString().toRequestBody("text/plain".toMediaTypeOrNull())
         val ingredient = requestDto.ingredient.toRequestBody("text/plain".toMediaTypeOrNull())
         val hashtag = requestDto.hashtag.toRequestBody("text/plain".toMediaTypeOrNull())
-        val carbohydrates = requestDto.nutritionalInfo?.carbohydrates.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val fat = requestDto.nutritionalInfo?.fat.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val minerals = requestDto.nutritionalInfo?.minerals.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val protein = requestDto.nutritionalInfo?.protein.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val vitamins = requestDto.nutritionalInfo?.vitamins.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val subCategoryId = requestDto.subCategoryDtoList.firstOrNull()?.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val carbohydrates = requestDto.nutritionalInfo?.carbohydrates.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val fat = requestDto.nutritionalInfo?.fat.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val minerals = requestDto.nutritionalInfo?.minerals.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val protein = requestDto.nutritionalInfo?.protein.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val vitamins = requestDto.nutritionalInfo?.vitamins.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val subCategoryId = requestDto.subCategoryDtoList.firstOrNull()?.id.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
 
         recipeService.createRecipe(
             recipeName,
@@ -143,18 +156,26 @@ class RecipeCreateModel(
         val recipeId = idString.toRequestBody("text/plain".toMediaTypeOrNull())
         val recipeName = requestDto.recipeName.toRequestBody("text/plain".toMediaTypeOrNull())
         val recipeDesc = requestDto.recipeDesc.toRequestBody("text/plain".toMediaTypeOrNull())
-        val timeTaken = requestDto.timeTaken.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val timeTaken =
+            requestDto.timeTaken.toString().toRequestBody("text/plain".toMediaTypeOrNull())
         val ingredient = requestDto.ingredient.toRequestBody("text/plain".toMediaTypeOrNull())
         val hashtag = requestDto.hashtag.toRequestBody("text/plain".toMediaTypeOrNull())
-        val nutritionalInfoId = requestDto.nutritionalInfo?.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val carbohydrates = requestDto.nutritionalInfo?.carbohydrates.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val fat = requestDto.nutritionalInfo?.fat.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val minerals = requestDto.nutritionalInfo?.minerals.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val protein = requestDto.nutritionalInfo?.protein.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val vitamins = requestDto.nutritionalInfo?.vitamins.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val nutritionalInfoId = requestDto.nutritionalInfo?.id.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val carbohydrates = requestDto.nutritionalInfo?.carbohydrates.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val fat = requestDto.nutritionalInfo?.fat.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val minerals = requestDto.nutritionalInfo?.minerals.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val protein = requestDto.nutritionalInfo?.protein.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val vitamins = requestDto.nutritionalInfo?.vitamins.toString()
+            .toRequestBody("text/plain".toMediaTypeOrNull())
         val subCategoryParts = mutableMapOf<String, RequestBody>()
         requestDto.subCategoryDtoList.forEachIndexed { index, subCategoryDto ->
-            subCategoryParts["subCategoryDtoList[$index].id"] = subCategoryDto.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            subCategoryParts["subCategoryDtoList[$index].id"] =
+                subCategoryDto.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
         }
 
         recipeService.updateRecipe(
@@ -191,92 +212,59 @@ class RecipeCreateModel(
         })
     }
 
-
-
-    // 이미지 URI를 실제 파일 경로로 변환하는 함수
-    private fun uriToFilePath(context: Context, uri: Uri): String? {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(
-                context,
-                uri
-            )
-        ) {
-            if ("com.android.externalstorage.documents" == uri.authority) {
-                val docId = DocumentsContract.getDocumentId(uri)
-                val split = docId.split(":").toTypedArray()
-                if (split.size == 2) {
-                    val type = split[0]
-                    if ("primary".equals(type, ignoreCase = true)) {
-                        return context.getExternalFilesDir(null)?.absolutePath + "/" + split[1]
-                    }
-                }
-            } else if ("com.android.providers.downloads.documents" == uri.authority) {
-                val id = DocumentsContract.getDocumentId(uri)
-                val contentUri = ContentUris.withAppendedId(
-                    Uri.parse("content://downloads/public_downloads"), id.toLong()
-                )
-                return getDataColumn(context, contentUri, null, null)
-            } else if ("content".equals(uri.scheme, ignoreCase = true)) {
-                return getDataColumn(context, uri, null, null)
-            } else if ("file".equals(uri.scheme, ignoreCase = true)) {
-                return uri.path
-            }
-        } else {
-            return getDataColumn(context, uri, null, null)
-        }
-        return null
-    }
-
     private fun getMimeType(context: Context, uri: Uri): String? {
         return context.contentResolver.getType(uri)
     }
 
-    private fun uriToMultipartBodyPart(uri: Uri, context: Context): MultipartBody.Part? {
-        val filePath = uriToFilePath(context, uri) ?: return null
+    // 이미지 URI를 MultipartBody.Part로 변환하는 함수
+    private fun uriToMultipartBodyPart(
+        uri: Uri,
+        context: Context
+    ): MultipartBody.Part? {
 
-        val file = File(filePath)
-        val mimeType = getMimeType(context, uri) ?: "image/*"
-        val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
-
-        return MultipartBody.Part.createFormData("fileList", file.name, requestFile)
-    }
-
-    private fun getDataColumn(
-        context: Context,
-        uri: Uri?,
-        selection: String?,
-        selectionArgs: Array<String>?
-    ): String? {
-        val column = "_data"
-        val projection = arrayOf(column)
-        var cursor: Cursor? = null
+        // 이미지 압축 및 예외 처리를 통한 오류 처리 추가
+        val compressedFile: File
         try {
-            cursor = uri?.let {
-                context.contentResolver.query(
-                    it,
-                    projection,
-                    selection,
-                    selectionArgs,
-                    null
-                )
-            }
-            if (cursor != null && cursor.moveToFirst()) {
-                val columnIndex = cursor.getColumnIndexOrThrow(column)
-                return cursor.getString(columnIndex)
-            }
-        } finally {
-            cursor?.close()
+            compressedFile = compressImageFile(context, uri, 1 * 1024 * 1024) // 10MB로 압축
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
         }
-        return null
+
+        // 이미지 MIME 유형 결정 추가
+        val mimeType = getMimeType(context, uri) ?: "image/*"
+        val requestFile = compressedFile.asRequestBody(mimeType.toMediaTypeOrNull())
+
+        return MultipartBody.Part.createFormData("fileList", compressedFile.name, requestFile)
     }
 
-    fun clearData() {
-        recipeName.value = ""
-        recipeDesc.value = ""
-        timeTaken.value = ""
-        ingredient.value = ""
-        hashtag.value = ""
-        nutritionalInfoList.clear()
-        selectedImageUris.clear()
-    }
+    // 이미지를 압축하여 파일로 저장하는 함수
+    @Throws(IOException::class)
+    private fun compressImageFile(
+        context: Context,
+        uri: Uri,
+        targetSizeBytes: Long
+    ): File {
 
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val originalBitmap = BitmapFactory.decodeStream(inputStream)
+
+        var quality = 100
+        val byteArrayOutputStream = ByteArrayOutputStream()
+
+        do {
+            byteArrayOutputStream.reset()
+            originalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+            quality -= 5
+        } while (byteArrayOutputStream.toByteArray().size > targetSizeBytes && quality > 0)
+
+        val compressedFileName = "compressed_${System.currentTimeMillis()}.jpg"
+        val compressedFile = File(context.cacheDir, compressedFileName)
+        val fileOutputStream = FileOutputStream(compressedFile)
+        fileOutputStream.write(byteArrayOutputStream.toByteArray())
+        fileOutputStream.flush()
+        fileOutputStream.close()
+
+        return compressedFile
+    }
 }

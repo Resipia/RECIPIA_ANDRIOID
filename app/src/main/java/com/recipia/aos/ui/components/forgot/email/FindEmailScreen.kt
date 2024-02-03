@@ -31,10 +31,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 
 /**
  * 이메일 찾기 화면
@@ -81,8 +79,8 @@ fun FindEmailScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // 여기에 innerPadding 적용
-                .padding(16.dp), // 추가적인 외부 패딩
+                .padding(innerPadding)
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -100,7 +98,7 @@ fun FindEmailScreen(
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(206,212,218), // 버튼 배경색
+                    containerColor = Color(206, 212, 218), // 버튼 배경색
                     contentColor = Color.Black // 버튼 내부 글자색
                 ),
                 shape = RoundedCornerShape(4.dp),
@@ -158,11 +156,4 @@ fun RadioOption(
                 }
         )
     }
-}
-
-@Preview
-@Composable
-fun FindIdScreenPreview() {
-    val navController = rememberNavController() // 네비게이션 컨트롤러를 위한 임시 객체
-    FindEmailScreen(navController)
 }

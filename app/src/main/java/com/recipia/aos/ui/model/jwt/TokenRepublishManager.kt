@@ -4,14 +4,11 @@ import TokenManager
 import android.util.Log
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.jwt.JwtRepublishService
-import com.recipia.aos.ui.dto.ResponseDto
 import com.recipia.aos.ui.dto.login.jwt.JwtRepublishRequestDto
-import com.recipia.aos.ui.dto.login.jwt.JwtRepublishResponseDto
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -23,6 +20,7 @@ class TokenRepublishManager(
     private val tokenManager: TokenManager
 ) {
 
+    // 토큰 재발급 api 설계
     private val jwtRepublishService: JwtRepublishService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -40,49 +38,38 @@ class TokenRepublishManager(
             .create(JwtRepublishService::class.java)
     }
 
-    fun renewTokenIfNeeded(
-        onTokenRenewed: (String) -> Unit,
-        onRenewalFailed: (Boolean) -> Unit
-    ) {
-
-        // 1. 멤버id, 리프레시 토큰 추출
+    /**
+     * 토큰 재발급 요청 실시
+     * Dispatchers.IO: 입출력, 네트워크 작업과 같은 블로킹 작업에 최적화된 스레드 풀이다.
+     */
+    suspend fun renewTokenIfNeeded(): Boolean = withContext(Dispatchers.IO) {
         val memberId = tokenManager.loadMemberId()
         val refreshToken = tokenManager.loadRefreshToken()
 
+        // memberId가 존재하고 refreshToken도 존재하면 재발급 요청 실시
         if (memberId != null && refreshToken != null) {
-
-            // 2. 멤버 서버에 엑세스 토큰 재발급 요청 보내기
-            jwtRepublishService.republishAccessToken(JwtRepublishRequestDto(memberId, refreshToken))
-                .enqueue(object : Callback<ResponseDto<JwtRepublishResponseDto>> {
-
-                    // 응답 성공시 동작
-                    override fun onResponse(
-                        call: Call<ResponseDto<JwtRepublishResponseDto>>,
-                        response: Response<ResponseDto<JwtRepublishResponseDto>>
-                    ) {
-                        if (response.isSuccessful) {
-                            val newAccessToken = response.body()?.result?.accessToken
-                            newAccessToken?.let {
-                                tokenManager.saveAccessToken(it)
-                                onTokenRenewed(it)
-                            } ?: onRenewalFailed(false)
-                        } else {
-                            onRenewalFailed(true)
-                        }
+            try {
+                val response = jwtRepublishService.republishAccessToken(
+                    JwtRepublishRequestDto(
+                        memberId,
+                        refreshToken
+                    )
+                )
+                // 재발급 요청에 성공한다면
+                if (response.isSuccessful) {
+                    val newAccessToken = response.body()?.result?.accessToken
+                    newAccessToken?.let {
+                        tokenManager.saveAccessToken(it)
+                        return@withContext true
                     }
-
-                    // 응답 실패시 동작
-                    override fun onFailure(
-                        call: Call<ResponseDto<JwtRepublishResponseDto>>,
-                        t: Throwable
-                    ) {
-                        // 실패한 경우 로그를 찍어서 문제를 파악하도록 하자.
-                        Log.e("TokenManager", "Error on renewing token: ${t.message}")
-                        onRenewalFailed(true)
-                    }
-                })
-        } else {
-            onRenewalFailed(true)
+                }
+                // 실패했다면
+                return@withContext false
+            } catch (e: Exception) {
+                Log.e("TokenManager", "Error on renewing token: ${e.message}")
+                return@withContext false
+            }
         }
+        return@withContext false
     }
 }

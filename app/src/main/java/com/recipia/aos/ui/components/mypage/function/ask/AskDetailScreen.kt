@@ -42,6 +42,15 @@ fun AskDetailScreen(
     askViewModel: AskViewModel
 ) {
     val askDetail by askViewModel.askDetail.observeAsState()
+    val navigateToLogin by askViewModel.navigateToLogin.observeAsState(initial = false)
+
+    // navigateToLogin 상태가 변경되었을 때 로그인 화면으로 이동
+    if (navigateToLogin) {
+        LaunchedEffect(key1 = Unit) {
+            navController.navigate("login")
+            askViewModel.resetNavigateToLogin() // 로그인 화면으로 이동 후 `_navigateToLogin`을 리셋하는 함수 호출
+        }
+    }
 
     // 상세보기 데이터 로딩
     LaunchedEffect(askId) {

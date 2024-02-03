@@ -3,11 +3,13 @@ package com.recipia.aos.ui.model.mypage
 import TokenManager
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -22,16 +24,21 @@ import com.recipia.aos.ui.dto.mypage.MyPageRequestDto
 import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
 import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
 import com.recipia.aos.ui.dto.recipe.detail.MemberProfileRequestDto
+import com.recipia.aos.ui.model.jwt.TokenRepublishManager
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 /**
  * 마이페이지 전용 Model
@@ -64,6 +71,7 @@ class MyPageViewModel(
     private val _recipeCount = MutableLiveData<Long?>()
     val recipeCount: MutableLiveData<Long?> = _recipeCount
 
+    // 로딩중인지 파악하는 상태
     val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
@@ -75,12 +83,18 @@ class MyPageViewModel(
     private val _updateResult = MutableLiveData<ResponseDto<Void>?>()
     val updateResult: LiveData<ResponseDto<Void>?> = _updateResult
 
-    // _myPageData를 초기화하는 함수
-    fun resetMyPageData() {
-        _myPageData.value?.followId = 0L
-        // 또는
-        // _myPageData.value = MyPageViewResponseDto() // 기본 상태의 객체로 초기화 (구조에 따라 달라짐)
-    }
+    // 로그인 화면으로 이동해야 함을 알린다.
+    val _navigateToLogin = MutableLiveData<Boolean>()
+    val navigateToLogin: LiveData<Boolean> = _navigateToLogin
+
+    // 로그인 페이지로 이동시키고 에러도 표시한다.
+    val logoutSuccess = MutableLiveData<Boolean>()
+    val deActiveAccount = MutableLiveData<Boolean>()
+    val logoutError = MutableLiveData<String?>()
+    val deactivateAccountError = MutableLiveData<String?>()
+
+    // 프로필 변경시 마이페이지에서 로딩 안하도록 하는 플래그
+    val updateComplete = MutableLiveData<Boolean>(true)
 
     // items와 highCountRecipe를 초기화하는 함수
     fun resetItemsAndHighCountRecipe() {
@@ -143,6 +157,10 @@ class MyPageViewModel(
             // 응답에 따른 동작
             if (response.isSuccessful) {
                 _recipeCount.value = response.body()?.result
+            } else if (response.code() == 401) {
+                handleUnauthorizedError {
+                    getRecipeTotalCount(targetMemberId) // 토큰 재발급 후 재시도
+                }
             } else {
                 // 오류 처리
             }
@@ -160,6 +178,10 @@ class MyPageViewModel(
             // 응답에 따른 동작
             if (response.isSuccessful) {
                 highCountRecipe.value = response.body()?.result!!
+            } else if (response.code() == 401) {
+                handleUnauthorizedError {
+                    getHighRecipe(targetMemberId) // 토큰 재발급 후 재시도
+                }
             } else {
                 // 오류 처리
             }
@@ -185,21 +207,12 @@ class MyPageViewModel(
             val birthRequestBody = birth?.toRequestBody("text/plain".toMediaTypeOrNull())
             val genderRequestBody = gender?.toRequestBody("text/plain".toMediaTypeOrNull())
 
-            // 여기서 context를 사용하여 Bitmap을 로드
+            // 이미지 Uri를 MultipartBody.Part로 변환하는 함수를 사용하여 압축된 이미지 처리
             val profileImagePart = profileImageUri?.let { uri ->
-                val bitmap = if (Build.VERSION.SDK_INT < 28) {
-                    MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-                } else {
-                    val source = ImageDecoder.createSource(context.contentResolver, uri)
-                    ImageDecoder.decodeBitmap(source)
-                }
-                val byteArrayOutputStream = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-                val requestBody = byteArrayOutputStream.toByteArray()
-                    .toRequestBody("image/jpeg".toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("profileImage", "file.jpg", requestBody)
+                uriToMultipartBodyPart(uri, context)
             }
 
+            // 프로필 업데이트 api 호출
             try {
                 val response = myPageService.updateProfile(
                     nicknameRequestBody,
@@ -209,18 +222,67 @@ class MyPageViewModel(
                     birthRequestBody,
                     genderRequestBody
                 )
+                // api응답 성공
                 if (response.isSuccessful) {
                     _updateResult.postValue(response.body())
+                    updateComplete.value = false
+                    loadMyPageData(tokenManager.loadMemberId()) // 이미지를 불러오기 위해 성공 응답을 받고 업데이트 진행
+                } else if (response.code() == 401) {
+                    handleUnauthorizedError {
+                        // 토큰 재발급 후 재시도
+                        updateProfile(context, nickname, introduction, deleteFileOrder, profileImageUri, birth, gender)
+                    }
                 } else {
-                    Log.e(
-                        "MyPageViewModel",
-                        "Profile update failed: ${response.errorBody()?.string()}"
-                    )
+                    Log.e("MyPageViewModel", "Profile update failed: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
                 Log.e("MyPageViewModel", "Exception in profile update", e)
             }
         }
+    }
+
+    // 이미지를 압축하여 파일로 저장하는 함수
+    @Throws(IOException::class)
+    private fun compressImageFile(
+        context: Context,
+        uri: Uri,
+        targetSizeBytes: Long = 1024 * 1024 // 기본값으로 1MB 설정
+    ): File {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val originalBitmap = BitmapFactory.decodeStream(inputStream)
+
+        var quality = 100
+        val byteArrayOutputStream = ByteArrayOutputStream()
+
+        do {
+            byteArrayOutputStream.reset()
+            originalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+            quality -= 5
+        } while (byteArrayOutputStream.size() > targetSizeBytes && quality > 0)
+
+        val compressedFileName = "compressed_${System.currentTimeMillis()}.jpg"
+        val compressedFile = File(context.cacheDir, compressedFileName).apply {
+            FileOutputStream(this).use { fileOutputStream ->
+                fileOutputStream.write(byteArrayOutputStream.toByteArray())
+            }
+        }
+
+        return compressedFile
+    }
+
+    // Uri를 MultipartBody.Part로 변환하는 함수
+    private fun uriToMultipartBodyPart(uri: Uri, context: Context): MultipartBody.Part? {
+        val compressedFile: File = try {
+            compressImageFile(context, uri)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
+        }
+
+        val mimeType = context.contentResolver.getType(uri) ?: "image/*"
+        val requestFile = compressedFile.asRequestBody(mimeType.toMediaTypeOrNull())
+
+        return MultipartBody.Part.createFormData("profileImage", compressedFile.name, requestFile)
     }
 
     // 내가 북마크한 레시피 조회
@@ -239,6 +301,10 @@ class MyPageViewModel(
                 items.value = items.value + newItems // 기존 리스트에 새 아이템들을 추가
                 isLastPage = newItems.size < currentRequestSize
                 currentRequestPage++
+            } else if (response.code() == 401) {
+                handleUnauthorizedError {
+                    getAllMyBookmarkRecipeList() // 토큰 재발급 후 재시도
+                }
             } else {
                 // 오류 처리
                 Log.e(
@@ -262,6 +328,10 @@ class MyPageViewModel(
                 items.value = items.value + newItems // 기존 리스트에 새 아이템들을 추가
                 isLastPage = newItems.size < currentRequestSize
                 currentRequestPage++
+            } else if (response.code() == 401) {
+                handleUnauthorizedError {
+                    getAllMyLikeRecipeList() // 토큰 재발급 후 재시도
+                }
             } else {
                 // 오류 처리
                 Log.e("MyPageViewModel", "Error in getAllMyLikeRecipeList: ${response.errorBody()}")
@@ -270,7 +340,9 @@ class MyPageViewModel(
     }
 
     // targetMemberId가 작성한 레시피를 더 불러오는 함수
-    fun loadMoreTargetMemberRecipes(targetMemberId: Long) {
+    fun loadMoreTargetMemberRecipes(
+        targetMemberId: Long
+    ) {
 
         viewModelScope.launch {
             currentRequestPage = 0
@@ -286,6 +358,10 @@ class MyPageViewModel(
                 items.value = items.value + newItems // 기존 리스트에 새 아이템들을 추가
                 isLastPage = newItems.size < currentRequestSize
                 currentRequestPage++
+            } else if (response.code() == 401) {
+                handleUnauthorizedError {
+                    loadMoreTargetMemberRecipes(targetMemberId) // 토큰 재발급 후 재시도
+                }
             } else {
                 // 오류 처리
                 Log.e(
@@ -313,6 +389,10 @@ class MyPageViewModel(
                 items.value = items.value + newItems // 기존 리스트에 새 아이템들을 추가
                 isLastPage = newItems.size < currentRequestSize
                 currentRequestPage++
+            } else if (response.code() == 401) {
+                handleUnauthorizedError {
+                    loadMoreMyBookmarkRecipes() // 토큰 재발급 후 재시도
+                }
             } else {
                 // 오류 처리
                 Log.e(
@@ -338,6 +418,10 @@ class MyPageViewModel(
                 items.value = items.value + newItems // 기존 리스트에 새 아이템들을 추가
                 isLastPage = newItems.size < currentRequestSize
                 currentRequestPage++
+            } else if (response.code() == 401) {
+                handleUnauthorizedError {
+                    loadMoreMyLikeRecipes() // 토큰 재발급 후 재시도
+                }
             } else {
                 // 오류 처리
                 Log.e("MyPageViewModel", "Error in loadMoreMyLikedRecipes: ${response.errorBody()}")
@@ -355,6 +439,10 @@ class MyPageViewModel(
                 val response = myPageService.viewMyPage(ViewMyPageRequestDto(targetMemberId))
                 if (response.isSuccessful) {
                     _myPageData.value = response.body()?.result
+                } else if (response.code() == 401) {
+                    handleUnauthorizedError {
+                        loadMyPageData(targetMemberId) // 토큰 재발급 후 재시도
+                    }
                 } else {
                     // 실패한 응답 처리
                     Log.e(
@@ -370,102 +458,100 @@ class MyPageViewModel(
     }
 
     // 로그아웃
-    fun logout(
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
-    ) {
+    fun logout() {
         viewModelScope.launch {
             try {
                 val response = myPageService.logout()
                 if (response.isSuccessful) {
-                    clearSession()
-                    onSuccess()
+                    clearSession() // 세션 클리어
+                    logoutSuccess.postValue(true) // 로그아웃 성공 표시
+                } else if (response.code() == 401) {
+                    handleUnauthorizedError { logout() } // 토큰 재발급 후 재시도
                 } else {
-                    onError("로그아웃 실패")
+                    logoutError.postValue("로그아웃 실패") // 로그아웃 실패 메시지 설정
                 }
             } catch (e: Exception) {
-                onError("네트워크 에러 발생")
+                logoutError.postValue("네트워크 오류 발생") // 네트워크 오류 메시지 설정
             }
         }
     }
 
     // 회원 탈퇴
-    fun deactivateAccount(
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
-    ) {
+    fun deactivateAccount() {
         viewModelScope.launch {
             try {
                 val response = myPageService.deactivate()
                 if (response.isSuccessful) {
                     clearSession()
-                    onSuccess()
+                    deActiveAccount.postValue(true)  // 로그아웃 성공 (탈퇴 성공으로 간주)
+                } else if (response.code() == 401) {
+                    handleUnauthorizedError { deactivateAccount() } // 토큰 재발급 후 재시도
                 } else {
-                    onError("회원탈퇴 실패")
+                    deactivateAccountError.postValue("회원 탈퇴에 실패했습니다.") // 탈퇴 실패 메시지 설정
                 }
             } catch (e: Exception) {
-                onError("네트워크 에러 발생")
+                deactivateAccountError.postValue("네트워크 오류 발생") // 네트워크 오류 메시지 설정
             }
         }
     }
 
+    // 프로필 이미지 URL 상태
+    val profileImageUrl = MutableLiveData<String?>()
+
     // 마이페이지 작성한 유저 프로필 사진 가져오기
     fun getMemberProfileImage(
-        memberId: Long,
-        onSuccess: (String?) -> Unit,
-        onError: (String) -> Unit
+        memberId: Long
     ) {
         viewModelScope.launch {
             try {
-                // 이미지 가져오는 요청 전송
                 val response = myPageService.getProfileImage(MemberProfileRequestDto(memberId))
                 if (response.isSuccessful && response.body() != null) {
-                    // 성공적으로 URL을 받아왔을 경우 onSuccess 콜백 호출
-                    onSuccess(response.body()?.result)
+                    profileImageUrl.postValue(response.body()?.result)
+                } else if (response.code() == 401) {
+                    handleUnauthorizedError { getMemberProfileImage(memberId) } // 토큰 재발급 후 재시도
                 } else {
-                    // 응답은 받았으나 실패했거나 바디가 null일 경우 onError 콜백 호출
-                    onError("프로필 이미지를 가져오는 요청이 실패했습니다.")
+                    // 오류 메시지 업데이트
+                    profileImageUrl.postValue(null)
                 }
             } catch (e: Exception) {
-                // 네트워크 오류 등의 예외 발생 시 onError 콜백 호출
-                onError("네트워크 에러 발생")
+                // 오류 메시지 업데이트
+                profileImageUrl.postValue(null)
             }
         }
     }
+
+    // 비밀번호 변경 성공 여부를 나타내는 LiveData
+    val passwordChangeSuccess = MutableLiveData<Boolean>()
+
+    // 비밀번호 변경 시 오류 메시지를 나타내는 LiveData
+    val passwordChangeError = MutableLiveData<String?>()
+
 
     // 비밀번호 변경 요청
     fun changePassword(
         originPassword: String,
-        newPassword: String,
-        onSuccess: (Long?) -> Unit,
-        onError: (String) -> Unit
+        newPassword: String
     ) {
         viewModelScope.launch {
             try {
                 val response = myPageService.changePassword(
-                    ChangePasswordRequestDto(
-                        originPassword,
-                        newPassword
-                    )
+                    ChangePasswordRequestDto(originPassword, newPassword)
                 )
                 if (response.isSuccessful && response.body() != null) {
-                    onSuccess(response.body()?.result)
+                    passwordChangeSuccess.postValue(true)
+                } else if (response.code() == 401) {
+                    handleUnauthorizedError { changePassword(originPassword, newPassword) }
                 } else {
-                    val errorResponseBody = response.errorBody()?.string()
-                    val errorJson = errorResponseBody?.let { JSONObject(it) }
-
-                    if (errorJson != null) {
-                        val errorCode = errorJson.optInt("code")
-
-                        when (errorCode) {
-                            1001 -> onError("기존 비밀번호가 잘못되었습니다.")
-                            9002 -> onError("잘못된 요청입니다.")
-                            else -> onError("알 수 없는 오류가 발생했습니다.")
-                        }
+                    val errorJson = JSONObject(response.errorBody()?.string())
+                    val errorMessage = when (errorJson.optInt("code")) {
+                        1001 -> "기존 비밀번호가 잘못되었습니다."
+                        9002 -> "잘못된 요청입니다."
+                        else -> "알 수 없는 오류가 발생했습니다."
                     }
+                    passwordChangeError.postValue(errorMessage)
                 }
             } catch (e: Exception) {
-                onError("네트워크 에러 발생")
+                passwordChangeError.postValue("네트워크 에러 발생")
             }
         }
     }
@@ -480,6 +566,29 @@ class MyPageViewModel(
     // 남의 마이페이지 팔로우 관리
     fun updateFollowingStatus(newStatus: Boolean) {
         isFollowing.value = newStatus
+    }
+
+    /**
+     * 401 Unauthorized 에러 처리 및 토큰 재발급 로직
+     */
+    private fun handleUnauthorizedError(
+        retryAction: suspend () -> Unit
+    ) {
+        viewModelScope.launch {
+            val tokenRepublishManager = TokenRepublishManager(tokenManager)
+            val result = tokenRepublishManager.renewTokenIfNeeded()
+            if (result) {
+                retryAction() // 토큰 재발급 성공 시 전달받은 작업 재시도
+            } else {
+                // 토큰 재발급에 실패했다면, 로그인 화면으로 이동합니다.
+                _navigateToLogin.value = true
+            }
+        }
+    }
+
+    // 홈 화면 이동 초기화
+    fun resetNavigateToLogin() {
+        _navigateToLogin.value = false
     }
 
 }

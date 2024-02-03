@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -101,7 +102,6 @@ fun SignUpSecondFormScreen(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
     val listState = rememberLazyListState()
-
 
     // AlertDialog를 표시할지 여부를 관리하는 상태
     var showDialog by remember { mutableStateOf(false) }
@@ -311,7 +311,12 @@ fun SignUpSecondFormScreen(
                                 .height(54.dp) // 높이 지정
                                 .padding(start = 8.dp, end = 8.dp) // 오른쪽 여백 추가
                         ) {
-                            Text("중복체크")
+                            Text(
+                                text = "중복체크",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
                         }
                     }
                 }
@@ -382,7 +387,12 @@ fun SignUpSecondFormScreen(
                                 .height(54.dp) // 높이 지정
                                 .padding(start = 8.dp, end = 8.dp) // 오른쪽 여백 추가
                         ) {
-                            Text("중복체크")
+                            Text(
+                                text = "중복체크",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
                         }
                     }
                 }

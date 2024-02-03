@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,7 +49,8 @@ fun FollowListItem(
             modifier = Modifier
                 .size(56.dp) // 이미지 크기를 더 크게 조절
                 .clip(CircleShape)
-                .border(0.5.dp, Color.LightGray, CircleShape) // 연한 테두리 추가
+                .border(0.5.dp, Color.LightGray, CircleShape), // 연한 테두리 추가
+            contentScale = ContentScale.Crop // 이미지를 꽉 차게 표시
         )
 
         Spacer(modifier = Modifier.width(16.dp)) // 이미지와 닉네임 사이 간격 추가

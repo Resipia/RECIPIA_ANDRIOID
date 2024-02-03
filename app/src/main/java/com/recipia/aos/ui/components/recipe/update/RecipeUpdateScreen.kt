@@ -306,6 +306,8 @@ fun RecipeUpdateScreen(
                                     )
                                 }
                             }
+                        } else {
+                            keyboardController?.hide()
                         }
                     },
                     modifier = Modifier

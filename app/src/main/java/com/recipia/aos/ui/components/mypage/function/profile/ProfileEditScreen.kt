@@ -207,8 +207,13 @@ fun ProfileEditScreen(
                     else -> null
                 }
             )
-            // 화면 이동
             navController.popBackStack()
+//            // 화면 이동
+//            navController.navigate("my-page") {
+//                popUpTo("my-page") { inclusive = true } // 마이페이지를 백스택에서 제거
+//                launchSingleTop = true // 마이페이지를 새 인스턴스로 시작
+//            }
+
         } else {
             // 중복 체크를 통과하지 못한 경우 사용자에게 알림
             coroutineScope.launch {

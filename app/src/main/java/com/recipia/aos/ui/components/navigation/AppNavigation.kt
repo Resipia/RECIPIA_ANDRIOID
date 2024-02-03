@@ -15,6 +15,7 @@ import com.recipia.aos.ui.components.forgot.password.PasswordResetScreen
 import com.recipia.aos.ui.components.home.CategorySelectRecipeScreen
 import com.recipia.aos.ui.components.home.HomeScreen
 import com.recipia.aos.ui.components.home.SplashScreen
+import com.recipia.aos.ui.components.home.search.RecipeSearchScreen
 import com.recipia.aos.ui.components.login.LoginScreen
 import com.recipia.aos.ui.components.mypage.MyPageRecipeListScreen
 import com.recipia.aos.ui.components.mypage.MyPageScreen
@@ -148,7 +149,15 @@ fun AppNavigation(
                 recipeAllListViewModel = recipeAllListViewModel
             )
         }
-        // 검색화면
+        // 홈 화면 제목으로 레시피 검색하는 화면
+        composable("recipe-search") {
+            RecipeSearchScreen(
+                navController,
+                recipeAllListViewModel,
+                bookmarkViewModel
+            )
+        }
+        // 재료, 해시태그 검색/추가 화면
         composable(
             route = "search-Screen/{type}",
             arguments = listOf(
@@ -159,7 +168,6 @@ fun AppNavigation(
                 backStackEntry.arguments?.getString("type") ?: SearchType.HASHTAG.toString()
             val type = SearchType.valueOf(typeString)
             MongoIngredientAndHashTagSearchScreen(navController, mongoSearchViewModel, type)
-
         }
         // 내가보는 마이페이지
         composable("my-page") {
@@ -286,7 +294,7 @@ fun AppNavigation(
         composable(
             "comment/{recipeId}",
             arguments = listOf(navArgument("recipeId") { type = NavType.LongType })
-        ) {backStackEntry ->
+        ) { backStackEntry ->
             val recipeId = backStackEntry.arguments?.getLong("recipeId") ?: 0L
             CommentPageScreen(commentViewModel, navController, recipeId, tokenManager)
         }

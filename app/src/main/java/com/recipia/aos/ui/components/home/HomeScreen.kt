@@ -170,6 +170,7 @@ fun HomeScreen(
     if (navigateToLogin) {
         LaunchedEffect(key1 = Unit) {
             navController.navigate("login")
+            recipeAllListViewModel.resetNavigateToLogin() // 로그인 화면으로 이동 후 `_navigateToLogin`을 리셋하는 함수 호출
         }
     }
 
@@ -249,7 +250,7 @@ fun HomeScreen(
                                     "레시피 통합검색 기능이 곧 추가됩니다."
                                 )
                             }
-//                            navController.navigate("search-Hashtag-Screen")
+                            navController.navigate("recipe-search")
                         },
                         modifier = Modifier.padding(top = 8.dp)
                     ) {
@@ -321,7 +322,7 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.width(2.dp))
                             Text(
                                 "작성",
-                                fontSize = 16.sp,
+                                fontSize = 12.sp,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
                             )
