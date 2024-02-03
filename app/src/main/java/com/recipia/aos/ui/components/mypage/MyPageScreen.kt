@@ -79,13 +79,13 @@ fun MyPageScreen(
     followViewModel: FollowViewModel,
     bookMarkViewModel: BookMarkViewModel,
     tokenManager: TokenManager,
-    targetMemberId: Long? = null
+    memberId: Long? = null
 ) {
     val myPageData by myPageViewModel.myPageData.observeAsState()
 
     // 색상 정의
     var menuExpanded by remember { mutableStateOf(false) } // 드롭다운 메뉴 상태
-    val targetId = targetMemberId ?: tokenManager.loadMemberId() // memberId 결정
+    val targetId = memberId ?: tokenManager.loadMemberId() // memberId 결정
     val lazyListState = rememberLazyListState() // LazyListState 인스턴스 생성
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope() // 코루틴 스코프 생성
@@ -150,10 +150,15 @@ fun MyPageScreen(
     }
 
     // targetMemberId가 존재하면 해당 멤버의 레시피를 가져오고, 그렇지 않으면 기본 마이페이지 기능을 표시
-    LaunchedEffect(key1 = targetMemberId) {
-        targetMemberId?.let {
+    LaunchedEffect(key1 = targetId) {
+        targetId?.let {
             myPageViewModel.getHighRecipe(it)
         }
+    }
+
+    // 레시피 총 개수 가져오기 (한 번만 호출)
+    LaunchedEffect(key1 = Unit) {
+        myPageViewModel.getRecipeTotalCount(targetId)
     }
 
     // MyPageScreen에서
@@ -315,8 +320,8 @@ fun MyPageScreen(
                     Spacer(modifier = Modifier.height(8.dp)) // 여기에 추가 공간
                 }
 
-                if (targetMemberId != null) {
-
+                // 남의 마이페이지로 접근했다면 (memberId값을 받게됨) 내가 접근하면 memberId = null이다.
+                if (memberId != null) {
                     item {
                         Column {
                             Row(
