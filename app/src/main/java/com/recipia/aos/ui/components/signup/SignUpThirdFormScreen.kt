@@ -82,6 +82,8 @@ fun SignUpThirdFormScreen(
     var selectedDate by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() } // 스낵바 설정
     val scope = rememberCoroutineScope() // 코루틴 스코프 생성
+    // 버튼 클릭 가능 상태를 관리하는 상태 변수 추가
+    var isButtonEnabled by remember { mutableStateOf(true) }
 
     // 입력 필드 검증 상태
     val oneLineIntroFocusRequester = remember { FocusRequester() }
@@ -310,8 +312,10 @@ fun SignUpThirdFormScreen(
                             .padding(vertical = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        // 건너뛰기 버튼
                         Button(
                             onClick = {
+                                isButtonEnabled = false // 버튼 클릭 처리 시작 시 버튼 비활성화
                                 // 성별 데이터 변환 및 업데이트
                                 val genderCode = when (gender) {
                                     "남성" -> "M"
@@ -332,6 +336,7 @@ fun SignUpThirdFormScreen(
                                         signUpViewModel.clearData() // 데이터 초기화
                                         phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
                                         navController.navigate("login-success-page")
+                                        isButtonEnabled = true // 성공 후 버튼을 다시 활성화
                                     },
                                     onFailure = {
                                         scope.launch {
@@ -340,9 +345,11 @@ fun SignUpThirdFormScreen(
                                                 duration = SnackbarDuration.Short
                                             )
                                         }
+                                        isButtonEnabled = true // 실패 후 버튼을 다시 활성화
                                     }
                                 )
                             },
+                            enabled = isButtonEnabled, // 버튼 활성화 상태를 isButtonEnabled에 따라 결정
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(27, 94, 32),
                                 contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
@@ -355,9 +362,13 @@ fun SignUpThirdFormScreen(
                         ) {
                             Text("건너뛰기", fontSize = 14.sp)
                         }
+
                         Spacer(modifier = Modifier.width(8.dp))
+
+                        // 회원가입 버튼
                         Button(
                             onClick = {
+                                isButtonEnabled = false // 버튼 클릭 처리 시작 시 버튼 비활성화
                                 // 성별 데이터 변환 및 업데이트
                                 val genderCode = when (gender) {
                                     "남성" -> "M"
@@ -378,6 +389,7 @@ fun SignUpThirdFormScreen(
                                         signUpViewModel.clearData() // 데이터 초기화
                                         phoneNumberAuthViewModel.clearData() // PhoneNumberAuthViewModel 초기화
                                         navController.navigate("login-success-page")
+                                        isButtonEnabled = true // 성공 후 버튼을 다시 활성화
                                     },
                                     onFailure = {
                                         scope.launch {
@@ -386,9 +398,11 @@ fun SignUpThirdFormScreen(
                                                 duration = SnackbarDuration.Short
                                             )
                                         }
+                                        isButtonEnabled = true // 실패 후 버튼을 다시 활성화
                                     }
                                 )
                             },
+                            enabled = isButtonEnabled, // 버튼 활성화 상태를 isButtonEnabled에 따라 결정
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(27, 94, 32),
                                 contentColor = Color.White // 버튼 내용(텍스트 등)의 색상 설정
