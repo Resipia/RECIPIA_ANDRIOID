@@ -289,7 +289,7 @@ fun SignUpFirstPhoneValidScreen(
                         fontWeight = FontWeight.Bold,
                         color = Color(27, 94, 32),
                         modifier = Modifier
-                            .clickable { /* 여기에 "보기"를 클릭했을 때 수행할 액션을 정의 */ }
+                            .clickable { navController.navigate("personalInfoConsent") }
                             .padding(end = 16.dp)
                     )
                 }
@@ -318,7 +318,7 @@ fun SignUpFirstPhoneValidScreen(
                         fontWeight = FontWeight.Bold,
                         color = Color(27, 94, 32),
                         modifier = Modifier
-                            .clickable { /* 여기에 "보기"를 클릭했을 때 수행할 액션을 정의 */ }
+                            .clickable { navController.navigate("dataRetentionConsent") }
                             .padding(end = 16.dp)
                     )
                 }
