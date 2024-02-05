@@ -125,8 +125,10 @@ fun BottomNavigationBar(
                                 }
                             }
                             "마이페이지" -> {
-                                navController.navigate("my-page") {
+                                scope.launch {
+                                    navController.navigate("my-page") {
 //                                    launchSingleTop = true // 이렇게하면 데이터를 변경 안함(쿼리호출x) 그래서 수정해야할지 고민이다.
+                                    }
                                 }
                             }
                             "채팅", "위글위글" -> {
