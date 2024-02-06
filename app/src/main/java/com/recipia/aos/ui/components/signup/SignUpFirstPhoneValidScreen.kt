@@ -283,6 +283,15 @@ fun SignUpFirstPhoneValidScreen(
                             .clickable { isPersonalInfoConsent = !isPersonalInfoConsent }
                             .padding(start = 8.dp)
                     )
+                    Spacer(Modifier.weight(1f)) // 텍스트 사이에 공간을 추가해서 "보기"를 우측 끝으로 밀어냄
+                    Text(
+                        text = "보기",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(27, 94, 32),
+                        modifier = Modifier
+                            .clickable { navController.navigate("personalInfoConsent") }
+                            .padding(end = 16.dp)
+                    )
                 }
 
                 // 개인정보 보관 및 파기 동의
@@ -302,6 +311,15 @@ fun SignUpFirstPhoneValidScreen(
                         modifier = Modifier
                             .clickable { isDataRetentionConsent = !isDataRetentionConsent }
                             .padding(start = 8.dp)
+                    )
+                    Spacer(Modifier.weight(1f)) // 텍스트 사이에 공간을 추가해서 "보기"를 우측 끝으로 밀어냄
+                    Text(
+                        text = "보기",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(27, 94, 32),
+                        modifier = Modifier
+                            .clickable { navController.navigate("dataRetentionConsent") }
+                            .padding(end = 16.dp)
                     )
                 }
 

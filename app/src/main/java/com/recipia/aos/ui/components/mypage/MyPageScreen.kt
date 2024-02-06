@@ -107,7 +107,10 @@ fun MyPageScreen(
     if (logoutSuccess == true) {
         LaunchedEffect(logoutSuccess) {
             navController.navigate("login") {
-                popUpTo("login") { inclusive = true }
+                myPageViewModel._myPageData.value = null
+                myPageViewModel.items.value = emptyList()
+                myPageViewModel._recipeCount.value = 0
+                popUpTo(0) { inclusive = true }
             }
             myPageViewModel.logoutSuccess.value = false // 로그아웃 성공 플래그를 다시 false로 설정
         }
@@ -117,7 +120,10 @@ fun MyPageScreen(
     if (deActiveAccount == true) {
         LaunchedEffect(logoutSuccess) {
             navController.navigate("login") {
-                popUpTo("login") { inclusive = true }
+                myPageViewModel._myPageData.value = null
+                myPageViewModel.items.value = emptyList()
+                myPageViewModel._recipeCount.value = 0
+                popUpTo(0) { inclusive = true }
             }
             myPageViewModel.deActiveAccount.value = false // 로그아웃 성공 플래그를 다시 false로 설정
         }
@@ -150,8 +156,8 @@ fun MyPageScreen(
     }
 
     // targetMemberId가 존재하면 해당 멤버의 레시피를 가져오고, 그렇지 않으면 기본 마이페이지 기능을 표시
-    LaunchedEffect(key1 = targetId) {
-        targetId?.let {
+    LaunchedEffect(key1 = memberId) {
+        memberId?.let {
             myPageViewModel.getHighRecipe(it)
         }
     }
@@ -162,9 +168,9 @@ fun MyPageScreen(
     }
 
     // MyPageScreen에서
-    LaunchedEffect(key1 = myPageViewModel.updateComplete.value) {
+    LaunchedEffect(key1 = Unit) {
+        myPageViewModel.loadMyPageData(targetId)
         if (myPageViewModel.updateComplete.value == true) {
-            myPageViewModel.loadMyPageData(targetId)
             myPageViewModel.updateComplete.value = false  // 데이터 로딩 후 상태를 다시 false로 설정
         }
     }

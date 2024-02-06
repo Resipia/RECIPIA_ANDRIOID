@@ -56,10 +56,7 @@ class MyPageViewModel(
 
     // 여기에서 북마크한 레시피, 좋아요한 레시피를 모두 저장하고 뒤로가면 데이터 초기화 시키도록 한다.
     var items = mutableStateOf<List<RecipeListResponseDto>>(listOf())
-        private set // 이렇게 하면 외부에서는 읽기만 가능해짐
-
     var highCountRecipe = mutableStateOf<List<RecipeListResponseDto>>(listOf())
-        private set // 이렇게 하면 외부에서는 읽기만 가능해짐
 
     // 현재 페이지, 사이즈, 정렬 유형 저장
     var currentRequestPage: Int = 0
@@ -68,7 +65,7 @@ class MyPageViewModel(
     var isLastPage = false
 
     // 레시피 총 개수 상태
-    private val _recipeCount = MutableLiveData<Long?>()
+    val _recipeCount = MutableLiveData<Long?>()
     val recipeCount: MutableLiveData<Long?> = _recipeCount
 
     // 로딩중인지 파악하는 상태
@@ -76,7 +73,7 @@ class MyPageViewModel(
     val isLoading: LiveData<Boolean> = _isLoading
 
     // api로 받아온 마이페이지 데이터
-    private val _myPageData = MutableLiveData<MyPageViewResponseDto?>()
+    val _myPageData = MutableLiveData<MyPageViewResponseDto?>()
     val myPageData: MutableLiveData<MyPageViewResponseDto?> = _myPageData
 
     // 프로필 업데이트 상태

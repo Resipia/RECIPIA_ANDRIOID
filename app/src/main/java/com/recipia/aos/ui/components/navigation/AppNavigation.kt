@@ -38,6 +38,8 @@ import com.recipia.aos.ui.components.signup.SignUpFirstPhoneValidScreen
 import com.recipia.aos.ui.components.signup.SignUpSecondFormScreen
 import com.recipia.aos.ui.components.signup.SignUpSuccessScreen
 import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
+import com.recipia.aos.ui.components.signup.agree.DataRetentionConsent
+import com.recipia.aos.ui.components.signup.agree.PersonalInfoConsentScreen
 import com.recipia.aos.ui.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.comment.CommentViewModel
@@ -336,6 +338,14 @@ fun AppNavigation(
         // 회원가입 1단계: 전화번호 인증 및 회원가입 동의 form 화면
         composable("signUpFirstForm") {
             SignUpFirstPhoneValidScreen(navController, phoneNumberAuthViewModel, signUpViewModel)
+        }
+        // 개인정보 수집 및 동의 여부
+        composable("personalInfoConsent") {
+            PersonalInfoConsentScreen(navController)
+        }
+        // 개인정보 보관 및 파기 동의
+        composable("dataRetentionConsent") {
+            DataRetentionConsent(navController)
         }
         // 회원가입 2단계: 이메일, 비밀번호 form 화면
         composable("signUpSecondForm") {
