@@ -495,7 +495,7 @@ class MyPageViewModel(
     // 프로필 이미지 URL 상태
     val profileImageUrl = MutableLiveData<String?>()
 
-    // 마이페이지 작성한 유저 프로필 사진 가져오기
+    // 레시피를 작성한 유저 프로필 사진 가져오기
     fun getMemberProfileImage(
         memberId: Long
     ) {
