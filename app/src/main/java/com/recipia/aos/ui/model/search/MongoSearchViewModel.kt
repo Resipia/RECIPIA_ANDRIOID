@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.search.MongoSearchService
-import com.recipia.aos.ui.dto.search.SearchType
+import com.recipia.aos.ui.api.dto.search.SearchType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +33,7 @@ class MongoSearchViewModel(
 ) : ViewModel() {
 
     // 검색 유형 상태 (재료 또는 해시태그)
-    private val _searchType = MutableStateFlow(SearchType.HASHTAG)
+    private val _searchType = MutableStateFlow(com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG)
     val searchType = _searchType.asStateFlow()
 
     // 검색 텍스트
@@ -80,7 +80,7 @@ class MongoSearchViewModel(
 
     // 검색어를 서버에 요청하는 메서드
     @OptIn(FlowPreview::class)
-    fun init(type: SearchType) {
+    fun init(type: com.recipia.aos.ui.api.dto.search.SearchType) {
         _searchText
             .debounce(200L) // 검색어 입력 후 500ms 대기
             .filter { it.isNotBlank() }
@@ -105,13 +105,13 @@ class MongoSearchViewModel(
     // 재료, 해시태그에 따라 Json 파싱 실시
     fun parseMongoSearchResult(
         jsonString: String,
-        type: SearchType
+        type: com.recipia.aos.ui.api.dto.search.SearchType
     ): String? {
         return try {
             val jsonObject = JSONObject(jsonString)
             val key = when (type) {
-                SearchType.INGREDIENT -> "ingredients"
-                SearchType.HASHTAG -> "hashtags"
+                com.recipia.aos.ui.api.dto.search.SearchType.INGREDIENT -> "ingredients"
+                com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG -> "hashtags"
                 else -> return null // 다른 타입이면 null 반환 또는 예외 처리
             }
             jsonObject.optString(key, null) // 'null'은 기본값으로, 키가 없을 경우 반환될 값임

@@ -17,13 +17,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.mypage.MyPageService
-import com.recipia.aos.ui.dto.RecipeListResponseDto
-import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.mypage.ChangePasswordRequestDto
-import com.recipia.aos.ui.dto.mypage.MyPageRequestDto
-import com.recipia.aos.ui.dto.mypage.MyPageViewResponseDto
-import com.recipia.aos.ui.dto.mypage.ViewMyPageRequestDto
-import com.recipia.aos.ui.dto.recipe.detail.MemberProfileRequestDto
+import com.recipia.aos.ui.api.dto.RecipeListResponseDto
+import com.recipia.aos.ui.api.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.mypage.ChangePasswordRequestDto
+import com.recipia.aos.ui.api.dto.mypage.MyPageRequestDto
+import com.recipia.aos.ui.api.dto.mypage.MyPageViewResponseDto
+import com.recipia.aos.ui.api.dto.mypage.ViewMyPageRequestDto
+import com.recipia.aos.ui.api.dto.recipe.detail.MemberProfileRequestDto
 import com.recipia.aos.ui.model.jwt.TokenRepublishManager
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -55,8 +55,8 @@ class MyPageViewModel(
     var isFollowing = MutableLiveData<Boolean>()
 
     // 여기에서 북마크한 레시피, 좋아요한 레시피를 모두 저장하고 뒤로가면 데이터 초기화 시키도록 한다.
-    var items = mutableStateOf<List<RecipeListResponseDto>>(listOf())
-    var highCountRecipe = mutableStateOf<List<RecipeListResponseDto>>(listOf())
+    var items = mutableStateOf<List<com.recipia.aos.ui.api.dto.RecipeListResponseDto>>(listOf())
+    var highCountRecipe = mutableStateOf<List<com.recipia.aos.ui.api.dto.RecipeListResponseDto>>(listOf())
 
     // 현재 페이지, 사이즈, 정렬 유형 저장
     var currentRequestPage: Int = 0
@@ -73,12 +73,12 @@ class MyPageViewModel(
     val isLoading: LiveData<Boolean> = _isLoading
 
     // api로 받아온 마이페이지 데이터
-    val _myPageData = MutableLiveData<MyPageViewResponseDto?>()
-    val myPageData: MutableLiveData<MyPageViewResponseDto?> = _myPageData
+    val _myPageData = MutableLiveData<com.recipia.aos.ui.api.dto.mypage.MyPageViewResponseDto?>()
+    val myPageData: MutableLiveData<com.recipia.aos.ui.api.dto.mypage.MyPageViewResponseDto?> = _myPageData
 
     // 프로필 업데이트 상태
-    private val _updateResult = MutableLiveData<ResponseDto<Void>?>()
-    val updateResult: LiveData<ResponseDto<Void>?> = _updateResult
+    private val _updateResult = MutableLiveData<com.recipia.aos.ui.api.dto.ResponseDto<Void>?>()
+    val updateResult: LiveData<com.recipia.aos.ui.api.dto.ResponseDto<Void>?> = _updateResult
 
     // 로그인 화면으로 이동해야 함을 알린다.
     val _navigateToLogin = MutableLiveData<Boolean>()
@@ -149,7 +149,11 @@ class MyPageViewModel(
     ) {
         viewModelScope.launch {
 
-            val response = recipeMyPageService.getRecipeTotalCount(MyPageRequestDto(targetMemberId))
+            val response = recipeMyPageService.getRecipeTotalCount(
+                com.recipia.aos.ui.api.dto.mypage.MyPageRequestDto(
+                    targetMemberId
+                )
+            )
 
             // 응답에 따른 동작
             if (response.isSuccessful) {
@@ -170,7 +174,11 @@ class MyPageViewModel(
     ) {
         viewModelScope.launch {
 
-            val response = recipeMyPageService.getHighRecipe(MyPageRequestDto(targetMemberId))
+            val response = recipeMyPageService.getHighRecipe(
+                com.recipia.aos.ui.api.dto.mypage.MyPageRequestDto(
+                    targetMemberId
+                )
+            )
 
             // 응답에 따른 동작
             if (response.isSuccessful) {
@@ -433,7 +441,11 @@ class MyPageViewModel(
     ) {
         viewModelScope.launch {
             try {
-                val response = myPageService.viewMyPage(ViewMyPageRequestDto(targetMemberId))
+                val response = myPageService.viewMyPage(
+                    com.recipia.aos.ui.api.dto.mypage.ViewMyPageRequestDto(
+                        targetMemberId
+                    )
+                )
                 if (response.isSuccessful) {
                     _myPageData.value = response.body()?.result
                 } else if (response.code() == 401) {
@@ -501,7 +513,11 @@ class MyPageViewModel(
     ) {
         viewModelScope.launch {
             try {
-                val response = myPageService.getProfileImage(MemberProfileRequestDto(memberId))
+                val response = myPageService.getProfileImage(
+                    com.recipia.aos.ui.api.dto.recipe.detail.MemberProfileRequestDto(
+                        memberId
+                    )
+                )
                 if (response.isSuccessful && response.body() != null) {
                     profileImageUrl.postValue(response.body()?.result)
                 } else if (response.code() == 401) {
@@ -532,7 +548,10 @@ class MyPageViewModel(
         viewModelScope.launch {
             try {
                 val response = myPageService.changePassword(
-                    ChangePasswordRequestDto(originPassword, newPassword)
+                    com.recipia.aos.ui.api.dto.mypage.ChangePasswordRequestDto(
+                        originPassword,
+                        newPassword
+                    )
                 )
                 if (response.isSuccessful && response.body() != null) {
                     passwordChangeSuccess.postValue(true)

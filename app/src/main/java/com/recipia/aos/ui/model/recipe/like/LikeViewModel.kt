@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.BookmarkService
 import com.recipia.aos.ui.api.recipe.like.RecipeLikeService
-import com.recipia.aos.ui.dto.like.RecipeLikeRequestDto
+import com.recipia.aos.ui.api.dto.like.RecipeLikeRequestDto
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -53,7 +53,11 @@ class LikeViewModel(
         viewModelScope.launch {
             try {
                 // 좋아요 요청 DTO 생성
-                val likeRequestDto = RecipeLikeRequestDto(recipeLikeId, recipeId, memberId)
+                val likeRequestDto = com.recipia.aos.ui.api.dto.like.RecipeLikeRequestDto(
+                    recipeLikeId,
+                    recipeId,
+                    memberId
+                )
                 // 서버에 요청
                 val response = recipeLikeService.recipeLike(likeRequestDto)
 

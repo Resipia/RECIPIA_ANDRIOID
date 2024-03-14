@@ -70,9 +70,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.recipe.create.ImageThumbnails
 import com.recipia.aos.ui.components.recipe.create.NutritionalInfoInputScreen
-import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
-import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
-import com.recipia.aos.ui.dto.search.SearchType
+import com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto
+import com.recipia.aos.ui.api.dto.recipe.RecipeCreateUpdateRequestDto
+import com.recipia.aos.ui.api.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 import com.recipia.aos.ui.model.recipe.read.RecipeDetailViewModel
@@ -115,7 +115,7 @@ fun RecipeUpdateScreen(
     val selectedImageUris = remember { mutableStateListOf<Uri?>() }
     val nutritionalInfo = remember {
         mutableStateOf(
-            recipeDetailViewModel?.recipeDetail?.value?.nutritionalInfoDto ?: NutritionalInfoDto()
+            recipeDetailViewModel?.recipeDetail?.value?.nutritionalInfoDto ?: com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto()
         )
     } // 영양 정보 상태 변수
     val context = LocalContext.current // 현재 컨텍스트를 가져옴
@@ -251,17 +251,18 @@ fun RecipeUpdateScreen(
                                 selectedIngredients.joinToString(separator = ", ")
                             val hashtagsString = selectedHashtags.joinToString(separator = ", ")
 
-                            val requestDto = RecipeCreateUpdateRequestDto(
-                                id = recipeDetailViewModel?.recipeDetail?.value?.id, // 수정할 레시피의 ID todo: 여기서 1이 들어옴
-                                recipeName = recipeName.value, // .value를 사용하여 실제 문자열 값 추출
-                                recipeDesc = recipeDesc.value, // .value를 사용하여 실제 문자열 값 추출
-                                timeTaken = timeTaken.value.toIntOrNull() ?: 0,
-                                ingredient = ingredientsString,
-                                hashtag = hashtagsString,
-                                nutritionalInfo = nutritionalInfo.value, // 수정된 영양 정보 (여기에 id값 넣어줘야함)
-                                subCategoryDtoList = subCategoryDtoList,
-                                deleteFileOrder = listOf()
-                            )
+                            val requestDto =
+                                com.recipia.aos.ui.api.dto.recipe.RecipeCreateUpdateRequestDto(
+                                    id = recipeDetailViewModel?.recipeDetail?.value?.id, // 수정할 레시피의 ID todo: 여기서 1이 들어옴
+                                    recipeName = recipeName.value, // .value를 사용하여 실제 문자열 값 추출
+                                    recipeDesc = recipeDesc.value, // .value를 사용하여 실제 문자열 값 추출
+                                    timeTaken = timeTaken.value.toIntOrNull() ?: 0,
+                                    ingredient = ingredientsString,
+                                    hashtag = hashtagsString,
+                                    nutritionalInfo = nutritionalInfo.value, // 수정된 영양 정보 (여기에 id값 넣어줘야함)
+                                    subCategoryDtoList = subCategoryDtoList,
+                                    deleteFileOrder = listOf()
+                                )
 
                             // 모델을 사용하여 서버로 데이터와 이미지 전송
                             recipeCreateModel.updateRecipeRequest(
@@ -276,7 +277,7 @@ fun RecipeUpdateScreen(
                                     recipeCreateModel.ingredient.value = ""
                                     recipeCreateModel.hashtag.value = ""
                                     nutritionalInfo.value =
-                                        NutritionalInfoDto() // 새 NutritionalInfoDto 객체로 초기화
+                                        com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto() // 새 NutritionalInfoDto 객체로 초기화
                                     recipeCreateModel.selectedImageUris = mutableStateListOf<Uri?>()
                                     categorySelectionViewModel.selectedCategories.value = emptySet()
                                     mongoSearchViewModel.resetSelectedIngredients()
@@ -473,7 +474,7 @@ fun RecipeUpdateScreen(
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = { navController.navigate("search-Screen/${SearchType.INGREDIENT.name}") }, // 백틱(`) 사용
+                        onClick = { navController.navigate("search-Screen/${com.recipia.aos.ui.api.dto.search.SearchType.INGREDIENT.name}") }, // 백틱(`) 사용
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
@@ -540,7 +541,7 @@ fun RecipeUpdateScreen(
                 // 해시태그 버튼
                 item {
                     Button(
-                        onClick = { navController.navigate("search-Screen/${SearchType.HASHTAG.name}") }, // 백틱(`) 사용
+                        onClick = { navController.navigate("search-Screen/${com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG.name}") }, // 백틱(`) 사용
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)

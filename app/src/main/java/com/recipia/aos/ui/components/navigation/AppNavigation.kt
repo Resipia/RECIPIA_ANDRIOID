@@ -40,7 +40,7 @@ import com.recipia.aos.ui.components.signup.SignUpSuccessScreen
 import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
 import com.recipia.aos.ui.components.signup.agree.DataRetentionConsent
 import com.recipia.aos.ui.components.signup.agree.PersonalInfoConsentScreen
-import com.recipia.aos.ui.dto.search.SearchType
+import com.recipia.aos.ui.api.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.comment.CommentViewModel
 import com.recipia.aos.ui.model.factory.AskViewModelFactory
@@ -167,8 +167,8 @@ fun AppNavigation(
             )
         ) { backStackEntry ->
             val typeString =
-                backStackEntry.arguments?.getString("type") ?: SearchType.HASHTAG.toString()
-            val type = SearchType.valueOf(typeString)
+                backStackEntry.arguments?.getString("type") ?: com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG.toString()
+            val type = com.recipia.aos.ui.api.dto.search.SearchType.valueOf(typeString)
             MongoIngredientAndHashTagSearchScreen(navController, mongoSearchViewModel, type)
         }
         // 내가보는 마이페이지

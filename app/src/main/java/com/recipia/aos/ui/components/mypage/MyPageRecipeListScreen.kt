@@ -53,7 +53,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.R
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.common.AnimatedPreloader
-import com.recipia.aos.ui.dto.RecipeListResponseDto
+import com.recipia.aos.ui.api.dto.RecipeListResponseDto
 import com.recipia.aos.ui.model.mypage.MyPageViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 
@@ -217,7 +217,7 @@ fun MyPageRecipeListScreen(
 
 @Composable
 fun MyPageRecipeListItem(
-    item: RecipeListResponseDto,
+    item: com.recipia.aos.ui.api.dto.RecipeListResponseDto,
     bookmarkViewModel: BookMarkViewModel,
     navController: NavController
 ) {

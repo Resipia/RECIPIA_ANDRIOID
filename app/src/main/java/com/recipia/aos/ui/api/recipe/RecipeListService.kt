@@ -1,7 +1,7 @@
 package com.recipia.aos.ui.api.recipe
 
-import com.recipia.aos.ui.dto.PagingResponseDto
-import com.recipia.aos.ui.dto.RecipeListResponseDto
+import com.recipia.aos.ui.api.dto.PagingResponseDto
+import com.recipia.aos.ui.api.dto.RecipeListResponseDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -18,6 +18,6 @@ interface RecipeListService {
         @Query("sortType") sortType: String,
         @Query("subCategoryList") subCategoryList: List<Long>?,
         @Query("searchWord") searchWord: String?
-    ): Response<PagingResponseDto<RecipeListResponseDto>>
+    ): Response<com.recipia.aos.ui.api.dto.PagingResponseDto<com.recipia.aos.ui.api.dto.RecipeListResponseDto>>
 
 }

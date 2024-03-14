@@ -76,7 +76,7 @@ import com.recipia.aos.ui.components.BottomNavigationBar
 import com.recipia.aos.ui.components.HorizontalDivider
 import com.recipia.aos.ui.components.common.AnimatedPreloader
 import com.recipia.aos.ui.components.menu.CustomDropdownMenu
-import com.recipia.aos.ui.dto.RecipeListResponseDto
+import com.recipia.aos.ui.api.dto.RecipeListResponseDto
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.bookmark.BookmarkUpdateState
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
@@ -520,7 +520,7 @@ fun HomeScreen(
 
 @Composable
 fun ListItem(
-    item: RecipeListResponseDto,
+    item: com.recipia.aos.ui.api.dto.RecipeListResponseDto,
     bookmarkViewModel: BookMarkViewModel,
     navController: NavController
 ) {

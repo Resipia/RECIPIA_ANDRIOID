@@ -64,8 +64,8 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.R
 import com.recipia.aos.ui.components.HorizontalDivider
-import com.recipia.aos.ui.dto.RecipeListResponseDto
-import com.recipia.aos.ui.dto.search.SearchType
+import com.recipia.aos.ui.api.dto.RecipeListResponseDto
+import com.recipia.aos.ui.api.dto.search.SearchType
 import com.recipia.aos.ui.model.recipe.bookmark.BookMarkViewModel
 import com.recipia.aos.ui.model.recipe.read.RecipeAllListViewModel
 
@@ -212,7 +212,7 @@ fun RecipeSearchScreen(
 // 무한스크롤로 보여줄 아이템
 @Composable
 fun SearchResultItem(
-    item: RecipeListResponseDto,
+    item: com.recipia.aos.ui.api.dto.RecipeListResponseDto,
     bookmarkViewModel: BookMarkViewModel,
     navController: NavController
 ) {

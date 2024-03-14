@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.recipia.aos.ui.components.HorizontalDivider
-import com.recipia.aos.ui.dto.comment.CommentListResponseDto
+import com.recipia.aos.ui.api.dto.comment.CommentListResponseDto
 import com.recipia.aos.ui.model.comment.CommentViewModel
 
 /**
@@ -37,7 +37,7 @@ import com.recipia.aos.ui.model.comment.CommentViewModel
  */
 @Composable
 fun CommentItem(
-    commentDto: CommentListResponseDto,
+    commentDto: com.recipia.aos.ui.api.dto.comment.CommentListResponseDto,
     commentViewModel: CommentViewModel,
     tokenManager: TokenManager,
     recipeId: Long

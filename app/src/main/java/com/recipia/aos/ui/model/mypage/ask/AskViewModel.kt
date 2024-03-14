@@ -7,10 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.mypage.ask.AskService
-import com.recipia.aos.ui.dto.mypage.ask.AskListResponseDto
-import com.recipia.aos.ui.dto.mypage.ask.AskRequestDto
-import com.recipia.aos.ui.dto.mypage.ask.AskViewResponseDto
-import com.recipia.aos.ui.dto.mypage.ask.ViewAskRequestDto
+import com.recipia.aos.ui.api.dto.mypage.ask.AskListResponseDto
+import com.recipia.aos.ui.api.dto.mypage.ask.AskRequestDto
+import com.recipia.aos.ui.api.dto.mypage.ask.AskViewResponseDto
+import com.recipia.aos.ui.api.dto.mypage.ask.ViewAskRequestDto
 import com.recipia.aos.ui.model.jwt.TokenRepublishManager
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -26,12 +26,12 @@ class AskViewModel(
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
-    val askItems = MutableLiveData<List<AskListResponseDto>>(emptyList())
+    val askItems = MutableLiveData<List<com.recipia.aos.ui.api.dto.mypage.ask.AskListResponseDto>>(emptyList())
     var isLastPage = false
     private var currentPage = 0
     private val pageSize = 10
 
-    val askDetail = MutableLiveData<AskViewResponseDto?>()
+    val askDetail = MutableLiveData<com.recipia.aos.ui.api.dto.mypage.ask.AskViewResponseDto?>()
 
     // 로그인 화면으로 이동해야 함을 알린다.
     val _navigateToLogin = MutableLiveData<Boolean>()
@@ -106,7 +106,12 @@ class AskViewModel(
     ) {
         viewModelScope.launch {
             try {
-                val response = askService.createAsk(AskRequestDto(title, content))
+                val response = askService.createAsk(
+                    com.recipia.aos.ui.api.dto.mypage.ask.AskRequestDto(
+                        title,
+                        content
+                    )
+                )
                 if (response.isSuccessful) {
                     // 성공적으로 문의사항이 등록되면 문의사항 목록 초기화 및 첫 페이지 로드
                     askItems.postValue(emptyList()) // LiveData를 사용하여 UI 스레드에서 안전하게 데이터 업데이트
@@ -129,7 +134,11 @@ class AskViewModel(
     fun getAskDetail(askId: Long) {
         viewModelScope.launch {
             try {
-                val response = askService.getDetailAsk(ViewAskRequestDto(askId))
+                val response = askService.getDetailAsk(
+                    com.recipia.aos.ui.api.dto.mypage.ask.ViewAskRequestDto(
+                        askId
+                    )
+                )
                 if (response.isSuccessful && response.body()?.result != null) {
                     askDetail.postValue(response.body()?.result)
                 } else if (response.code() == 401) {

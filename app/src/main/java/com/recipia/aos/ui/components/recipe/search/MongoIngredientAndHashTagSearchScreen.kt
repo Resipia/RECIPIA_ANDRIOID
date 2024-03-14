@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.recipia.aos.ui.components.HorizontalDivider
-import com.recipia.aos.ui.dto.search.SearchType
+import com.recipia.aos.ui.api.dto.search.SearchType
 import com.recipia.aos.ui.model.search.MongoSearchViewModel
 import kotlinx.coroutines.launch
 
@@ -70,7 +70,7 @@ import kotlinx.coroutines.launch
 fun MongoIngredientAndHashTagSearchScreen(
     navController: NavController,
     mongoViewModel: MongoSearchViewModel,
-    type: SearchType
+    type: com.recipia.aos.ui.api.dto.search.SearchType
 ) {
 
     val searchText by mongoViewModel.searchText.collectAsState()
@@ -125,9 +125,9 @@ fun MongoIngredientAndHashTagSearchScreen(
             Button(
                 onClick = {
                     // 사용자가 선택한 항목들을 ViewModel로 업데이트
-                    if (type == SearchType.INGREDIENT) {
+                    if (type == com.recipia.aos.ui.api.dto.search.SearchType.INGREDIENT) {
                         mongoViewModel.setSelectedIngredients(selectedIngredients)
-                    } else if (type == SearchType.HASHTAG) {
+                    } else if (type == com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG) {
                         mongoViewModel.setSelectedHashtags(selectedHashtags)
                     }
                     navController.popBackStack()
@@ -174,12 +174,12 @@ fun MongoIngredientAndHashTagSearchScreen(
                         .focusRequester(focusRequester),
                     textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
                     placeholder = {
-                        if (type == SearchType.INGREDIENT) {
+                        if (type == com.recipia.aos.ui.api.dto.search.SearchType.INGREDIENT) {
                             Text(
                                 "재료를 입력하세요 (한/영, 숫자만 입력 가능)",
                                 fontSize = 14.sp
                             )
-                        } else if (type == SearchType.HASHTAG) {
+                        } else if (type == com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG) {
                             Text(
                                 "해시태그를 입력하세요 (한/영, 숫자만 입력 가능)",
                                 fontSize = 14.sp
@@ -220,12 +220,12 @@ fun MongoIngredientAndHashTagSearchScreen(
 
                                 } else {
                                     // 기존 로직
-                                    if (type == SearchType.INGREDIENT && !selectedIngredients.contains(
+                                    if (type == com.recipia.aos.ui.api.dto.search.SearchType.INGREDIENT && !selectedIngredients.contains(
                                             searchText
                                         )
                                     ) {
                                         selectedIngredients.add(searchText) // 재료 리스트에 추가
-                                    } else if (type == SearchType.HASHTAG && !selectedHashtags.contains(
+                                    } else if (type == com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG && !selectedHashtags.contains(
                                             searchText
                                         )
                                     ) {
@@ -244,8 +244,8 @@ fun MongoIngredientAndHashTagSearchScreen(
 
                 // 검색 유형에 따른 상태 리스트 선택
                 val selectedResults = when (type) {
-                    SearchType.INGREDIENT -> selectedIngredients
-                    SearchType.HASHTAG -> selectedHashtags
+                    com.recipia.aos.ui.api.dto.search.SearchType.INGREDIENT -> selectedIngredients
+                    com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG -> selectedHashtags
 //                    SearchType.INGREDIENT -> mongoViewModel.selectedIngredients.value
 //                    SearchType.HASHTAG -> mongoViewModel.selectedHashtags.value
                     else -> listOf() // 기본적으로 빈 리스트
@@ -264,9 +264,9 @@ fun MongoIngredientAndHashTagSearchScreen(
                         AssistChip(
                             onClick = {},
                             label = {
-                                if (type == SearchType.INGREDIENT) {
+                                if (type == com.recipia.aos.ui.api.dto.search.SearchType.INGREDIENT) {
                                     Text(result, fontSize = 12.sp)
-                                } else if (type == SearchType.HASHTAG) {
+                                } else if (type == com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG) {
                                     Text("#${result}", fontSize = 12.sp)
                                 }
                             },
@@ -292,11 +292,11 @@ fun MongoIngredientAndHashTagSearchScreen(
                                     .fillMaxWidth()
                                     .padding(20.dp)
                                     .clickable {
-                                        if (type == SearchType.INGREDIENT) {
+                                        if (type == com.recipia.aos.ui.api.dto.search.SearchType.INGREDIENT) {
                                             if (!selectedIngredients.contains(result)) {
                                                 selectedIngredients.add(result) // 재료 리스트에 추가
                                             }
-                                        } else if (type == SearchType.HASHTAG) {
+                                        } else if (type == com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG) {
                                             if (!selectedHashtags.contains(result)) {
                                                 selectedHashtags.add(result) // 해시태그 리스트에 추가
                                             }

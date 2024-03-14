@@ -10,8 +10,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.RecipeListService
-import com.recipia.aos.ui.dto.PagingResponseDto
-import com.recipia.aos.ui.dto.RecipeListResponseDto
+import com.recipia.aos.ui.api.dto.PagingResponseDto
+import com.recipia.aos.ui.api.dto.RecipeListResponseDto
 import com.recipia.aos.ui.model.jwt.TokenRepublishManager
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -27,7 +27,7 @@ class RecipeAllListViewModel(
 ) : ViewModel() {
 
     // api요청으로 받은 응답 데이터 리스트 (메인)
-    var items = mutableStateOf<List<RecipeListResponseDto>>(listOf())
+    var items = mutableStateOf<List<com.recipia.aos.ui.api.dto.RecipeListResponseDto>>(listOf())
         private set // 이렇게 하면 외부에서는 읽기만 가능해짐
 
     // 현재 페이지, 사이즈, 정렬 유형 저장
@@ -40,7 +40,7 @@ class RecipeAllListViewModel(
     // 검색어 상태
     var searchText = mutableStateOf("")
     // api요청으로 받은 응답 데이터 리스트 (검색)
-    var searchResults = mutableStateOf<List<RecipeListResponseDto>>(listOf())
+    var searchResults = mutableStateOf<List<com.recipia.aos.ui.api.dto.RecipeListResponseDto>>(listOf())
         private set // 이렇게 하면 외부에서는 읽기만 가능해짐
 
     val _isLoading = MutableLiveData<Boolean>()

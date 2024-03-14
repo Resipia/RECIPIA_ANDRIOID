@@ -1,7 +1,7 @@
 package com.recipia.aos.ui.api.recipe
 
-import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.recipe.detail.RecipeDetailViewResponseDto
+import com.recipia.aos.ui.api.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.recipe.detail.RecipeDetailViewResponseDto
 import retrofit2.Response
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -16,12 +16,12 @@ interface RecipeDetailAndDeleteService {
     @GET("/recipe/getRecipeDetail")
     suspend fun getRecipeDetailView(
         @Query("recipeId") recipeId: Long
-    ): Response<ResponseDto<RecipeDetailViewResponseDto>>
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<com.recipia.aos.ui.api.dto.recipe.detail.RecipeDetailViewResponseDto>>
 
     // 레시피 삭제
     @DELETE("/recipe/deleteRecipe")
     suspend fun deleteRecipe(
         @Query("recipeId") recipeId: Long
-    ): Response<ResponseDto<Void>>
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Void>>
 
 }

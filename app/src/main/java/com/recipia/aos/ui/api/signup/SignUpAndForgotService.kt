@@ -1,10 +1,10 @@
 package com.recipia.aos.ui.api.signup
 
-import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.forgot.FindEmailRequestDto
-import com.recipia.aos.ui.dto.forgot.TempPasswordRequestDto
-import com.recipia.aos.ui.dto.singup.EmailAvailableRequestDto
-import com.recipia.aos.ui.dto.singup.NicknameAvailableRequestDto
+import com.recipia.aos.ui.api.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.forgot.FindEmailRequestDto
+import com.recipia.aos.ui.api.dto.forgot.TempPasswordRequestDto
+import com.recipia.aos.ui.api.dto.singup.EmailAvailableRequestDto
+import com.recipia.aos.ui.api.dto.singup.NicknameAvailableRequestDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -22,26 +22,26 @@ interface SignUpAndForgotService {
     // 이메일 중복 체크 요청
     @POST("/member/management/checkDupEmail")
     suspend fun checkDuplicateEmail(
-        @Body request: EmailAvailableRequestDto
-    ): Response<ResponseDto<Boolean>>
+        @Body request: com.recipia.aos.ui.api.dto.singup.EmailAvailableRequestDto
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Boolean>>
 
     // 닉네임 중복 체크 요청
     @POST("/member/management/checkDupNickname")
     suspend fun checkDuplicateNickname(
-        @Body nicknameRequestDto: NicknameAvailableRequestDto
-    ): Response<ResponseDto<Boolean>>
+        @Body nicknameRequestDto: com.recipia.aos.ui.api.dto.singup.NicknameAvailableRequestDto
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Boolean>>
 
     // 이메일 찾기
     @POST("/member/management/find/email")
     suspend fun findEmail(
-        @Body dto: FindEmailRequestDto
-    ): Response<ResponseDto<String>>
+        @Body dto: com.recipia.aos.ui.api.dto.forgot.FindEmailRequestDto
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<String>>
 
     // 임시 비밀번호 재발급
     @POST("/member/management/tempPassword")
     suspend fun sendTempPassword(
-        @Body dto: TempPasswordRequestDto
-    ): Response<ResponseDto<Void>>
+        @Body dto: com.recipia.aos.ui.api.dto.forgot.TempPasswordRequestDto
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Void>>
 
     // 회원가입
     @Multipart
@@ -60,6 +60,6 @@ interface SignUpAndForgotService {
         @Part("isDataRetentionConsent") isDataRetentionConsent: RequestBody,
         @Part("birth") birth: RequestBody?,
         @Part("gender") gender: RequestBody?
-    ): Response<ResponseDto<Long>>
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Long>>
 
 }

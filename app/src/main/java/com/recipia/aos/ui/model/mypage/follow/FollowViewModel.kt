@@ -8,8 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.mypage.FollowService
-import com.recipia.aos.ui.dto.mypage.follow.FollowListResponseDto
-import com.recipia.aos.ui.dto.mypage.follow.FollowRequestDto
+import com.recipia.aos.ui.api.dto.mypage.follow.FollowListResponseDto
+import com.recipia.aos.ui.api.dto.mypage.follow.FollowRequestDto
 import com.recipia.aos.ui.model.jwt.TokenRepublishManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +27,7 @@ class FollowViewModel(
 ) : ViewModel() {
 
     // 팔로잉과 팔로워 목록을 저장할 리스트
-    var followList = mutableStateListOf<FollowListResponseDto>()
+    var followList = mutableStateListOf<com.recipia.aos.ui.api.dto.mypage.follow.FollowListResponseDto>()
 
     // 현재 페이지와 목록 유형을 저장 (following or follower)
     private var currentPage = 0
@@ -97,7 +97,7 @@ class FollowViewModel(
     }
 
     // 팔로잉/팔로워 목록 업데이트
-    fun updateFollowListItem(index: Int, updatedItem: FollowListResponseDto) {
+    fun updateFollowListItem(index: Int, updatedItem: com.recipia.aos.ui.api.dto.mypage.follow.FollowListResponseDto) {
         if (index >= 0 && index < followList.size) {
             followList[index] = updatedItem
         }
@@ -113,7 +113,11 @@ class FollowViewModel(
         lastRequestedMemberId = targetMemberId // 요청한 memberId 저장
         viewModelScope.launch {
             // 응답 받기
-            val response = followService.followOrUnFollow(FollowRequestDto(targetMemberId))
+            val response = followService.followOrUnFollow(
+                com.recipia.aos.ui.api.dto.mypage.follow.FollowRequestDto(
+                    targetMemberId
+                )
+            )
             // 성공했을때 동작
             if (response.isSuccessful && response.body() != null) {
                 val result = response.body()!!.result

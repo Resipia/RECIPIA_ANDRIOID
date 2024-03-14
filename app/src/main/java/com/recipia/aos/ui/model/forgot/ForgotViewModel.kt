@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.signup.SignUpAndForgotService
-import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.forgot.FindEmailRequestDto
-import com.recipia.aos.ui.dto.forgot.TempPasswordRequestDto
+import com.recipia.aos.ui.api.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.forgot.FindEmailRequestDto
+import com.recipia.aos.ui.api.dto.forgot.TempPasswordRequestDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -60,7 +60,7 @@ class ForgotViewModel : ViewModel() {
     fun findEmail(
         name: String,
         phoneNumber: String,
-        onResult: (ResponseDto<String>?) -> Unit,
+        onResult: (com.recipia.aos.ui.api.dto.ResponseDto<String>?) -> Unit,
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
@@ -112,9 +112,14 @@ class ForgotViewModel : ViewModel() {
     private suspend fun getFindEmailResponse(
         name: String,
         phoneNumber: String
-    ): Response<ResponseDto<String>> {
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<String>> {
         // Retrofit을 사용하여 API 호출
-        return signUpAndForgotService.findEmail(FindEmailRequestDto(name, phoneNumber))
+        return signUpAndForgotService.findEmail(
+            com.recipia.aos.ui.api.dto.forgot.FindEmailRequestDto(
+                name,
+                phoneNumber
+            )
+        )
     }
 
     // 임시 비밀번호 재발급 호출(코루틴)
@@ -122,9 +127,15 @@ class ForgotViewModel : ViewModel() {
         name: String,
         telNo: String,
         email: String
-    ): Response<ResponseDto<Void>> {
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Void>> {
         // Retrofit을 사용하여 API 호출
-        return signUpAndForgotService.sendTempPassword(TempPasswordRequestDto(name, telNo, email))
+        return signUpAndForgotService.sendTempPassword(
+            com.recipia.aos.ui.api.dto.forgot.TempPasswordRequestDto(
+                name,
+                telNo,
+                email
+            )
+        )
     }
 
     // 찾은 이메일 저장

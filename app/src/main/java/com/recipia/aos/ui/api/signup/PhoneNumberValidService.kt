@@ -1,10 +1,10 @@
 package com.recipia.aos.ui.api.signup
 
-import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.singup.CheckVerifyCodeRequestDto
-import com.recipia.aos.ui.dto.singup.PhoneNumberRequestDto
-import com.recipia.aos.ui.dto.singup.ServerResponse
-import com.recipia.aos.ui.dto.singup.TelNoAvailableRequestDto
+import com.recipia.aos.ui.api.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.singup.CheckVerifyCodeRequestDto
+import com.recipia.aos.ui.api.dto.singup.PhoneNumberRequestDto
+import com.recipia.aos.ui.api.dto.singup.ServerResponse
+import com.recipia.aos.ui.api.dto.singup.TelNoAvailableRequestDto
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.Response
@@ -18,19 +18,19 @@ interface PhoneNumberValidService {
     // 전화번호 중복 체크 요청
     @POST("/member/management/checkDupTelNo")
     suspend fun checkDupTelNo(
-        @Body requestDto: TelNoAvailableRequestDto
-    ): Response<ResponseDto<Boolean>>
+        @Body requestDto: com.recipia.aos.ui.api.dto.singup.TelNoAvailableRequestDto
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Boolean>>
 
     // 핸드폰 번호 인증 요청
     @POST("/member/auth/phone")
     suspend fun sendPhoneNumber(
-        @Body requestDto: PhoneNumberRequestDto
-    ): Response<ResponseDto<ServerResponse>>
+        @Body requestDto: com.recipia.aos.ui.api.dto.singup.PhoneNumberRequestDto
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<com.recipia.aos.ui.api.dto.singup.ServerResponse>>
 
     // 인증번호 입력 후 확인 요청
     @POST("/member/auth/check/verifyCode")
     suspend fun checkVerifyCode(
-        @Body requestDto: CheckVerifyCodeRequestDto
-    ): Response<ResponseDto<Boolean>>
+        @Body requestDto: com.recipia.aos.ui.api.dto.singup.CheckVerifyCodeRequestDto
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Boolean>>
 
 }

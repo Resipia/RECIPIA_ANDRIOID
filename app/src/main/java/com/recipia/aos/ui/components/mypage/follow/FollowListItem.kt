@@ -23,15 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.recipia.aos.R
-import com.recipia.aos.ui.dto.mypage.follow.FollowListResponseDto
+import com.recipia.aos.ui.api.dto.mypage.follow.FollowListResponseDto
 
 /**
  * 팔로잉/팔로워 페이지 메인 호출 컴포저
  */
 @Composable
 fun FollowListItem(
-    followData: FollowListResponseDto,
-    onFollowClick: (FollowListResponseDto) -> Unit
+    followData: com.recipia.aos.ui.api.dto.mypage.follow.FollowListResponseDto,
+    onFollowClick: (com.recipia.aos.ui.api.dto.mypage.follow.FollowListResponseDto) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,

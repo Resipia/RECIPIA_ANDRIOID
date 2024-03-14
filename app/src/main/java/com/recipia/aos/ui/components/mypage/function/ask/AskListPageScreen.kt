@@ -45,7 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.recipia.aos.ui.dto.mypage.ask.AskListResponseDto
+import com.recipia.aos.ui.api.dto.mypage.ask.AskListResponseDto
 import com.recipia.aos.ui.model.mypage.ask.AskViewModel
 import kotlinx.coroutines.launch
 
@@ -191,7 +191,7 @@ fun EmptyAskItemsMessage() {
 
 @Composable
 fun AskItemView(
-    askItem: AskListResponseDto,
+    askItem: com.recipia.aos.ui.api.dto.mypage.ask.AskListResponseDto,
     navController: NavController
 ) {
 

@@ -1,6 +1,6 @@
 package com.recipia.aos.ui.api.recipe
 
-import com.recipia.aos.ui.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.ResponseDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -32,7 +32,7 @@ interface RecipeCreateAndUpdateService {
         @Part("nutritionalInfo.vitamins") vitamins: RequestBody,
         @Part("subCategoryDtoList[0].id") subCategoryId: RequestBody,
         @Part fileList: List<MultipartBody.Part>
-    ): Call<ResponseDto<Long>>
+    ): Call<com.recipia.aos.ui.api.dto.ResponseDto<Long>>
 
     // 레시피 수정하기
     @Multipart
@@ -52,6 +52,6 @@ interface RecipeCreateAndUpdateService {
         @Part("nutritionalInfo.vitamins") vitamins: RequestBody,
         @PartMap subCategoryParts: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part fileList: List<MultipartBody.Part>
-    ): Call<ResponseDto<Void>>
+    ): Call<com.recipia.aos.ui.api.dto.ResponseDto<Void>>
 
 }

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.login.LoginService
-import com.recipia.aos.ui.dto.login.TokenMemberInfoDto
+import com.recipia.aos.ui.api.dto.login.TokenMemberInfoDto
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -44,7 +44,12 @@ class LoginViewModel(
     ) {
         viewModelScope.launch {
             try {
-                val response = loginService.login(TokenMemberInfoDto(email, password))
+                val response = loginService.login(
+                    com.recipia.aos.ui.api.dto.login.TokenMemberInfoDto(
+                        email,
+                        password
+                    )
+                )
                 if (response.isSuccessful) {
                     response.body()?.result?.let {
                         // 엑세스 토큰, 리프래시 토큰, 멤버id 저장

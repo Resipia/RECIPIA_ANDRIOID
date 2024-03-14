@@ -1,9 +1,9 @@
 package com.recipia.aos.ui.api.recipe.mypage
 
-import com.recipia.aos.ui.dto.PagingResponseDto
-import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.mypage.follow.FollowListResponseDto
-import com.recipia.aos.ui.dto.mypage.follow.FollowRequestDto
+import com.recipia.aos.ui.api.dto.PagingResponseDto
+import com.recipia.aos.ui.api.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.mypage.follow.FollowListResponseDto
+import com.recipia.aos.ui.api.dto.mypage.follow.FollowRequestDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -22,12 +22,12 @@ interface FollowService {
         @Query("size") size: Int,
         @Query("targetMemberId") targetMemberId: Long,
         @Query("type") type: String
-    ): Response<PagingResponseDto<FollowListResponseDto>>
+    ): Response<com.recipia.aos.ui.api.dto.PagingResponseDto<com.recipia.aos.ui.api.dto.mypage.follow.FollowListResponseDto>>
 
     // 팔로우/언팔로우 요청
     @POST("/member/follow/totalFollow")
     suspend fun followOrUnFollow(
-        @Body dto: FollowRequestDto
-    ): Response<ResponseDto<Long>>
+        @Body dto: com.recipia.aos.ui.api.dto.mypage.follow.FollowRequestDto
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Long>>
 
 }

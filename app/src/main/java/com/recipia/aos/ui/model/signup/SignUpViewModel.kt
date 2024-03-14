@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.signup.SignUpAndForgotService
-import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.singup.EmailAvailableRequestDto
-import com.recipia.aos.ui.dto.singup.NicknameAvailableRequestDto
+import com.recipia.aos.ui.api.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.singup.EmailAvailableRequestDto
+import com.recipia.aos.ui.api.dto.singup.NicknameAvailableRequestDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -149,7 +149,7 @@ class SignUpViewModel : ViewModel() {
                 val response = getCheckDuplicateNicknameResult(nickname)
 
                 if (response.isSuccessful) {
-                    val responseDto: ResponseDto<Boolean>? = response.body()
+                    val responseDto: com.recipia.aos.ui.api.dto.ResponseDto<Boolean>? = response.body()
                     if (responseDto?.result != null) {
                         _isNicknameAvailable.value = responseDto.result
                         // 중복 체크 결과 메시지 업데이트
@@ -178,7 +178,7 @@ class SignUpViewModel : ViewModel() {
                 val response = getCheckDuplicateEmailResult(email)
 
                 if (response.isSuccessful) {
-                    val responseDto: ResponseDto<Boolean>? = response.body()
+                    val responseDto: com.recipia.aos.ui.api.dto.ResponseDto<Boolean>? = response.body()
                     if (responseDto?.result != null) {
                         // 이메일 인증 성공 여부 업데이트
                         _isEmailVerified.value = responseDto.result
@@ -203,17 +203,25 @@ class SignUpViewModel : ViewModel() {
     // 이메일 중복 체크
     private suspend fun getCheckDuplicateEmailResult(
         email: String
-    ): Response<ResponseDto<Boolean>> {
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Boolean>> {
         // Retrofit을 사용하여 API 호출
-        return signUpAndForgotService.checkDuplicateEmail(EmailAvailableRequestDto(email))
+        return signUpAndForgotService.checkDuplicateEmail(
+            com.recipia.aos.ui.api.dto.singup.EmailAvailableRequestDto(
+                email
+            )
+        )
     }
 
     // 닉네임 중복 체크
     private suspend fun getCheckDuplicateNicknameResult(
         nickname: String
-    ): Response<ResponseDto<Boolean>> {
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<Boolean>> {
         // Retrofit을 사용하여 API 호출
-        return signUpAndForgotService.checkDuplicateNickname(NicknameAvailableRequestDto(nickname))
+        return signUpAndForgotService.checkDuplicateNickname(
+            com.recipia.aos.ui.api.dto.singup.NicknameAvailableRequestDto(
+                nickname
+            )
+        )
     }
 
     // 비밀번호 일치여부 변경 함수

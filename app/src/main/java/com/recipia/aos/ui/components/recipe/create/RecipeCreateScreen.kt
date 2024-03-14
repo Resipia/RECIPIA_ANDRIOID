@@ -68,9 +68,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
-import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
-import com.recipia.aos.ui.dto.search.SearchType
+import com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto
+import com.recipia.aos.ui.api.dto.recipe.RecipeCreateUpdateRequestDto
+import com.recipia.aos.ui.api.dto.search.SearchType
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
 import com.recipia.aos.ui.model.recipe.create.RecipeCreateModel
 import com.recipia.aos.ui.model.search.MongoSearchViewModel
@@ -193,7 +193,7 @@ fun RecipeCreateScreen(
 
                             // 데이터 전송 로직
                             val lastNutritionalInfo =
-                                nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
+                                nutritionalInfoList.lastOrNull() ?: com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto()
                             val subCategoryDtoList =
                                 categorySelectionViewModel.createSubCategoryDtoList(
                                     categorySelectionViewModel.selectedCategories.value
@@ -204,17 +204,18 @@ fun RecipeCreateScreen(
                                 selectedIngredients.joinToString(separator = ", ")
                             val hashtagsString = selectedHashtags.joinToString(separator = ", ")
 
-                            val requestDto = RecipeCreateUpdateRequestDto(
-                                id = null,
-                                recipeName = recipeName,
-                                recipeDesc = recipeDesc,
-                                timeTaken = timeTaken.toIntOrNull() ?: 0,
-                                ingredient = ingredientsString,
-                                hashtag = hashtagsString,
-                                nutritionalInfo = lastNutritionalInfo,
-                                subCategoryDtoList = subCategoryDtoList,
-                                deleteFileOrder = listOf()
-                            )
+                            val requestDto =
+                                com.recipia.aos.ui.api.dto.recipe.RecipeCreateUpdateRequestDto(
+                                    id = null,
+                                    recipeName = recipeName,
+                                    recipeDesc = recipeDesc,
+                                    timeTaken = timeTaken.toIntOrNull() ?: 0,
+                                    ingredient = ingredientsString,
+                                    hashtag = hashtagsString,
+                                    nutritionalInfo = lastNutritionalInfo,
+                                    subCategoryDtoList = subCategoryDtoList,
+                                    deleteFileOrder = listOf()
+                                )
 
                             // 모델을 사용하여 서버로 데이터와 이미지 전송
                             recipeCreateModel.createRecipeRequest(
@@ -422,7 +423,7 @@ fun RecipeCreateScreen(
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = { navController.navigate("search-Screen/${SearchType.INGREDIENT.name}") }, // 백틱(`) 사용
+                        onClick = { navController.navigate("search-Screen/${com.recipia.aos.ui.api.dto.search.SearchType.INGREDIENT.name}") }, // 백틱(`) 사용
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
@@ -489,7 +490,7 @@ fun RecipeCreateScreen(
                 // 해시태그 버튼
                 item {
                     Button(
-                        onClick = { navController.navigate("search-Screen/${SearchType.HASHTAG.name}") }, // 백틱(`) 사용
+                        onClick = { navController.navigate("search-Screen/${com.recipia.aos.ui.api.dto.search.SearchType.HASHTAG.name}") }, // 백틱(`) 사용
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
@@ -654,7 +655,7 @@ fun RecipeCreateScreen(
                         Spacer(modifier = Modifier.height(10.dp))
 
                         NutritionalInfoInputScreen(
-                            nutritionalInfoList.lastOrNull() ?: NutritionalInfoDto()
+                            nutritionalInfoList.lastOrNull() ?: com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto()
                         ) { updatedInfo ->
                             // 사용자가 입력한 영양소 정보 가져오기
                             val carbohydrates = updatedInfo.carbohydrates
@@ -664,13 +665,14 @@ fun RecipeCreateScreen(
                             val minerals = updatedInfo.minerals
 
                             // 영양소 정보를 NutritionalInfoDto 객체로 생성
-                            val nutritionalInfoDto = NutritionalInfoDto(
-                                carbohydrates = carbohydrates,
-                                protein = protein,
-                                fat = fat,
-                                vitamins = vitamins,
-                                minerals = minerals
-                            )
+                            val nutritionalInfoDto =
+                                com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto(
+                                    carbohydrates = carbohydrates,
+                                    protein = protein,
+                                    fat = fat,
+                                    vitamins = vitamins,
+                                    minerals = minerals
+                                )
 
                             // 생성된 NutritionalInfoDto 객체를 nutritionalInfoList에 추가
                             nutritionalInfoList.add(nutritionalInfoDto)

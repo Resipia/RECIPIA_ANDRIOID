@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
+import com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto
 
 /**
  * 영양소 입력 필드
@@ -21,8 +21,8 @@ import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
  */
 @Composable
 fun NutritionalInfoInputScreen(
-    nutritionalInfo: NutritionalInfoDto,
-    onNutritionalInfoChanged: (NutritionalInfoDto) -> Unit
+    nutritionalInfo: com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto,
+    onNutritionalInfoChanged: (com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),

@@ -4,7 +4,7 @@ import TokenManager
 import android.util.Log
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.jwt.JwtRepublishService
-import com.recipia.aos.ui.dto.login.jwt.JwtRepublishRequestDto
+import com.recipia.aos.ui.api.dto.login.jwt.JwtRepublishRequestDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -50,7 +50,7 @@ class TokenRepublishManager(
         if (memberId != null && refreshToken != null) {
             try {
                 val response = jwtRepublishService.republishAccessToken(
-                    JwtRepublishRequestDto(
+                    com.recipia.aos.ui.api.dto.login.jwt.JwtRepublishRequestDto(
                         memberId,
                         refreshToken
                     )

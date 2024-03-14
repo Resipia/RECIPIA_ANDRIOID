@@ -7,9 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.BookmarkService
-import com.recipia.aos.ui.dto.RecipeListResponseDto
-import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.recipe.BookmarkRequestDto
+import com.recipia.aos.ui.api.dto.RecipeListResponseDto
+import com.recipia.aos.ui.api.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.recipe.BookmarkRequestDto
 import com.recipia.aos.ui.model.jwt.TokenRepublishManager
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -61,12 +61,12 @@ class BookMarkViewModel(
 
     // 북마크 추가
     fun addBookmark(recipeId: Long) {
-        val request = BookmarkRequestDto(recipeId)
-        bookmarkService.addBookmark(request).enqueue(object : Callback<ResponseDto<Long>> {
+        val request = com.recipia.aos.ui.api.dto.recipe.BookmarkRequestDto(recipeId)
+        bookmarkService.addBookmark(request).enqueue(object : Callback<com.recipia.aos.ui.api.dto.ResponseDto<Long>> {
 
             override fun onResponse(
-                call: Call<ResponseDto<Long>>,
-                response: Response<ResponseDto<Long>>
+                call: Call<com.recipia.aos.ui.api.dto.ResponseDto<Long>>,
+                response: Response<com.recipia.aos.ui.api.dto.ResponseDto<Long>>
             ) {
                 // 응답 성공시 동작
                 if (response.isSuccessful) {
@@ -92,7 +92,7 @@ class BookMarkViewModel(
             }
 
             // 응답 실패
-            override fun onFailure(call: Call<ResponseDto<Long>>, t: Throwable) {
+            override fun onFailure(call: Call<com.recipia.aos.ui.api.dto.ResponseDto<Long>>, t: Throwable) {
                 snackBarMessage.postValue("네트워크 오류: ${t.message}")
             }
         })
@@ -100,12 +100,12 @@ class BookMarkViewModel(
 
     // 북마크 제거
     fun removeBookmark(bookmarkId: Long) {
-        bookmarkService.removeBookmark(bookmarkId).enqueue(object : Callback<ResponseDto<Void>> {
+        bookmarkService.removeBookmark(bookmarkId).enqueue(object : Callback<com.recipia.aos.ui.api.dto.ResponseDto<Void>> {
 
             // 응답 성공
             override fun onResponse(
-                call: Call<ResponseDto<Void>>,
-                response: Response<ResponseDto<Void>>
+                call: Call<com.recipia.aos.ui.api.dto.ResponseDto<Void>>,
+                response: Response<com.recipia.aos.ui.api.dto.ResponseDto<Void>>
             ) {
                 // 응답 성공시 동작
                 if (response.isSuccessful) {
@@ -124,7 +124,7 @@ class BookMarkViewModel(
 
             // 응답 실패
             override fun onFailure(
-                call: Call<ResponseDto<Void>>,
+                call: Call<com.recipia.aos.ui.api.dto.ResponseDto<Void>>,
                 t: Throwable
             ) {
                 snackBarMessage.postValue("네트워크 오류: ${t.message}")

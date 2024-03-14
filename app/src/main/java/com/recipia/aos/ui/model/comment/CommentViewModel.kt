@@ -7,11 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.CommentService
-import com.recipia.aos.ui.dto.PagingResponseDto
-import com.recipia.aos.ui.dto.comment.CommentDeleteRequestDto
-import com.recipia.aos.ui.dto.comment.CommentListResponseDto
-import com.recipia.aos.ui.dto.comment.CommentRegistRequestDto
-import com.recipia.aos.ui.dto.comment.CommentUpdateRequestDto
+import com.recipia.aos.ui.api.dto.PagingResponseDto
+import com.recipia.aos.ui.api.dto.comment.CommentDeleteRequestDto
+import com.recipia.aos.ui.api.dto.comment.CommentListResponseDto
+import com.recipia.aos.ui.api.dto.comment.CommentRegistRequestDto
+import com.recipia.aos.ui.api.dto.comment.CommentUpdateRequestDto
 import com.recipia.aos.ui.model.jwt.TokenRepublishManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +29,7 @@ class CommentViewModel(
 ) : ViewModel() {
 
     // 댓글 데이터를 저장할 StateFlow
-    private val _comments = MutableStateFlow<PagingResponseDto<CommentListResponseDto>?>(null)
+    private val _comments = MutableStateFlow<com.recipia.aos.ui.api.dto.PagingResponseDto<com.recipia.aos.ui.api.dto.comment.CommentListResponseDto>?>(null)
     val comments = _comments.asStateFlow()
 
     // 에러 메시지를 위한 상태
@@ -111,9 +111,10 @@ class CommentViewModel(
                     if (newComments.isNotEmpty()) {
                         // 새로운 댓글이 있는 경우, 기존 댓글 목록에 추가
                         val updatedComments = _comments.value?.content.orEmpty() + newComments
-                        _comments.value = PagingResponseDto(
+                        _comments.value = com.recipia.aos.ui.api.dto.PagingResponseDto(
                             content = updatedComments,
-                            totalCount = response.body()?.totalCount ?: updatedComments.size.toLong()
+                            totalCount = response.body()?.totalCount
+                                ?: updatedComments.size.toLong()
                         )
                         // 다음 페이지 준비
                         currentPage++
@@ -144,7 +145,12 @@ class CommentViewModel(
         commentText: String
     ) {
         viewModelScope.launch {
-            val response = commentService.registComment(CommentRegistRequestDto(recipeId, commentText))
+            val response = commentService.registComment(
+                com.recipia.aos.ui.api.dto.comment.CommentRegistRequestDto(
+                    recipeId,
+                    commentText
+                )
+            )
             if (response.isSuccessful) {
                 // 상태를 강제로 초기화하여 변경을 감지하게 만듦
                 _comments.value = null
@@ -168,7 +174,13 @@ class CommentViewModel(
     ) {
         viewModelScope.launch {
             val response =
-                commentService.updateComment(CommentUpdateRequestDto(id, recipeId, commentText))
+                commentService.updateComment(
+                    com.recipia.aos.ui.api.dto.comment.CommentUpdateRequestDto(
+                        id,
+                        recipeId,
+                        commentText
+                    )
+                )
             if (response.isSuccessful) {
                 // 기존 댓글 목록에서 수정된 댓글 찾아서 업데이트하고, updated 플래그를 true로 설정
                 val updatedList = _comments.value?.content?.map { comment ->
@@ -200,7 +212,12 @@ class CommentViewModel(
         recipeId: Long
     ) {
         viewModelScope.launch {
-            val response = commentService.deleteComment(CommentDeleteRequestDto(id, recipeId))
+            val response = commentService.deleteComment(
+                com.recipia.aos.ui.api.dto.comment.CommentDeleteRequestDto(
+                    id,
+                    recipeId
+                )
+            )
             if (response.isSuccessful) {
                 // 상태를 강제로 초기화하여 변경을 감지하게 만듦
                 _comments.value = null

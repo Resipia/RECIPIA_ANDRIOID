@@ -1,22 +1,18 @@
 package com.recipia.aos.ui.model.recipe.create
 
 import TokenManager
-import android.content.ContentUris
 import android.content.Context
-import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Build
-import android.provider.DocumentsContract
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.RecipeCreateAndUpdateService
-import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.recipe.NutritionalInfoDto
-import com.recipia.aos.ui.dto.recipe.RecipeCreateUpdateRequestDto
+import com.recipia.aos.ui.api.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto
+import com.recipia.aos.ui.api.dto.recipe.RecipeCreateUpdateRequestDto
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -33,7 +29,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 
 /**
  * 레시피 생성할 때 사용하는 모델 객체
@@ -48,7 +43,7 @@ class RecipeCreateModel(
     var timeTaken = mutableStateOf("")
     var ingredient = mutableStateOf("")
     var hashtag = mutableStateOf("")
-    var nutritionalInfoList = mutableStateListOf<NutritionalInfoDto>()
+    var nutritionalInfoList = mutableStateListOf<com.recipia.aos.ui.api.dto.recipe.NutritionalInfoDto>()
     var selectedImageUris = mutableStateListOf<Uri?>()
 
 
@@ -75,7 +70,7 @@ class RecipeCreateModel(
 
     // 레시피 생성하는 요청을 서버로 보낸다.
     fun createRecipeRequest(
-        requestDto: RecipeCreateUpdateRequestDto,
+        requestDto: com.recipia.aos.ui.api.dto.recipe.RecipeCreateUpdateRequestDto,
         imageUris: List<Uri?>,
         context: Context,
         onSuccess: (Long) -> Unit, // Long 타입의 recipeId를 인자로 받는 콜백
@@ -119,10 +114,10 @@ class RecipeCreateModel(
             vitamins,
             subCategoryId,
             imageParts
-        ).enqueue(object : Callback<ResponseDto<Long>> {
+        ).enqueue(object : Callback<com.recipia.aos.ui.api.dto.ResponseDto<Long>> {
             override fun onResponse(
-                call: Call<ResponseDto<Long>>,
-                response: Response<ResponseDto<Long>>
+                call: Call<com.recipia.aos.ui.api.dto.ResponseDto<Long>>,
+                response: Response<com.recipia.aos.ui.api.dto.ResponseDto<Long>>
             ) {
                 if (response.isSuccessful) {
                     val recipeId = response.body()?.result ?: 0L // recipeId 추출
@@ -132,7 +127,7 @@ class RecipeCreateModel(
                 }
             }
 
-            override fun onFailure(call: Call<ResponseDto<Long>>, t: Throwable) {
+            override fun onFailure(call: Call<com.recipia.aos.ui.api.dto.ResponseDto<Long>>, t: Throwable) {
                 onError("네트워크 오류: ${t.message}")
             }
         })
@@ -140,7 +135,7 @@ class RecipeCreateModel(
 
     // 레시피 수정하는 요청을 서버로 보낸다.
     fun updateRecipeRequest(
-        requestDto: RecipeCreateUpdateRequestDto,
+        requestDto: com.recipia.aos.ui.api.dto.recipe.RecipeCreateUpdateRequestDto,
         imageUris: List<Uri?>,
         context: Context,
         onSuccess: () -> Unit,
@@ -193,10 +188,10 @@ class RecipeCreateModel(
             vitamins,
             subCategoryParts,
             imageParts
-        ).enqueue(object : Callback<ResponseDto<Void>> {
+        ).enqueue(object : Callback<com.recipia.aos.ui.api.dto.ResponseDto<Void>> {
             override fun onResponse(
-                call: Call<ResponseDto<Void>>,
-                response: Response<ResponseDto<Void>>
+                call: Call<com.recipia.aos.ui.api.dto.ResponseDto<Void>>,
+                response: Response<com.recipia.aos.ui.api.dto.ResponseDto<Void>>
             ) {
                 if (response.isSuccessful) {
                     response.body()?.result
@@ -206,7 +201,7 @@ class RecipeCreateModel(
                 }
             }
 
-            override fun onFailure(call: Call<ResponseDto<Void>>, t: Throwable) {
+            override fun onFailure(call: Call<com.recipia.aos.ui.api.dto.ResponseDto<Void>>, t: Throwable) {
                 onError("네트워크 오류: ${t.message}")
             }
         })

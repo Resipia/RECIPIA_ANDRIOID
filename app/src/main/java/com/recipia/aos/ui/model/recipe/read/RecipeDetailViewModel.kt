@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.recipia.aos.BuildConfig
 import com.recipia.aos.ui.api.recipe.RecipeDetailAndDeleteService
-import com.recipia.aos.ui.dto.ResponseDto
-import com.recipia.aos.ui.dto.recipe.detail.RecipeDetailViewResponseDto
+import com.recipia.aos.ui.api.dto.ResponseDto
+import com.recipia.aos.ui.api.dto.recipe.detail.RecipeDetailViewResponseDto
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -21,8 +21,8 @@ class RecipeDetailViewModel(
 ) : ViewModel() {
 
     // 서버로부터 받은 레시피 상세 정보를 저장하는 LiveData
-    private val _recipeDetail = MutableLiveData<RecipeDetailViewResponseDto?>()
-    val recipeDetail: MutableLiveData<RecipeDetailViewResponseDto?> = _recipeDetail
+    private val _recipeDetail = MutableLiveData<com.recipia.aos.ui.api.dto.recipe.detail.RecipeDetailViewResponseDto?>()
+    val recipeDetail: MutableLiveData<com.recipia.aos.ui.api.dto.recipe.detail.RecipeDetailViewResponseDto?> = _recipeDetail
 
     // 타임스탬프를 사용하여 업데이트 이벤트를 트리거
     private val _updateTrigger = MutableLiveData(System.currentTimeMillis())
@@ -84,7 +84,7 @@ class RecipeDetailViewModel(
     // 서버로부터 레시피 상세 정보를 가져오는 함수 (Retrofit 사용)
     private suspend fun getRecipeDetailView(
         recipeId: Long
-    ): Response<ResponseDto<RecipeDetailViewResponseDto>> {
+    ): Response<com.recipia.aos.ui.api.dto.ResponseDto<com.recipia.aos.ui.api.dto.recipe.detail.RecipeDetailViewResponseDto>> {
 
         // Retrofit을 사용하여 서버 요청을 구현합니다.
          return recipeDetailAndDeleteService.getRecipeDetailView(recipeId)
