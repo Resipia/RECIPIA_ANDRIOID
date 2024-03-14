@@ -131,9 +131,14 @@ fun BottomNavigationBar(
                                     }
                                 }
                             }
-                            "채팅", "위글위글" -> {
+                            "채팅" -> {
                                 scope.launch {
-                                    snackbarHostState.showSnackbar("준비중인 서비스입니다.")
+                                    navController.navigate("chat-list")
+                                }
+                            }
+                            "위글위글" -> {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("지식인 서비스를 준비중입니다.")
                                 }
                             }
                         }

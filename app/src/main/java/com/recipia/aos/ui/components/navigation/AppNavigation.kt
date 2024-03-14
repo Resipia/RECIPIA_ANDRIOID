@@ -41,11 +41,15 @@ import com.recipia.aos.ui.components.signup.SignUpThirdFormScreen
 import com.recipia.aos.ui.components.signup.agree.DataRetentionConsent
 import com.recipia.aos.ui.components.signup.agree.PersonalInfoConsentScreen
 import com.recipia.aos.ui.api.dto.search.SearchType
+import com.recipia.aos.ui.components.chat.ChatRoomListScreen
+import com.recipia.aos.ui.components.chat.ChatRoomScaffoldScreen
 import com.recipia.aos.ui.model.category.CategorySelectionViewModel
+import com.recipia.aos.ui.model.chat.ChatViewModel
 import com.recipia.aos.ui.model.comment.CommentViewModel
 import com.recipia.aos.ui.model.factory.AskViewModelFactory
 import com.recipia.aos.ui.model.factory.BookMarkViewModelFactory
 import com.recipia.aos.ui.model.factory.CategorySelectionViewModelFactory
+import com.recipia.aos.ui.model.factory.ChatViewModelFactory
 import com.recipia.aos.ui.model.factory.CommentViewModelFactory
 import com.recipia.aos.ui.model.factory.FollowViewModelFactory
 import com.recipia.aos.ui.model.factory.LikeViewModelFactory
@@ -116,6 +120,9 @@ fun AppNavigation(
     val askViewModel: AskViewModel = viewModel(
         factory = AskViewModelFactory(tokenManager)
     )
+    val chatViewModel: ChatViewModel = viewModel(
+        factory = ChatViewModelFactory(tokenManager)
+    )
     val phoneNumberAuthViewModel: PhoneNumberAuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
     val forgotViewModel: ForgotViewModel = viewModel()
@@ -138,6 +145,10 @@ fun AppNavigation(
             // 홈 화면 호출할때는 카테고리 정보 초기화하기
 //            recipeAllListViewModel.makeEmptyListSubCategoryData()
             HomeScreen(navController, recipeAllListViewModel, bookmarkViewModel)
+        }
+        // 채팅방 이동
+        composable("chat-list") {
+            ChatRoomScaffoldScreen(chatViewModel, navController, recipeAllListViewModel)
         }
         // 카테고리 조건 조회
         composable("category-recipe-search") {
