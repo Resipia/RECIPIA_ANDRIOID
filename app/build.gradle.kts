@@ -26,6 +26,7 @@ android {
         // BuildConfig 필드 추가
         buildConfigField("String", "MEMBER_SERVER_URL", "\"${property("MemberServerUrl")}\"")
         buildConfigField("String", "RECIPE_SERVER_URL", "\"${property("RecipeServerUrl")}\"")
+        buildConfigField("String", "CHAT_SERVER_URL", "\"${property("ChatServerUrl")}\"")
     }
 
     buildTypes {
